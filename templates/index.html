@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Cold Outreach Personalization Engine</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+        }
+        h1 { color: #333; margin-bottom: 10px; font-size: 28px; }
+        .subtitle { color: #666; margin-bottom: 30px; font-size: 14px; }
+        .input-section { margin-bottom: 30px; }
+        label { display: block; margin-bottom: 8px; color: #333; font-weight: 600; font-size: 14px; }
+        input[type="text"], textarea {
+            width: 100%; padding: 12px 16px;
+            border: 2px solid #e0e0e0; border-radius: 8px;
+            font-size: 14px; transition: border-color 0.3s; font-family: inherit;
+        }
+        input[type="text"]:focus, textarea:focus { outline: none; border-color: #667eea; }
+        textarea { resize: vertical; min-height: 80px; }
+        .help-text { font-size: 12px; color: #888; margin-top: 4px; }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; border: none; padding: 14px 32px;
+            border-radius: 8px; font-size: 16px; font-weight: 600;
+            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; width: 100%;
+        }
+        button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(102,126,234,0.3); }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .loading { display: none; text-align: center; margin: 20px 0; }
+        .loading.active { display: block; }
+        .spinner {
+            border: 3px solid #f3f3f3; border-top: 3px solid #667eea;
+            border-radius: 50%; width: 40px; height: 40px;
+            animation: spin 1s linear infinite; margin: 0 auto 10px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .result { display: none; margin-top: 30px; padding-top: 30px; border-top: 2px solid #f0f0f0; }
+        .result.active { display: block; }
+        .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .result-title { font-size: 20px; color: #333; font-weight: 600; }
+        .copy-btn {
+            background: #f0f0f0; color: #333; border: none;
+            padding: 8px 16px; border-radius: 6px; font-size: 13px;
+            cursor: pointer; transition: background 0.2s; width: auto;
+        }
+        .copy-btn:hover { background: #e0e0e0; }
+        .copy-btn.copied { background: #4caf50; color: white; }
+        .email-field { background: #f9f9f9; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+        .field-label { font-size: 12px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .field-content { color: #333; line-height: 1.6; white-space: pre-wrap; }
+        .subject-line { font-weight: 600; font-size: 16px; }
+        .personalization-notes { background: #e8f5e9; border-left: 4px solid #4caf50; padding: 12px; border-radius: 4px; margin-top: 16px; }
+        .personalization-notes ul { margin-left: 20px; margin-top: 8px; }
+        .personalization-notes li { color: #2e7d32; font-size: 13px; margin-bottom: 4px; }
+        .error { display: none; background: #ffebee; color: #c62828; padding: 12px 16px; border-radius: 8px; margin-top: 16px; border-left: 4px solid #c62828; }
+        .error.active { display: block; }
+        .prospect-info { background: #e3f2fd; border-radius: 8px; padding: 12px; margin-bottom: 16px; font-size: 13px; color: #1565c0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Cold Outreach Engine</h1>
+        <p class="subtitle">Generate hyper-personalized cold emails powered by Google Gemini</p>
+        
+        <form id="outreachForm">
+            <div class="input-section">
+                <label for="url">Prospect URL</label>
+                <input type="text" id="url" name="url" placeholder="https://linkedin.com/in/john-doe or https://company.com" required>
+                <p class="help-text">Enter a LinkedIn profile or company website URL</p>
+            </div>
+            <div class="input-section">
+                <label for="senderContext">Your Value Proposition (Optional)</label>
+                <textarea id="senderContext" name="senderContext" placeholder="E.g., I help SaaS companies automate their customer onboarding with AI agents..."></textarea>
+                <p class="help-text">Describe what you offer. Leave blank to use default pitch.</p>
+            </div>
+            <button type="submit" id="generateBtn">Generate Personalized Email</button>
+        </form>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Analyzing prospect and crafting personalized email...</p>
+        </div>
+        
+        <div class="error" id="error"></div>
+        
+        <div class="result" id="result">
+            <div class="result-header">
+                <h2 class="result-title">Your Personalized Email</h2>
+                <button class="copy-btn" id="copyBtn">Copy Email</button>
+            </div>
+            <div class="prospect-info" id="prospectInfo"></div>
+            <div class="email-field">
+                <div class="field-label">Subject Line</div>
+                <div class="field-content subject-line" id="subject"></div>
+            </div>
+            <div class="email-field">
+                <div class="field-label">Email Body</div>
+                <div class="field-content" id="body"></div>
+            </div>
+            <div class="personalization-notes">
+                <div class="field-label">Personalization Signals Used</div>
+                <ul id="personalizationNotes"></ul>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const form = document.getElementById('outreachForm');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+        const error = document.getElementById('error');
+        const generateBtn = document.getElementById('generateBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const url = document.getElementById('url').value.trim();
+            const senderContext = document.getElementById('senderContext').value.trim();
+            
+            loading.classList.add('active');
+            result.classList.remove('active');
+            error.classList.remove('active');
+            generateBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, sender_context: senderContext || null })
+                });
+                const data = await response.json();
+                if (!response.ok || !data.success) throw new Error(data.error || 'Failed to generate email');
+                displayResult(data.data, data.prospect);
+            } catch (err) {
+                showError(err.message);
+            } finally {
+                loading.classList.remove('active');
+                generateBtn.disabled = false;
+            }
+        });
+        
+        function displayResult(emailData, prospectData) {
+            document.getElementById('subject').textContent = emailData.subject;
+            document.getElementById('body').textContent = emailData.body;
+            if (prospectData) {
+                document.getElementById('prospectInfo').innerHTML = `<strong>Analyzed:</strong> ${prospectData.domain || prospectData.url}`;
+            }
+            const notesList = document.getElementById('personalizationNotes');
+            notesList.innerHTML = '';
+            emailData.personalization_notes.forEach(note => {
+                const li = document.createElement('li');
+                li.textContent = note;
+                notesList.appendChild(li);
+            });
+            result.classList.add('active');
+        }
+        
+        function showError(message) {
+            const errorEl = document.getElementById('error');
+            errorEl.textContent = message;
+            errorEl.classList.add('active');
+        }
+        
+        copyBtn.addEventListener('click', () => {
+            const subject = document.getElementById('subject').textContent;
+            const body = document.getElementById('body').textContent;
+            const fullEmail = `Subject: ${subject}\n\n${body}`;
+            navigator.clipboard.writeText(fullEmail).then(() => {
+                copyBtn.textContent = 'Copied!';
+                copyBtn.classList.add('copied');
+                setTimeout(() => { copyBtn.textContent = 'Copy Email'; copyBtn.classList.remove('copied'); }, 2000);
+            });
+        });
+    </script>
+</body>
+</html>
