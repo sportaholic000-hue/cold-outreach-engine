@@ -1,9 +1,7 @@
 services:
   - type: web
     name: cold-outreach-engine
-    runtime: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 120 app:app
+    runtime: docker
     healthCheckPath: /health
     envVars:
       - key: GEMINI_API_KEY
