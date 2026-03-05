@@ -13,14 +13,12 @@ from bs4 import BeautifulSoup
 import google.generativeai as genai
 from urllib.parse import urlparse
 
-# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 CORS(app)
 
-# Lazy Gemini client
 _gemini_client = None
 
 def get_gemini_client():
@@ -33,11 +31,6 @@ def get_gemini_client():
         _gemini_client = genai.GenerativeModel('gemini-1.5-flash')
     return _gemini_client
 
-
-# ---------------------------------------------------------------------------
-# PLACEHOLDER / JUNK DOMAIN DETECTION
-# ---------------------------------------------------------------------------
-
 PLACEHOLDER_DOMAINS = {
     'godaddy.com', 'wix.com', 'squarespace.com', 'weebly.com',
     'wordpress.com', 'sites.google.com', 'business.site', 'myshopify.com',
@@ -46,7 +39,6 @@ PLACEHOLDER_DOMAINS = {
 }
 
 def is_real_website(url: str) -> bool:
-    """Return True if URL looks like a real dedicated business website."""
     if not url:
         return False
     try:
@@ -59,18 +51,7 @@ def is_real_website(url: str) -> bool:
     except Exception:
         return False
 
-
-# ---------------------------------------------------------------------------
-# REQUESTS-BASED GOOGLE MAPS SCRAPER  (no Playwright, no API key)
-# ---------------------------------------------------------------------------
-
 class PlaywrightLeadFinder:
-    """
-    Scrapes Google Maps search results using plain HTTP requests + BeautifulSoup.
-    Works on any server — no Playwright/Chromium required.
-    Falls back to Google Places Text Search API if GOOGLE_PLACES_API_KEY is set.
-    """
-
     HEADERS = {
         'User-Agent': (
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
@@ -82,615 +63,634 @@ class PlaywrightLeadFinder:
     }
 
     def search(self, keyword: str, city: str, max_results: int = 20) -> list:
-        # If Google Places API key is available, use it (most reliable)
         api_key = os.getenv('GOOGLE_PLACES_API_KEY')
         if api_key:
-            return self._search_places_api(keyword, city, max_results, api_key)
-        # Otherwise fall back to scraping
-        return self._search_scrape(keyword, city, max_results)
+            return self._search_with_api(keyword, city, max_results, api_key)
+        query = f"{keyword} in {city}"
+        url = f"https://www.google.com/maps/search/{urllib.parse.quote(query)}"
+        logger.info(f"Scraping Google Maps (no API): {query}")
+        try:
+            resp = requests.get(url, headers=self.HEADERS, timeout=10)
+            resp.raise_for_status()
+            soup = BeautifulSoup(resp.text, 'html.parser')
+            businesses = []
+            divs = soup.find_all('div', class_=re.compile(r'.*hfpxzc.*|.*place.*', re.I))
+            for div in divs[:max_results]:
+                name_elem = div.find(['span', 'h3', 'div'], class_=re.compile(r'.*fontHeadlineSmall.*|.*title.*', re.I))
+                name = name_elem.get_text(strip=True) if name_elem else None
+                if name:
+                    businesses.append({'name': name, 'address': '', 'phone': '', 'website': '', 'rating': None, 'reviews': None})
+            if len(businesses) < 3:
+                logger.warning("HTML scraping returned few results. Consider setting GOOGLE_PLACES_API_KEY.")
+            return businesses[:max_results]
+        except Exception as e:
+            logger.error(f"Google Maps scraping failed: {e}")
+            return []
 
-    def _search_places_api(self, keyword: str, city: str, max_results: int, api_key: str) -> list:
-        """Use Google Places Text Search API — most reliable path."""
+    def _search_with_api(self, keyword: str, city: str, max_results: int, api_key: str) -> list:
         query = f"{keyword} in {city}"
         url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
-        results = []
-        page_token = None
-
-        while len(results) < max_results:
-            params = {'query': query, 'key': api_key}
-            if page_token:
-                params['pagetoken'] = page_token
-                time.sleep(2)  # Required delay for next_page_token
-
+        logger.info(f"Using Google Places API: {query}")
+        params = {'query': query, 'key': api_key}
+        try:
             resp = requests.get(url, params=params, timeout=10)
-            data = resp.json()
-
-            if data.get('status') not in ('OK', 'ZERO_RESULTS'):
-                logger.warning(f"Places API error: {data.get('status')} — {data.get('error_message','')}")
-                break
-
-            for place in data.get('results', []):
-                if len(results) >= max_results:
-                    break
-                lead = self._place_to_lead(place, api_key)
-                results.append(lead)
-
-            page_token = data.get('next_page_token')
-            if not page_token:
-                break
-
-        logger.info(f"Google Places API returned {len(results)} leads")
-        return results
-
-    def _place_to_lead(self, place: dict, api_key: str) -> dict:
-        """Convert a Places API result to our lead format, enriching with details if possible."""
-        place_id = place.get('place_id')
-        name = place.get('name', '')
-        address = place.get('formatted_address', '')
-        rating = place.get('rating')
-        review_count = place.get('user_ratings_total', 0)
-        category = place.get('types', [''])[0].replace('_', ' ').title() if place.get('types') else ''
-
-        # Fetch place details to get phone + website
-        phone = ''
-        website = ''
-        if place_id:
-            try:
-                det_url = "https://maps.googleapis.com/maps/api/place/details/json"
-                det = requests.get(det_url, params={
-                    'place_id': place_id,
-                    'fields': 'formatted_phone_number,website',
-                    'key': api_key
-                }, timeout=8).json()
-                result = det.get('result', {})
-                phone = result.get('formatted_phone_number', '')
-                website = result.get('website', '')
-            except Exception as e:
-                logger.warning(f"Could not fetch details for {name}: {e}")
-
-        has_real_site = is_real_website(website)
-        return {
-            'name': name,
-            'address': address,
-            'phone': phone,
-            'website': website,
-            'has_website': has_real_site,
-            'is_hot_lead': not has_real_site,
-            'category': category,
-            'rating': rating,
-            'review_count': review_count,
-        }
-
-    def _search_scrape(self, keyword: str, city: str, max_results: int) -> list:
-        """
-        Fallback: scrape Google Maps HTML search results page.
-        Extracts structured data from the page's embedded JSON blobs.
-        """
-        query = urllib.parse.quote_plus(f"{keyword} {city}")
-        search_url = f"https://www.google.com/maps/search/{query}"
-        logger.info(f"Scraping Google Maps: {search_url}")
-
-        try:
-            resp = requests.get(search_url, headers=self.HEADERS, timeout=15)
             resp.raise_for_status()
+            data = resp.json()
+            businesses = []
+            for result in data.get('results', [])[:max_results]:
+                place_id = result.get('place_id')
+                details = self._get_place_details(place_id, api_key)
+                businesses.append({
+                    'name': result.get('name', ''),
+                    'address': result.get('formatted_address', ''),
+                    'phone': details.get('phone', ''),
+                    'website': details.get('website', ''),
+                    'rating': result.get('rating'),
+                    'reviews': result.get('user_ratings_total'),
+                })
+            return businesses
         except Exception as e:
-            raise Exception(f"Failed to reach Google Maps: {e}")
+            logger.error(f"Google Places API failed: {e}")
+            return []
 
-        html = resp.text
-
-        # Extract business data from embedded JSON in the page
-        results = []
-        # Google Maps embeds data in window.APP_INITIALIZATION_STATE or similar JSON blobs
-        # We parse out business listings using regex on the serialised data arrays
-        patterns = [
-            r'"([^"]{2,80})",[^,]*,\["https?://[^"]+"\],[^,]*,\["(\+?[\d\s\-().]{7,20})"\]',
-        ]
-
-        # More reliable: look for the /*""*/ JSON data blocks
-        json_blocks = re.findall(r'\\x22([^\\]{5,80})\\x22', html)
-
-        # Parse business name + address blocks from the HTML directly
-        soup = BeautifulSoup(html, 'html.parser')
-
-        # Try to find structured listing data
-        seen_names = set()
-        for div in soup.find_all('div', attrs={'aria-label': True}):
-            label = div.get('aria-label', '').strip()
-            if not label or label in seen_names or len(label) < 3:
-                continue
-            if any(skip in label.lower() for skip in ['search', 'map', 'zoom', 'directions', 'menu']):
-                continue
-            seen_names.add(label)
-
-            # Try to find associated details nearby in the DOM
-            text = div.get_text(separator=' ', strip=True)
-            phone_match = re.search(r'(\+?1?\s?[\(]?\d{3}[\)]?[\s.\-]?\d{3}[\s.\-]?\d{4})', text)
-            phone = phone_match.group(1) if phone_match else ''
-
-            # Look for website in nearby links
-            website = ''
-            for a in div.find_all('a', href=True):
-                href = a['href']
-                if href.startswith('http') and 'google.com' not in href and 'goo.gl' not in href:
-                    website = href
-                    break
-
-            has_real_site = is_real_website(website)
-            results.append({
-                'name': label,
-                'address': '',
-                'phone': phone,
-                'website': website,
-                'has_website': has_real_site,
-                'is_hot_lead': not has_real_site,
-                'category': keyword.title(),
-                'rating': None,
-                'review_count': 0,
-            })
-
-            if len(results) >= max_results:
-                break
-
-        # If scraping got nothing useful, return a helpful error set
-        if not results:
-            raise Exception(
-                "Google Maps HTML scraping returned no results. "
-                "Please set the GOOGLE_PLACES_API_KEY environment variable on Render "
-                "for reliable lead search. Get a free key at https://console.cloud.google.com/"
-            )
-
-        logger.info(f"Scraped {len(results)} leads from Google Maps HTML")
-        return results
-
-
-# ---------------------------------------------------------------------------
-# WEBSITE SCRAPER
-# ---------------------------------------------------------------------------
-
-class ProspectScraper:
-    """Scrapes and extracts key information from prospect URLs."""
-
-    def __init__(self):
-        self.headers = {
-            'User-Agent': (
-                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                'AppleWebKit/537.36 (KHTML, like Gecko) '
-                'Chrome/91.0.4472.124 Safari/537.36'
-            )
-        }
-
-    def scrape_url(self, url: str, timeout: int = 10) -> dict:
+    def _get_place_details(self, place_id: str, api_key: str) -> dict:
+        url = "https://maps.googleapis.com/maps/api/place/details/json"
+        params = {'place_id': place_id, 'fields': 'formatted_phone_number,website', 'key': api_key}
         try:
-            logger.info(f"Scraping URL: {url}")
-            response = requests.get(url, headers=self.headers, timeout=timeout)
-            response.raise_for_status()
-            soup = BeautifulSoup(response.text, 'html.parser')
-            for tag in soup(["script", "style", "nav", "footer"]):
-                tag.decompose()
-            text = re.sub(r'\s+', ' ', soup.get_text(separator=' ', strip=True)).strip()[:8000]
-            title = soup.find('title')
-            meta_desc = soup.find('meta', attrs={'name': 'description'})
-            og_title = soup.find('meta', property='og:title')
-            og_desc = soup.find('meta', property='og:description')
-            headings = [h.get_text(strip=True) for h in soup.find_all(['h1', 'h2', 'h3']) if h.get_text(strip=True)][:10]
-            return {
-                'url': url,
-                'is_linkedin': 'linkedin.com' in url.lower(),
-                'title': title.string if title else '',
-                'meta_description': meta_desc.get('content', '') if meta_desc else '',
-                'og_title': og_title.get('content', '') if og_title else '',
-                'og_description': og_desc.get('content', '') if og_desc else '',
-                'headings': headings,
-                'content': text,
-                'domain': urlparse(url).netloc,
-            }
-        except requests.exceptions.Timeout:
-            raise Exception("Request timeout — website took too long to respond")
-        except requests.exceptions.RequestException as e:
-            raise Exception(f"Failed to fetch URL: {e}")
+            resp = requests.get(url, params=params, timeout=5)
+            resp.raise_for_status()
+            data = resp.json()
+            result = data.get('result', {})
+            return {'phone': result.get('formatted_phone_number', ''), 'website': result.get('website', '')}
         except Exception as e:
-            raise Exception(f"Error processing URL: {e}")
+            logger.error(f"Failed to get place details: {e}")
+            return {'phone': '', 'website': ''}
 
 
-# ---------------------------------------------------------------------------
-# OUTREACH EMAIL GENERATOR
-# ---------------------------------------------------------------------------
+def enrich_with_ai(business: dict) -> dict:
+    client = get_gemini_client()
+    name = business.get('name', '')
+    address = business.get('address', '')
+    website = business.get('website', '')
 
-class OutreachGenerator:
-    """Generates personalized cold outreach emails using Gemini."""
+    if not website or not business.get('phone') or not business.get('email'):
+        search_prompt = f"""Find contact information for this business:
+- Name: {name}
+- Address: {address}
 
-    SYSTEM = (
-        "You are an expert cold email writer who creates highly personalized, "
-        "concise outreach that feels human and authentic. Never use hype or generic phrases."
-    )
-
-    def __init__(self, client):
-        self.client = client
-
-    # ---- Original URL-based flow ------------------------------------------
-
-    def generate_email(self, prospect_data: dict, sender_context: str = None) -> dict:
-        context = self._build_url_context(prospect_data)
-        prompt = self._url_prompt(context, sender_context)
-        result = self._call_gemini(prompt)
-        result['personalization_notes'] = self._url_signals(prospect_data, result)
-        return result
-
-    def _build_url_context(self, d: dict) -> str:
-        parts = [f"URL: {d['url']}", f"Domain: {d['domain']}"]
-        if d.get('is_linkedin'):
-            parts.append("Source: LinkedIn Profile")
-        if d.get('title'):
-            parts.append(f"Page Title: {d['title']}")
-        if d.get('meta_description'):
-            parts.append(f"Description: {d['meta_description']}")
-        if d.get('headings'):
-            parts.append(f"Key Topics: {', '.join(d['headings'][:5])}")
-        if d.get('content'):
-            parts.append(f"\nPage Content:\n{d['content'][:3000]}")
-        return "\n".join(parts)
-
-    def _url_prompt(self, context: str, sender_context: str = None) -> str:
-        sender_info = sender_context or (
-            "You are reaching out on behalf of a growth consultant who helps companies "
-            "scale revenue through automation and AI. Value prop: Custom AI agents that "
-            "automate lead gen, customer support, and content creation."
-        )
-        return f"""Based on the following prospect information, write a highly personalized cold outreach email.
-
-PROSPECT INFORMATION:
-{context}
-
-SENDER CONTEXT:
-{sender_info}
-
-REQUIREMENTS:
-1. Subject: Short, specific, references something from their profile/site
-2. Opening: Hook with a specific observation
-3. Body: 2-3 short paragraphs. Connect their pain to your solution.
-4. CTA: Clear, low-friction (15-min call, quick demo)
-5. Tone: Professional but conversational. Under 150 words total.
-
-FORMAT EXACTLY:
-SUBJECT: [subject line]
-
-BODY:
-[email body]
+Return ONLY valid, working information in this exact JSON format:
+{{
+    "website": "full URL or empty string",
+    "phone": "phone number or empty string",
+    "email": "email address or empty string"
+}}
+Rules:
+- Website must be a real, dedicated business website (not Facebook, Instagram, Wix placeholder, etc.)
+- Only include information you're confident is correct
+- Use empty strings if you can't find valid info
+- Return ONLY the JSON, no explanation
 """
+        try:
+            response = client.generate_content(search_prompt)
+            contact_data = json.loads(response.text.strip().replace('```json', '').replace('```', ''))
+            if contact_data.get('website') and is_real_website(contact_data['website']):
+                business['website'] = contact_data['website']
+                website = contact_data['website']
+            if contact_data.get('phone') and not business.get('phone'):
+                business['phone'] = contact_data['phone']
+            if contact_data.get('email') and not business.get('email'):
+                business['email'] = contact_data['email']
+        except Exception as e:
+            logger.warning(f"AI contact search failed for {name}: {e}")
 
-    def _url_signals(self, prospect_data: dict, email: dict) -> list:
-        signals = []
-        email_text = f"{email.get('subject','')} {email.get('body','')}".lower()
-        if prospect_data.get('is_linkedin'):
-            signals.append("LinkedIn profile analyzed")
-        else:
-            signals.append(f"Company website ({prospect_data.get('domain','')}) analyzed")
-        if prospect_data.get('domain'):
-            company = prospect_data['domain'].replace('.com','').replace('www.','')
-            if company.lower() in email_text:
-                signals.append("Company name referenced")
-        for heading in prospect_data.get('headings', [])[:5]:
-            if len(heading) > 10 and heading.lower() in email_text:
-                signals.append(f"Referenced: '{heading}'")
-        if not signals:
-            signals.append("Content analysis and context matching applied")
-        return signals
+    if website and is_real_website(website):
+        try:
+            resp = requests.get(website, headers=PlaywrightLeadFinder.HEADERS, timeout=8)
+            soup = BeautifulSoup(resp.text, 'html.parser')
+            text = soup.get_text(separator=' ', strip=True)[:3000]
+            analysis_prompt = f"""Analyze this business website and identify the TOP 3 specific pain points or improvement opportunities.
+Business: {name}
+Website content: {text}
+Focus on: missing features, poor UX, outdated design, missing marketing elements, competition advantages.
+Return ONLY a JSON array of exactly 3 pain points:
+["Specific pain point 1", "Specific pain point 2", "Specific pain point 3"]
+Return ONLY the JSON array, no explanation."""
+            response = client.generate_content(analysis_prompt)
+            pain_points = json.loads(response.text.strip().replace('```json', '').replace('```', ''))
+            business['pain_points'] = pain_points
+        except Exception as e:
+            logger.warning(f"Website analysis failed for {name}: {e}")
+            business['pain_points'] = []
+    else:
+        business['pain_points'] = []
 
-    # ---- Lead-based flow (from Google Maps scrape) -----------------------
+    pain_points_text = '\n'.join(f"- {p}" for p in business.get('pain_points', []))
+    outreach_prompt = f"""Write a personalized cold email for this business:
+Business: {name}
+Location: {address}
+Website: {website or 'None found'}
+Pain Points Identified:
+{pain_points_text or 'None analyzed'}
+Write a SHORT (3-4 sentences max), highly personalized email that:
+1. References something specific about their business
+2. Mentions ONE specific pain point or opportunity
+3. Offers a clear, relevant solution
+4. Ends with a simple call-to-action
+Tone: Professional but conversational, helpful not salesy.
+Return ONLY the email body text, no subject line, no JSON."""
+    try:
+        response = client.generate_content(outreach_prompt)
+        business['outreach_email'] = response.text.strip()
+    except Exception as e:
+        logger.warning(f"Email generation failed for {name}: {e}")
+        business['outreach_email'] = ""
 
-    def generate_email_for_lead(self, lead: dict, sender_context: str = None, website_data: dict = None) -> dict:
-        """Two paths: no website → pitch digital presence; has website → personalize from site."""
-        sender_info = sender_context or (
-            "You help local service businesses get more customers online. "
-            "You build professional websites, Google Business profiles, and simple "
-            "AI chat widgets. Packages start at $500."
-        )
-        if not lead.get('has_website'):
-            prompt = self._no_website_prompt(lead, sender_info)
-        else:
-            prompt = self._has_website_prompt(lead, sender_info, website_data)
+    return business
 
-        result = self._call_gemini(prompt)
-        result['lead_type'] = 'no_website' if not lead.get('has_website') else 'has_website'
-        result['personalization_notes'] = self._lead_signals(lead)
-        return result
-
-    def _no_website_prompt(self, lead: dict, sender_info: str) -> str:
-        return f"""Write a cold outreach email to a local business owner who has NO website yet.
-
-BUSINESS INFO:
-- Name: {lead['name']}
-- Category: {lead.get('category', 'Local Business')}
-- Address: {lead.get('address', '')}
-- Phone: {lead.get('phone', 'N/A')}
-- Google Rating: {lead.get('rating', 'N/A')} ({lead.get('review_count', 0)} reviews)
-
-SENDER CONTEXT:
-{sender_info}
-
-KEY ANGLE: They have no website. Their competitors likely do. This costs them customers every day.
-Reference their specific business type and location. Make it feel genuine, not templated.
-
-REQUIREMENTS:
-- Under 130 words
-- Empathetic, not pushy
-- Mention the missing website opportunity specifically
-- Low-friction CTA (free chat, quick call)
-
-FORMAT EXACTLY:
-SUBJECT: [subject line]
-
-BODY:
-[email body]
-"""
-
-    def _has_website_prompt(self, lead: dict, sender_info: str, website_data: dict = None) -> str:
-        site_context = ""
-        if website_data:
-            site_context = f"""
-WEBSITE CONTENT:
-- Title: {website_data.get('title', '')}
-- Description: {website_data.get('meta_description', '')}
-- Key Topics: {', '.join(website_data.get('headings', [])[:5])}
-- Excerpt: {website_data.get('content', '')[:1500]}
-"""
-        return f"""Write a cold outreach email to a local business owner who HAS a website.
-
-BUSINESS INFO:
-- Name: {lead['name']}
-- Category: {lead.get('category', 'Local Business')}
-- Address: {lead.get('address', '')}
-- Website: {lead.get('website', '')}
-- Google Rating: {lead.get('rating', 'N/A')} ({lead.get('review_count', 0)} reviews)
-{site_context}
-SENDER CONTEXT:
-{sender_info}
-
-KEY ANGLE: Reference something specific from their business. Offer clear added value.
-
-REQUIREMENTS:
-- Under 150 words
-- Reference at least one specific detail from their business
-- Professional but warm tone
-- Clear, low-friction CTA
-
-FORMAT EXACTLY:
-SUBJECT: [subject line]
-
-BODY:
-[email body]
-"""
-
-    def _call_gemini(self, prompt: str) -> dict:
-        response = self.client.generate_content(
-            f"{self.SYSTEM}\n\n{prompt}",
-            generation_config=genai.GenerationConfig(temperature=0.7, max_output_tokens=800),
-        )
-        return self._parse_response(response.text)
-
-    def _parse_response(self, text: str) -> dict:
-        subject_match = re.search(r'SUBJECT:\s*(.+?)(?:\n|$)', text, re.IGNORECASE)
-        subject = subject_match.group(1).strip() if subject_match else "Quick question"
-        body_match = re.search(r'BODY:\s*(.+)', text, re.IGNORECASE | re.DOTALL)
-        body = body_match.group(1).strip() if body_match else text
-        body = re.sub(r'^(SUBJECT|BODY):.*', '', body, flags=re.IGNORECASE | re.MULTILINE).strip()
-        return {'subject': subject, 'body': body}
-
-    def _lead_signals(self, lead: dict) -> list:
-        signals = []
-        if not lead.get('has_website'):
-            signals.append("No website detected — web presence pitch applied")
-        else:
-            signals.append(f"Website found: {lead.get('website', '')}")
-        if lead.get('rating'):
-            signals.append(f"Google rating: {lead['rating']} ({lead.get('review_count', 0)} reviews)")
-        if lead.get('category'):
-            signals.append(f"Category: {lead['category']}")
-        return signals
-
-
-# ---------------------------------------------------------------------------
-# FLASK ROUTES
-# ---------------------------------------------------------------------------
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
 
-@app.route('/health', methods=['GET'])
-def health():
-    return jsonify({'status': 'healthy', 'service': 'Cold Outreach Engine', 'timestamp': time.time()}), 200
+@app.route('/api/search', methods=['POST'])
+def api_search():
+    data = request.json
+    keyword = data.get('keyword', '')
+    city = data.get('city', '')
+    max_results = int(data.get('max_results', 20))
+    if not keyword or not city:
+        return jsonify({'error': 'keyword and city required'}), 400
+    logger.info(f"Search request: {keyword} in {city} (max {max_results})")
+    finder = PlaywrightLeadFinder()
+    results = finder.search(keyword, city, max_results)
+    return jsonify({'results': results})
 
 
-# ---- Original single-URL route (unchanged) --------------------------------
-
-@app.route('/api/generate', methods=['POST'])
-def generate_outreach():
-    try:
-        if not request.is_json:
-            return jsonify({'success': False, 'error': 'Content-Type must be application/json'}), 400
-        data = request.get_json()
-        url = data.get('url', '').strip()
-        if not url:
-            return jsonify({'success': False, 'error': 'URL is required'}), 400
-        if not url.startswith(('http://', 'https://')):
-            url = 'https://' + url
-        if not urlparse(url).netloc:
-            return jsonify({'success': False, 'error': 'Invalid URL format'}), 400
-
-        scraper = ProspectScraper()
-        prospect_data = scraper.scrape_url(url)
-        generator = OutreachGenerator(get_gemini_client())
-        email_result = generator.generate_email(prospect_data, data.get('sender_context'))
-
-        return jsonify({
-            'success': True,
-            'data': email_result,
-            'prospect': {'url': url, 'domain': prospect_data['domain'], 'title': prospect_data['title']},
-        }), 200
-    except Exception as e:
-        logger.error(f"Error in generate_outreach: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+@app.route('/api/enrich', methods=['POST'])
+def api_enrich():
+    data = request.json
+    businesses = data.get('businesses', [])
+    if not businesses:
+        return jsonify({'error': 'businesses array required'}), 400
+    logger.info(f"Enriching {len(businesses)} businesses with AI")
+    enriched = []
+    for biz in businesses:
+        try:
+            enriched.append(enrich_with_ai(biz))
+        except Exception as e:
+            logger.error(f"Enrichment failed for {biz.get('name')}: {e}")
+            biz['error'] = str(e)
+            enriched.append(biz)
+    return jsonify({'results': enriched})
 
 
-# ---- Search leads via Playwright Google Maps scraper ---------------------
-
-@app.route('/api/search-leads', methods=['POST'])
-def search_leads():
-    """
-    Find local businesses by scraping Google Maps — no API key required.
-    Body: { "keyword": "plumbers", "city": "Halifax", "max_results": 20 }
-    Returns leads tagged as hot (no website) or warm (has website).
-    """
-    try:
-        if not request.is_json:
-            return jsonify({'success': False, 'error': 'Content-Type must be application/json'}), 400
-        data = request.get_json()
-        keyword = data.get('keyword', '').strip()
-        city = data.get('city', '').strip()
-        max_results = min(int(data.get('max_results', 20)), 60)
-
-        if not keyword or not city:
-            return jsonify({'success': False, 'error': 'keyword and city are required'}), 400
-
-        finder = PlaywrightLeadFinder()
-        leads = finder.search(keyword, city, max_results)
-        hot = [l for l in leads if l['is_hot_lead']]
-        warm = [l for l in leads if not l['is_hot_lead']]
-
-        return jsonify({
-            'success': True,
-            'total': len(leads),
-            'hot_leads': len(hot),
-            'warm_leads': len(warm),
-            'leads': leads,
-        }), 200
-    except Exception as e:
-        logger.error(f"Error in search_leads: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-
-# ---- Bulk generate emails for a list of leads ---------------------------
-
-@app.route('/api/bulk-generate', methods=['POST'])
-def bulk_generate():
-    """
-    Generate cold emails for a list of leads.
-    Body: {
-        "leads": [...],
-        "sender_context": "optional — what you're selling",
-        "scrape_websites": false
-    }
-    """
-    try:
-        if not request.is_json:
-            return jsonify({'success': False, 'error': 'Content-Type must be application/json'}), 400
-        data = request.get_json()
-        leads = data.get('leads', [])
-        sender_context = data.get('sender_context')
-        scrape_websites = data.get('scrape_websites', False)
-
-        if not leads:
-            return jsonify({'success': False, 'error': 'leads list is required'}), 400
-
-        generator = OutreachGenerator(get_gemini_client())
-        scraper = ProspectScraper() if scrape_websites else None
-        results = []
-
-        for lead in leads:
-            website_data = None
-            if scrape_websites and lead.get('has_website') and lead.get('website'):
-                try:
-                    website_data = scraper.scrape_url(lead['website'])
-                except Exception as e:
-                    logger.warning(f"Could not scrape {lead.get('website')}: {e}")
-
-            try:
-                email = generator.generate_email_for_lead(lead, sender_context, website_data)
-                results.append({'lead': lead, 'email': email, 'success': True})
-            except Exception as e:
-                logger.error(f"Failed for {lead.get('name')}: {e}")
-                results.append({'lead': lead, 'email': None, 'success': False, 'error': str(e)})
-
-            time.sleep(0.5)  # Rate limit buffer
-
-        return jsonify({
-            'success': True,
-            'total': len(results),
-            'generated': sum(1 for r in results if r['success']),
-            'results': results,
-        }), 200
-    except Exception as e:
-        logger.error(f"Error in bulk_generate: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-
-# ---- Export to CSV -------------------------------------------------------
-
-@app.route('/api/export-csv', methods=['POST'])
-def export_csv():
-    """
-    Export bulk-generate results to downloadable CSV.
-    Body: { "results": [...] }
-    """
-    try:
-        if not request.is_json:
-            return jsonify({'success': False, 'error': 'Content-Type must be application/json'}), 400
-        data = request.get_json()
-        results = data.get('results', [])
-        if not results:
-            return jsonify({'success': False, 'error': 'No results to export'}), 400
-
+@app.route('/api/export', methods=['POST'])
+def api_export():
+    data = request.json
+    businesses = data.get('businesses', [])
+    export_format = data.get('format', 'csv')
+    if export_format == 'csv':
         output = io.StringIO()
-        writer = csv.writer(output)
-        writer.writerow([
-            'Business Name', 'Category', 'Address', 'Phone', 'Website',
-            'Has Website', 'Hot Lead', 'Rating', 'Reviews',
-            'Email Subject', 'Email Body', 'Lead Type',
-        ])
-        for r in results:
-            lead = r.get('lead', {})
-            email = r.get('email') or {}
-            writer.writerow([
-                lead.get('name', ''),
-                lead.get('category', ''),
-                lead.get('address', ''),
-                lead.get('phone', ''),
-                lead.get('website', ''),
-                'No' if lead.get('is_hot_lead') else 'Yes',
-                'YES' if lead.get('is_hot_lead') else 'No',
-                lead.get('rating', ''),
-                lead.get('review_count', ''),
-                email.get('subject', ''),
-                email.get('body', '').replace('\n', ' '),
-                email.get('lead_type', ''),
-            ])
-
+        fieldnames = ['name', 'address', 'phone', 'email', 'website', 'rating', 'reviews', 'pain_points', 'outreach_email']
+        writer = csv.DictWriter(output, fieldnames=fieldnames)
+        writer.writeheader()
+        for biz in businesses:
+            row = {k: biz.get(k, '') for k in fieldnames}
+            if isinstance(row['pain_points'], list):
+                row['pain_points'] = '; '.join(row['pain_points'])
+            writer.writerow(row)
         response = make_response(output.getvalue())
-        response.headers['Content-Disposition'] = 'attachment; filename=cold_outreach_leads.csv'
         response.headers['Content-Type'] = 'text/csv'
+        response.headers['Content-Disposition'] = 'attachment; filename=leads.csv'
         return response
-    except Exception as e:
-        logger.error(f"Error in export_csv: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+    else:
+        response = make_response(json.dumps(businesses, indent=2))
+        response.headers['Content-Type'] = 'application/json'
+        response.headers['Content-Disposition'] = 'attachment; filename=leads.json'
+        return response
 
 
-# ---- Error handlers ------------------------------------------------------
+@app.route('/api/mockup', methods=['POST'])
+def api_mockup():
+    """
+    POST /api/mockup
+    Body: { name, city, category, phone, address, website (optional) }
+    Returns: { html: '...complete HTML mockup...' }
+    """
+    data = request.json
+    name = data.get('name', 'Your Business')
+    city = data.get('city', '')
+    category = data.get('category', 'business')
+    phone = data.get('phone', '')
+    address = data.get('address', '')
+    website = data.get('website', '')
+    has_website = bool(website and is_real_website(website))
 
-@app.errorhandler(404)
-def not_found(e):
-    return jsonify({'success': False, 'error': 'Endpoint not found'}), 404
+    # Map category to Unsplash keyword for hero image
+    category_lower = category.lower()
+    unsplash_keywords = {
+        'restaurant': 'restaurant,food',
+        'cafe': 'cafe,coffee',
+        'coffee': 'cafe,coffee',
+        'bar': 'bar,cocktails',
+        'plumber': 'plumbing,pipe',
+        'plumbing': 'plumbing,pipe',
+        'electrician': 'electrician,electrical',
+        'electrical': 'electrician,electrical',
+        'dentist': 'dental,dentist',
+        'dental': 'dental,dentist',
+        'doctor': 'medical,clinic',
+        'medical': 'medical,clinic',
+        'salon': 'hair,salon',
+        'hair': 'hair,salon',
+        'barbershop': 'barbershop,haircut',
+        'barber': 'barbershop,haircut',
+        'gym': 'gym,fitness',
+        'fitness': 'gym,fitness',
+        'lawyer': 'law,office',
+        'law': 'law,office',
+        'real estate': 'realestate,house',
+        'realtor': 'realestate,house',
+        'auto': 'car,garage',
+        'mechanic': 'car,garage',
+        'landscaping': 'garden,landscaping',
+        'cleaning': 'cleaning,house',
+        'photographer': 'photography,camera',
+        'photography': 'photography,camera',
+        'accounting': 'office,finance',
+        'accountant': 'office,finance',
+        'bakery': 'bakery,bread',
+        'pizza': 'pizza,restaurant',
+        'spa': 'spa,wellness',
+        'yoga': 'yoga,wellness',
+        'pet': 'pets,dog',
+        'vet': 'veterinary,dog',
+        'florist': 'flowers,florist',
+        'jewelry': 'jewelry,gems',
+        'clothing': 'fashion,clothing',
+        'retail': 'shop,retail',
+        'hotel': 'hotel,luxury',
+        'construction': 'construction,building',
+        'roofing': 'roof,construction',
+        'hvac': 'hvac,airconditioning',
+        'insurance': 'office,business',
+        'travel': 'travel,vacation',
+        'tutoring': 'education,learning',
+        'childcare': 'children,daycare',
+    }
+    unsplash_kw = category_lower
+    for key, val in unsplash_keywords.items():
+        if key in category_lower:
+            unsplash_kw = val
+            break
 
-@app.errorhandler(500)
-def internal_error(e):
-    return jsonify({'success': False, 'error': 'Internal server error'}), 500
+    hero_image_url = f"https://source.unsplash.com/1600x900/?{urllib.parse.quote(unsplash_kw)}"
+
+    # Determine services to show based on category
+    client = get_gemini_client()
+    try:
+        services_prompt = f"""For a {category} business called "{name}" in {city}, generate exactly 6 short service offerings (2-5 words each).
+Return ONLY a JSON array of 6 strings. No explanation.
+Example: ["Service One", "Service Two", "Service Three", "Service Four", "Service Five", "Service Six"]"""
+        response = client.generate_content(services_prompt)
+        raw = response.text.strip().replace('```json', '').replace('```', '').strip()
+        services = json.loads(raw)
+        if not isinstance(services, list) or len(services) < 3:
+            raise ValueError("bad services response")
+        services = services[:6]
+    except Exception:
+        services = ["Professional Service", "Expert Consultation", "Quality Work", "Fast Turnaround", "Licensed & Insured", "Free Estimates"]
+
+    # Generate a compelling tagline
+    try:
+        tagline_prompt = f"""Write ONE short punchy tagline (8 words or less) for a {category} business called "{name}" in {city}.
+Return ONLY the tagline text, nothing else."""
+        response = client.generate_content(tagline_prompt)
+        tagline = response.text.strip().strip('"').strip("'")
+        if len(tagline) > 80:
+            tagline = tagline[:80]
+    except Exception:
+        tagline = f"Your Trusted {category.title()} in {city}"
+
+    # Generate about section text
+    try:
+        about_prompt = f"""Write 2 short sentences (total max 40 words) describing a {category} business called "{name}" in {city}.
+Warm, professional tone. Return ONLY the text."""
+        response = client.generate_content(about_prompt)
+        about_text = response.text.strip()
+        if len(about_text) > 300:
+            about_text = about_text[:300]
+    except Exception:
+        about_text = f"{name} has been proudly serving the {city} community with top-quality {category} services. We are committed to excellence and customer satisfaction in everything we do."
+
+    # Generate the full HTML mockup
+    html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{name}</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+  :root {{
+    --green: #00ff88;
+    --dark: #0a0a0a;
+    --card: #111;
+    --border: #222;
+    --text: #e0e0e0;
+    --muted: #888;
+  }}
+  body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--dark); color: var(--text); }}
+
+  /* NAV */
+  nav {{ position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,10,10,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; align-items: center; justify-content: space-between; height: 64px; }}
+  .nav-logo {{ font-size: 20px; font-weight: 800; color: var(--green); letter-spacing: -0.5px; }}
+  .nav-links {{ display: flex; gap: 32px; }}
+  .nav-links a {{ color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }}
+  .nav-links a:hover {{ color: var(--green); }}
+  .nav-cta {{ background: var(--green); color: #000; padding: 8px 20px; border-radius: 6px; font-size: 14px; font-weight: 700; text-decoration: none; transition: background 0.2s; }}
+  .nav-cta:hover {{ background: #00dd77; }}
+
+  /* HERO */
+  .hero {{ position: relative; height: 100vh; min-height: 600px; display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; }}
+  .hero-bg {{ position: absolute; inset: 0; background-image: url('{hero_image_url}'); background-size: cover; background-position: center; filter: brightness(0.25); }}
+  .hero-overlay {{ position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(10,10,10,0.8) 100%); }}
+  .hero-content {{ position: relative; z-index: 1; max-width: 800px; padding: 0 24px; }}
+  .hero-badge {{ display: inline-block; background: rgba(0,255,136,0.15); border: 1px solid rgba(0,255,136,0.3); color: var(--green); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; padding: 6px 16px; border-radius: 100px; margin-bottom: 24px; }}
+  .hero h1 {{ font-size: clamp(36px, 6vw, 72px); font-weight: 900; line-height: 1.05; letter-spacing: -2px; margin-bottom: 20px; color: #fff; }}
+  .hero h1 span {{ color: var(--green); }}
+  .hero-tagline {{ font-size: clamp(16px, 2vw, 20px); color: rgba(255,255,255,0.7); margin-bottom: 40px; line-height: 1.5; }}
+  .hero-actions {{ display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }}
+  .btn-hero {{ padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 700; text-decoration: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }}
+  .btn-hero-primary {{ background: var(--green); color: #000; }}
+  .btn-hero-primary:hover {{ background: #00dd77; transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,255,136,0.3); }}
+  .btn-hero-secondary {{ background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(4px); }}
+  .btn-hero-secondary:hover {{ background: rgba(255,255,255,0.15); }}
+  .hero-stats {{ display: flex; gap: 48px; justify-content: center; margin-top: 60px; flex-wrap: wrap; }}
+  .stat {{ text-align: center; }}
+  .stat-num {{ font-size: 32px; font-weight: 900; color: var(--green); }}
+  .stat-label {{ font-size: 13px; color: var(--muted); margin-top: 4px; }}
+
+  /* SECTION BASE */
+  section {{ padding: 100px 40px; }}
+  .section-label {{ font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; color: var(--green); margin-bottom: 12px; }}
+  .section-title {{ font-size: clamp(28px, 4vw, 48px); font-weight: 900; letter-spacing: -1px; margin-bottom: 16px; }}
+  .section-sub {{ font-size: 16px; color: var(--muted); max-width: 560px; line-height: 1.6; }}
+  .section-header {{ margin-bottom: 64px; }}
+
+  /* SERVICES */
+  .services {{ background: var(--dark); }}
+  .services-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }}
+  .service-card {{ background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 32px; transition: all 0.3s; position: relative; overflow: hidden; }}
+  .service-card::before {{ content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--green), transparent); opacity: 0; transition: opacity 0.3s; }}
+  .service-card:hover {{ border-color: var(--green); transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,255,136,0.08); }}
+  .service-card:hover::before {{ opacity: 1; }}
+  .service-icon {{ width: 48px; height: 48px; background: rgba(0,255,136,0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; color: var(--green); font-size: 20px; }}
+  .service-name {{ font-size: 17px; font-weight: 700; margin-bottom: 8px; color: #fff; }}
+  .service-desc {{ font-size: 14px; color: var(--muted); line-height: 1.5; }}
+
+  /* ABOUT */
+  .about {{ background: #0d0d0d; }}
+  .about-inner {{ display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; max-width: 1100px; margin: 0 auto; }}
+  .about-image {{ border-radius: 20px; overflow: hidden; height: 420px; position: relative; }}
+  .about-image img {{ width: 100%; height: 100%; object-fit: cover; filter: brightness(0.8); }}
+  .about-image-badge {{ position: absolute; bottom: 24px; left: 24px; background: var(--green); color: #000; padding: 12px 20px; border-radius: 10px; font-weight: 800; font-size: 13px; }}
+  .about-text .section-sub {{ max-width: 100%; margin-bottom: 32px; font-size: 17px; color: #bbb; }}
+  .about-features {{ display: flex; flex-direction: column; gap: 16px; }}
+  .about-feature {{ display: flex; align-items: center; gap: 14px; font-size: 15px; color: var(--text); }}
+  .about-feature i {{ color: var(--green); font-size: 16px; width: 20px; }}
+
+  /* TESTIMONIALS */
+  .testimonials {{ background: var(--dark); }}
+  .testimonials-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }}
+  .testimonial-card {{ background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; }}
+  .testimonial-stars {{ color: #ffd700; font-size: 14px; margin-bottom: 16px; letter-spacing: 2px; }}
+  .testimonial-text {{ font-size: 15px; color: #ccc; line-height: 1.7; margin-bottom: 20px; font-style: italic; }}
+  .testimonial-author {{ display: flex; align-items: center; gap: 12px; }}
+  .testimonial-avatar {{ width: 40px; height: 40px; border-radius: 50%; background: rgba(0,255,136,0.15); border: 2px solid var(--green); display: flex; align-items: center; justify-content: center; color: var(--green); font-weight: 700; font-size: 16px; }}
+  .testimonial-name {{ font-weight: 700; font-size: 14px; }}
+  .testimonial-location {{ font-size: 12px; color: var(--muted); }}
+
+  /* CTA BAND */
+  .cta-band {{ background: var(--green); padding: 80px 40px; text-align: center; }}
+  .cta-band h2 {{ font-size: clamp(28px, 4vw, 48px); font-weight: 900; color: #000; letter-spacing: -1px; margin-bottom: 12px; }}
+  .cta-band p {{ font-size: 18px; color: rgba(0,0,0,0.7); margin-bottom: 36px; }}
+  .btn-cta-dark {{ display: inline-flex; align-items: center; gap: 8px; background: #000; color: var(--green); padding: 16px 40px; border-radius: 8px; font-size: 16px; font-weight: 800; text-decoration: none; transition: all 0.2s; }}
+  .btn-cta-dark:hover {{ background: #111; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }}
+
+  /* CONTACT */
+  .contact {{ background: #0d0d0d; }}
+  .contact-inner {{ display: grid; grid-template-columns: 1fr 1fr; gap: 60px; max-width: 1000px; margin: 0 auto; }}
+  .contact-info {{ display: flex; flex-direction: column; gap: 24px; }}
+  .contact-item {{ display: flex; align-items: flex-start; gap: 16px; }}
+  .contact-icon {{ width: 44px; height: 44px; background: rgba(0,255,136,0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--green); font-size: 18px; flex-shrink: 0; }}
+  .contact-label {{ font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 4px; }}
+  .contact-value {{ font-size: 16px; font-weight: 600; color: #fff; }}
+  .contact-form {{ background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 32px; }}
+  .form-group {{ margin-bottom: 16px; }}
+  .form-group label {{ display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }}
+  .form-group input, .form-group textarea {{ width: 100%; background: #0a0a0a; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-size: 14px; color: var(--text); font-family: inherit; transition: border-color 0.2s; }}
+  .form-group input:focus, .form-group textarea:focus {{ outline: none; border-color: var(--green); }}
+  .form-group textarea {{ resize: vertical; min-height: 100px; }}
+  .form-submit {{ width: 100%; background: var(--green); color: #000; border: none; padding: 13px; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background 0.2s; }}
+  .form-submit:hover {{ background: #00dd77; }}
+
+  /* FOOTER */
+  footer {{ background: var(--dark); border-top: 1px solid var(--border); padding: 40px; text-align: center; }}
+  .footer-logo {{ font-size: 22px; font-weight: 900; color: var(--green); margin-bottom: 8px; }}
+  .footer-tagline {{ font-size: 14px; color: var(--muted); margin-bottom: 24px; }}
+  .footer-links {{ display: flex; gap: 32px; justify-content: center; margin-bottom: 24px; flex-wrap: wrap; }}
+  .footer-links a {{ color: var(--muted); text-decoration: none; font-size: 14px; transition: color 0.2s; }}
+  .footer-links a:hover {{ color: var(--green); }}
+  .footer-copy {{ font-size: 13px; color: #444; }}
+
+  /* WATERMARK */
+  .watermark-bar {{ background: #0d0d0d; border-top: 1px solid var(--border); padding: 12px 40px; text-align: center; }}
+  .watermark-bar p {{ font-size: 12px; color: #444; }}
+  .watermark-bar span {{ color: var(--green); font-weight: 700; }}
+
+  @media (max-width: 768px) {{
+    nav .nav-links {{ display: none; }}
+    section {{ padding: 60px 20px; }}
+    .about-inner, .contact-inner {{ grid-template-columns: 1fr; gap: 40px; }}
+    .hero-stats {{ gap: 24px; }}
+    nav {{ padding: 0 20px; }}
+  }}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">{name}</div>
+  <div class="nav-links">
+    <a href="#services">Services</a>
+    <a href="#about">About</a>
+    <a href="#testimonials">Reviews</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <a href="#contact" class="nav-cta">Get a Quote</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-badge">{city} &bull; {category.title()}</div>
+    <h1>{name}<br><span>{tagline}</span></h1>
+    <p class="hero-tagline">Professional {category} services trusted by hundreds of customers in {city}.</p>
+    <div class="hero-actions">
+      <a href="#contact" class="btn-hero btn-hero-primary"><i class="fa fa-phone"></i> Get a Free Quote</a>
+      <a href="#services" class="btn-hero btn-hero-secondary"><i class="fa fa-arrow-down"></i> Our Services</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">500+</div><div class="stat-label">Happy Clients</div></div>
+      <div class="stat"><div class="stat-num">10+</div><div class="stat-label">Years Experience</div></div>
+      <div class="stat"><div class="stat-num">4.9<i class="fa fa-star" style="font-size:20px;margin-left:4px;"></i></div><div class="stat-label">Avg Rating</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="services" id="services">
+  <div style="max-width:1100px;margin:0 auto;">
+    <div class="section-header">
+      <div class="section-label">What We Do</div>
+      <div class="section-title">Our Services</div>
+      <div class="section-sub">Everything you need from a trusted {category} provider — done right the first time.</div>
+    </div>
+    <div class="services-grid">
+      {''.join(f'''
+      <div class="service-card">
+        <div class="service-icon"><i class="fa fa-check-circle"></i></div>
+        <div class="service-name">{s}</div>
+        <div class="service-desc">Top-quality service delivered by our experienced team with attention to detail.</div>
+      </div>''' for s in services)}
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="about-inner">
+    <div class="about-image">
+      <img src="https://source.unsplash.com/800x600/?{urllib.parse.quote(unsplash_kw)},team" alt="{name} team">
+      <div class="about-image-badge"><i class="fa fa-shield-halved"></i>&nbsp; Licensed &amp; Insured</div>
+    </div>
+    <div class="about-text">
+      <div class="section-label">About Us</div>
+      <div class="section-title">Why Choose {name}?</div>
+      <p class="section-sub">{about_text}</p>
+      <div class="about-features">
+        <div class="about-feature"><i class="fa fa-circle-check"></i> Fully licensed and insured</div>
+        <div class="about-feature"><i class="fa fa-circle-check"></i> Local {city} experts since day one</div>
+        <div class="about-feature"><i class="fa fa-circle-check"></i> Transparent pricing — no surprises</div>
+        <div class="about-feature"><i class="fa fa-circle-check"></i> 100% satisfaction guaranteed</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials" id="testimonials">
+  <div style="max-width:1100px;margin:0 auto;">
+    <div class="section-header">
+      <div class="section-label">Reviews</div>
+      <div class="section-title">What Clients Say</div>
+      <div class="section-sub">Real feedback from real customers in {city}.</div>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p class="testimonial-text">"Absolutely incredible service. {name} showed up on time, did the job perfectly, and the price was very fair. Will definitely call them again!"</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">S</div>
+          <div><div class="testimonial-name">Sarah M.</div><div class="testimonial-location">{city}</div></div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p class="testimonial-text">"Best {category} service I've ever used. Highly professional team, great communication from start to finish. Strongly recommend to anyone in {city}."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">J</div>
+          <div><div class="testimonial-name">James R.</div><div class="testimonial-location">{city}</div></div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p class="testimonial-text">"I was skeptical at first but {name} completely exceeded my expectations. Fast, clean, and honestly the best value in town."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">A</div>
+          <div><div class="testimonial-name">Amanda K.</div><div class="testimonial-location">{city}</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BAND -->
+<div class="cta-band">
+  <h2>Ready to Get Started?</h2>
+  <p>Call us today or fill out the form below — we respond within 1 hour.</p>
+  <a href="#contact" class="btn-cta-dark"><i class="fa fa-calendar-check"></i> Book a Free Consultation</a>
+</div>
+
+<!-- CONTACT -->
+<section class="contact" id="contact">
+  <div style="max-width:1000px;margin:0 auto;">
+    <div class="section-header" style="text-align:center;">
+      <div class="section-label">Get In Touch</div>
+      <div class="section-title">Contact Us</div>
+    </div>
+    <div class="contact-inner">
+      <div class="contact-info">
+        {f'<div class="contact-item"><div class="contact-icon"><i class="fa fa-phone"></i></div><div><div class="contact-label">Phone</div><div class="contact-value">{phone}</div></div></div>' if phone else ''}
+        {f'<div class="contact-item"><div class="contact-icon"><i class="fa fa-location-dot"></i></div><div><div class="contact-label">Address</div><div class="contact-value">{address}</div></div></div>' if address else ''}
+        <div class="contact-item"><div class="contact-icon"><i class="fa fa-clock"></i></div><div><div class="contact-label">Hours</div><div class="contact-value">Mon–Fri: 8am – 6pm<br>Sat: 9am – 4pm</div></div></div>
+        <div class="contact-item"><div class="contact-icon"><i class="fa fa-map-marker-alt"></i></div><div><div class="contact-label">Service Area</div><div class="contact-value">{city} &amp; surrounding areas</div></div></div>
+      </div>
+      <div class="contact-form">
+        <div class="form-group"><label>Your Name</label><input type="text" placeholder="John Smith"></div>
+        <div class="form-group"><label>Email</label><input type="email" placeholder="john@email.com"></div>
+        <div class="form-group"><label>Phone</label><input type="tel" placeholder="(555) 000-0000"></div>
+        <div class="form-group"><label>Message</label><textarea placeholder="Tell us about your project..."></textarea></div>
+        <button class="form-submit">Send Message <i class="fa fa-arrow-right"></i></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">{name}</div>
+  <div class="footer-tagline">{city}'s trusted {category} specialists</div>
+  <div class="footer-links">
+    <a href="#services">Services</a>
+    <a href="#about">About</a>
+    <a href="#testimonials">Reviews</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <div class="footer-copy">&copy; 2025 {name}. All rights reserved.</div>
+</footer>
+
+<div class="watermark-bar">
+  <p>Website mockup powered by <span>Cold Outreach Engine</span> &mdash; We can build your real site today.</p>
+</div>
+
+</body>
+</html>"""
+
+    return jsonify({'html': html})
+
+
+@app.route('/health')
+def health():
+    return jsonify({'status': 'ok', 'timestamp': time.time()})
 
 
 if __name__ == '__main__':
-    if not os.getenv('GEMINI_API_KEY'):
-        logger.warning("GEMINI_API_KEY not set — AI calls will fail")
     port = int(os.getenv('PORT', 5000))
-    debug = os.getenv('FLASK_ENV') == 'development'
-    logger.info(f"Starting Cold Outreach Engine on port {port}")
-    app.run(host='0.0.0.0', port=port, debug=debug)
+    app.run(host='0.0.0.0', port=port, debug=False)
