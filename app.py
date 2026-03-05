@@ -708,6 +708,28 @@ def health():
     return jsonify({'status': 'ok', 'timestamp': time.time()})
 
 
+@app.route('/api/debug', methods=['GET'])
+def api_debug():
+    """Diagnostic endpoint — shows env var status and tests Gemini connectivity."""
+    gemini_key = os.getenv('GEMINI_API_KEY', '')
+    places_key = os.getenv('GOOGLE_PLACES_API_KEY', '')
+    gemini_test = None
+    try:
+        client = get_gemini_client()
+        resp = client.generate_content('Reply with exactly: {"ok": true}')
+        gemini_test = resp.text.strip()[:100]
+    except Exception as e:
+        gemini_test = f'ERROR: {e}'
+    return jsonify({
+        'gemini_key_set': bool(gemini_key),
+        'gemini_key_prefix': gemini_key[:8] + '...' if gemini_key else None,
+        'places_key_set': bool(places_key),
+        'gemini_test': gemini_test,
+        'has_gemini_fallback': hasattr(PlaywrightLeadFinder, '_search_with_gemini'),
+        'timestamp': time.time(),
+    })
+
+
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
