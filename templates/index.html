@@ -310,6 +310,7 @@
                                     <th>Phone</th>
                                     <th>Website</th>
                                     <th>Rating</th>
+                                    <th>Reviews</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -483,13 +484,15 @@
                 const tr = document.createElement('tr');
                 if (selectedSearchIndices.has(idx)) tr.classList.add('selected');
                 
+                const websiteBadge = biz.website ? '<span class="badge valid">Has Site</span>' : '<span class="badge none">No Site</span>';
                 tr.innerHTML = `
                     <td><input type="checkbox" class="row-select" data-index="${idx}" ${selectedSearchIndices.has(idx) ? 'checked' : ''}></td>
                     <td>${biz.name || ''}</td>
                     <td>${biz.address || ''}</td>
                     <td>${biz.phone || ''}</td>
-                    <td>${biz.website ? `<a href="${biz.website}" target="_blank" style="color: #00ff88;">${biz.website}</a>` : ''}</td>
-                    <td>${biz.rating ? `⭐ ${biz.rating} (${biz.reviews || 0})` : ''}</td>
+                    <td>${biz.website ? `<a href="${biz.website}" target="_blank" style="color: #00ff88;">${biz.website}</a>` : 'N/A'} ${websiteBadge}</td>
+                    <td>${biz.rating ? biz.rating + ' ★' : 'N/A'}</td>
+                    <td>${biz.reviews || 'N/A'}</td>
                 `;
                 tbody.appendChild(tr);
             });
