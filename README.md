@@ -1,41 +1,171 @@
-# AI Cold Outreach Personalization Engine
+# Cold Outreach Engine
 
-A production-ready Flask API that generates hyper-personalized cold outreach emails using AI. Simply provide a prospect's LinkedIn profile or company website URL, and the engine scrapes key information, analyzes it with Google Gemini 1.5 Flash, and generates a personalized cold email with subject line, body, and CTA.
+Find local businesses on Google, detect who has no website, and generate personalized AI cold emails in bulk — powered by Gemini. Built for service providers targeting local businesses: web design, AI automation, SEO, and more.
 
-## Features
+---
 
-- **Smart Web Scraping**: Extracts prospect information from LinkedIn profiles and company websites
-- **AI-Powered Personalization**: Uses Google Gemini 1.5 Flash to craft authentic, personalized emails
-- **Clean API**: RESTful JSON API with proper error handling
-- **Beautiful Frontend**: Single-page interface for non-technical users
-- **Production Ready**: Includes health checks, logging, CORS support, and error handling
-- **Flexible Context**: Customize your value proposition per request
+## What It Does
 
-## Quick Deploy to Render
+### Tab 1 — Find Leads (NEW)
+1. **Search** — Enter a keyword (e.g. `plumbers`) + city (e.g. `Halifax`) to pull local businesses from Google Places
+2. **Detect** — Automatically flags businesses with **no website** as 🔥 **Hot Leads** — your best prospects
+3. **Filter** — View all leads, hot only, or warm only
+4. **Bulk select** — Check the leads you want to target
+5. **Generate** — AI writes a personalized cold email for each selected business:
+   - **No website** → pitches web presence / digital setup
+   - **Has website** → optionally scrapes it for deeper personalization
+6. **Export** — Download all leads + generated emails as a CSV
 
-1. Fork this repo
-2. Go to [render.com](https://render.com) and create a new Web Service
-3. Connect your GitHub repo
-4. Add environment variable: `GEMINI_API_KEY=your-key`
-5. Deploy — live URL in ~3 minutes
+### Tab 2 — Single URL Email
+- Paste any LinkedIn profile or company website URL
+- AI analyzes the page and writes a personalized cold email
 
-## API
+---
 
-### POST /api/generate
+## Hot Lead Logic
+
+A business is flagged as a **Hot Lead** (no website) if:
+- Their Google listing has no website field, OR
+- Their website is a placeholder/social page (Facebook, Instagram, Linktree, Wix default page, etc.)
+
+These businesses are your best targets — they clearly need digital help and aren't being reached by competitors doing online outreach.
+
+---
+
+## API Keys You Need
+
+| Key | What for | Where to get it | Cost |
+|-----|----------|-----------------|------|
+| `GEMINI_API_KEY` | AI email generation | [aistudio.google.com](https://aistudio.google.com) | Free tier available |
+| `GOOGLE_PLACES_API_KEY` | Business search | [console.cloud.google.com](https://console.cloud.google.com) | ~$17/1000 searches; $200/mo free credit for new accounts |
+
+---
+
+## Quick Start
+
+### 1. Install dependencies
+
+```bash
+cd code/cold-outreach-engine
+pip install -r requirements.txt
+```
+
+### 2. Set up environment
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env`:
+```
+GEMINI_API_KEY=your-gemini-api-key-here
+GOOGLE_PLACES_API_KEY=your-google-places-api-key-here
+PORT=5000
+FLASK_ENV=development
+```
+
+### 3. Get a Google Places API Key
+
+1. Go to [console.cloud.google.com](https://console.cloud.google.com)
+2. Create a new project (or use existing)
+3. Go to **APIs & Services → Library**
+4. Search for and enable **Places API**
+5. Go to **APIs & Services → Credentials → Create Credentials → API Key**
+6. Copy the key into your `.env`
+
+> New Google Cloud accounts get $200/month free credit — enough for thousands of searches.
+
+### 4. Run
+
+```bash
+python app.py
+# Visit http://localhost:5000
+```
+
+---
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/` | Web UI |
+| `POST` | `/api/search-leads` | Search Google Places for businesses |
+| `POST` | `/api/bulk-generate` | Generate cold emails for a list of leads |
+| `POST` | `/api/export-csv` | Download leads + emails as CSV |
+| `POST` | `/api/generate` | Generate email from a single URL (original flow) |
+| `GET` | `/health` | Health check |
+
+### POST /api/search-leads
 ```json
 {
-  "url": "https://linkedin.com/in/john-doe",
-  "sender_context": "Optional: describe your offer"
+  "keyword": "plumbers",
+  "city": "Halifax",
+  "max_results": 20
 }
 ```
 
-### GET /health
-Health check endpoint.
+Returns:
+```json
+{
+  "success": true,
+  "total": 18,
+  "hot_leads": 7,
+  "warm_leads": 11,
+  "leads": [
+    {
+      "name": "Joe's Plumbing",
+      "address": "123 Main St, Halifax, NS",
+      "phone": "(902) 555-1234",
+      "website": "",
+      "has_website": false,
+      "is_hot_lead": true,
+      "category": "Plumber",
+      "rating": 4.3,
+      "review_count": 28
+    }
+  ]
+}
+```
 
-## Environment Variables
+### POST /api/bulk-generate
+```json
+{
+  "leads": [...],
+  "sender_context": "I build websites for local trades businesses. Packages from $500.",
+  "scrape_websites": false
+}
+```
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| GEMINI_API_KEY | Yes | Get free at aistudio.google.com/app/apikey |
-| PORT | No | Default 8080 |
-| FLASK_ENV | No | Set to production for deploy |
+### POST /api/export-csv
+```json
+{ "results": [...] }
+```
+Returns a downloadable `cold_outreach_leads.csv` file.
+
+---
+
+## Deploy to Railway / Render
+
+### Railway
+```bash
+railway init
+railway up
+```
+Set env vars in Railway dashboard.
+
+### Render
+Uses the included `render.yaml`. Connect your repo, add env vars, deploy.
+
+---
+
+## Requirements
+
+```
+flask
+flask-cors
+requests
+beautifulsoup4
+google-generativeai
+```
+
+Install: `pip install -r requirements.txt`
