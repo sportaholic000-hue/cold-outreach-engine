@@ -28,7 +28,7 @@ def get_gemini_client():
         if not api_key:
             raise ValueError("GEMINI_API_KEY environment variable not set")
         genai.configure(api_key=api_key)
-        _gemini_client = genai.GenerativeModel('gemini-1.5-flash')
+        _gemini_client = genai.GenerativeModel('gemini-2.0-flash')
     return _gemini_client
 
 PLACEHOLDER_DOMAINS = {
