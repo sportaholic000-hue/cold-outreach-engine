@@ -232,24 +232,47 @@ def index():
 
 @app.route('/api/search', methods=['POST'])
 def api_search():
-    data = request.json
-    keyword = data.get('keyword', '')
-    city = data.get('city', '')
-    max_results = int(data.get('max_results', 20))
+    data = request.json or {}
+    keyword = data.get('keyword', '').strip()
+    city = data.get('city', '').strip()
+    try:
+        max_results = max(1, min(50, int(data.get('max_results', 20))))
+    except (ValueError, TypeError):
+        max_results = 20
     if not keyword or not city:
-        return jsonify({'error': 'keyword and city required'}), 400
+        return jsonify({'error': 'keyword and city are required'}), 400
+    # Check if any search method is available
+    has_places_key = bool(os.getenv('GOOGLE_PLACES_API_KEY'))
+    has_gemini_key = bool(os.getenv('GEMINI_API_KEY'))
+    if not has_places_key and not has_gemini_key:
+        return jsonify({
+            'error': 'No search API configured. Please add GOOGLE_PLACES_API_KEY or GEMINI_API_KEY.',
+            'results': [],
+            'count': 0
+        }), 503
     logger.info(f"Search request: {keyword} in {city} (max {max_results})")
     finder = PlaywrightLeadFinder()
     results = finder.search(keyword, city, max_results)
-    return jsonify({'results': results})
+    if not results and not has_places_key and has_gemini_key:
+        return jsonify({
+            'error': 'Search failed — Gemini API quota may be exhausted. Try again tomorrow or add a Google Places API key.',
+            'results': [],
+            'count': 0
+        }), 503
+    return jsonify({'results': results, 'count': len(results)})
 
 
 @app.route('/api/enrich', methods=['POST'])
 def api_enrich():
-    data = request.json
+    data = request.json or {}
     businesses = data.get('businesses', [])
     if not businesses:
         return jsonify({'error': 'businesses array required'}), 400
+    if not os.getenv('GEMINI_API_KEY'):
+        return jsonify({
+            'error': 'GEMINI_API_KEY not configured. Enrichment requires Gemini.',
+            'results': []
+        }), 503
     logger.info(f"Enriching {len(businesses)} businesses with AI")
     enriched = []
     for biz in businesses:
@@ -259,7 +282,7 @@ def api_enrich():
             logger.error(f"Enrichment failed for {biz.get('name')}: {e}")
             biz['error'] = str(e)
             enriched.append(biz)
-    return jsonify({'results': enriched})
+    return jsonify({'results': enriched, 'count': len(enriched)})
 
 
 @app.route('/api/export', methods=['POST'])
@@ -710,21 +733,15 @@ def health():
 
 @app.route('/api/debug', methods=['GET'])
 def api_debug():
-    """Diagnostic endpoint — shows env var status and tests Gemini connectivity."""
+    """Diagnostic endpoint — shows env var and config status (no API calls)."""
     gemini_key = os.getenv('GEMINI_API_KEY', '')
     places_key = os.getenv('GOOGLE_PLACES_API_KEY', '')
-    gemini_test = None
-    try:
-        client = get_gemini_client()
-        resp = client.generate_content('Reply with exactly: {"ok": true}')
-        gemini_test = resp.text.strip()[:100]
-    except Exception as e:
-        gemini_test = f'ERROR: {e}'
     return jsonify({
         'gemini_key_set': bool(gemini_key),
         'gemini_key_prefix': gemini_key[:8] + '...' if gemini_key else None,
         'places_key_set': bool(places_key),
-        'gemini_test': gemini_test,
+        'places_key_prefix': places_key[:8] + '...' if places_key else None,
+        'search_mode': 'google_places' if places_key else ('gemini_fallback' if gemini_key else 'none'),
         'has_gemini_fallback': hasattr(PlaywrightLeadFinder, '_search_with_gemini'),
         'timestamp': time.time(),
     })
