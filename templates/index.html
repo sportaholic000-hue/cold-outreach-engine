@@ -404,6 +404,24 @@
                     </div>
                 </div>
 
+                <div class="form-row">
+                    <div class="field">
+                        <label>Google Rating (optional)</label>
+                        <input type="text" id="mockup-rating" placeholder="e.g., 4.7">
+                    </div>
+                    <div class="field">
+                        <label>Review Count (optional)</label>
+                        <input type="text" id="mockup-reviews" placeholder="e.g., 142">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="field" style="flex: 1;">
+                        <label>Business Description (optional)</label>
+                        <input type="text" id="mockup-description" placeholder="e.g., Family-owned Italian restaurant since 1985">
+                    </div>
+                </div>
+
                 <button class="btn btn-primary" id="mockup-generate-btn">
                     Generate Mockup
                 </button>
@@ -673,6 +691,9 @@
             const category = document.getElementById('mockup-category').value.trim();
             const phone = document.getElementById('mockup-phone').value.trim();
             const address = document.getElementById('mockup-address').value.trim();
+            const rating = document.getElementById('mockup-rating').value.trim();
+            const review_count = document.getElementById('mockup-reviews').value.trim();
+            const description = document.getElementById('mockup-description').value.trim();
 
             if (!name || !city || !category) {
                 alert('Please fill in Business Name, City, and Category');
@@ -687,7 +708,7 @@
                 const response = await fetch('/api/mockup', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, city, category, phone, address })
+                    body: JSON.stringify({ name, city, category, phone, address, rating, review_count, description })
                 });
 
                 if (!response.ok) {
