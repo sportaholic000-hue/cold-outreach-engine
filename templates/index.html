@@ -108,733 +108,623 @@
         .btn-primary {
             background: #00ff88;
             color: #000;
-            width: 100%;
         }
-        .btn-primary:hover { background: #00e07a; transform: translateY(-1px); }
-        .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+        .btn-primary:hover { background: #00dd77; }
         .btn-secondary {
             background: #1a1a1a;
-            color: #ccc;
-            border: 1px solid #333;
+            color: #00ff88;
+            border: 1px solid #2a2a2a;
         }
-        .btn-secondary:hover { background: #222; color: #00ff88; border-color: #00ff88; }
-        .btn-danger { background: #2a0a0a; color: #ff4444; border: 1px solid #ff4444; }
-        .btn-success { background: #002a14; color: #00ff88; border: 1px solid #00ff88; }
-        .btn-sm { padding: 6px 14px; font-size: 12px; }
+        .btn-secondary:hover { background: #222; }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
 
-        /* LOADING SPINNER */
+        /* SPINNER */
         .spinner {
             display: inline-block;
-            width: 16px; height: 16px;
-            border: 2px solid rgba(0,255,136,0.3);
-            border-top-color: #00ff88;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(0,0,0,0.3);
+            border-top-color: #000;
             border-radius: 50%;
-            animation: spin 0.7s linear infinite;
-            margin-right: 8px;
-            vertical-align: middle;
+            animation: spin 0.6s linear infinite;
+            margin-left: 8px;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* STATS BAR */
-        .stats-bar {
+        /* RESULTS TABLE */
+        .results-container {
+            background: #0a0a0a;
+            border: 1px solid #222;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .results-header {
             display: flex;
-            gap: 12px;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 16px;
         }
-        .stat-pill {
-            padding: 6px 14px;
-            border-radius: 20px;
+        .results-header h3 { font-size: 16px; color: #00ff88; }
+        .results-actions { display: flex; gap: 8px; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
             font-size: 13px;
-            font-weight: 600;
         }
-        .stat-pill.total { background: #0a1a0f; color: #00ff88; border: 1px solid #00ff88; }
-        .stat-pill.hot { background: #1a1000; color: #ffaa00; border: 1px solid #ffaa00; }
-        .stat-pill.warm { background: #0a0a1a; color: #4488ff; border: 1px solid #4488ff; }
-
-        /* LEADS TABLE */
-        .leads-toolbar {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-        .leads-toolbar .spacer { flex: 1; }
-
-        .leads-table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid #222; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        thead { background: #0d0d0d; }
-        th {
-            padding: 10px 14px;
+        thead th {
+            background: #111;
+            padding: 10px 12px;
             text-align: left;
             font-weight: 600;
-            color: #00ff88;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+            color: #888;
             border-bottom: 1px solid #222;
-            white-space: nowrap;
         }
-        td {
-            padding: 10px 14px;
+        tbody td {
+            padding: 12px;
             border-bottom: 1px solid #1a1a1a;
-            vertical-align: middle;
             color: #ccc;
         }
-        tr:last-child td { border-bottom: none; }
-        tr:hover td { background: #141414; }
-        tr.selected td { background: #0a1a0f; }
+        tbody tr:hover { background: #111; }
+        tbody tr.selected { background: #0d1a14; }
 
-        /* BADGES */
+        input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
         .badge {
             display: inline-block;
-            padding: 3px 9px;
-            border-radius: 12px;
+            padding: 3px 8px;
+            border-radius: 4px;
             font-size: 11px;
-            font-weight: 700;
-            white-space: nowrap;
+            font-weight: 600;
         }
-        .badge-hot { background: #1a1000; color: #ffaa00; border: 1px solid #ffaa00; }
-        .badge-warm { background: #0a0a1a; color: #4488ff; border: 1px solid #4488ff; }
-        .badge-generated { background: #0a1a0f; color: #00ff88; border: 1px solid #00ff88; }
+        .badge-success { background: rgba(0,255,136,0.15); color: #00ff88; }
+        .badge-warning { background: rgba(255,200,0,0.15); color: #ffc800; }
 
-        .stars { color: #ffaa00; font-size: 12px; }
-        .no-website { color: #ff4444; font-size: 12px; font-style: italic; }
-        .has-website { font-size: 12px; }
-        .has-website a { color: #00ff88; text-decoration: none; }
-        .has-website a:hover { text-decoration: underline; }
-
-        /* EMAIL RESULT PANEL */
-        .email-result {
-            background: #0d0d0d;
-            border: 1px solid #222;
-            border-radius: 10px;
-            padding: 16px;
-            margin-top: 12px;
+        .pain-points-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 12px;
+            color: #999;
         }
-        .email-result .subject {
-            font-size: 13px;
-            font-weight: 700;
+        .pain-points-list li {
+            padding: 3px 0;
+            padding-left: 14px;
+            position: relative;
+        }
+        .pain-points-list li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
             color: #00ff88;
-            margin-bottom: 8px;
         }
-        .email-result .body {
-            font-size: 13px;
-            color: #ccc;
-            white-space: pre-wrap;
-            line-height: 1.6;
-        }
-        .email-actions { display: flex; gap: 8px; margin-top: 10px; }
 
-        /* BULK RESULTS */
-        .bulk-result-item {
+        .email-preview {
+            background: #0a0a0a;
             border: 1px solid #222;
-            border-radius: 10px;
-            margin-bottom: 12px;
-            overflow: hidden;
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #aaa;
+            white-space: pre-wrap;
         }
-        .bulk-result-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 16px;
-            background: #0d0d0d;
-            cursor: pointer;
-            user-select: none;
-        }
-        .bulk-result-header:hover { background: #141414; }
-        .bulk-result-header .biz-name { font-weight: 700; font-size: 14px; flex: 1; color: #e0e0e0; }
-        .bulk-result-body { padding: 16px; display: none; background: #0a0a0a; }
-        .bulk-result-body.open { display: block; }
 
-        /* ALERTS */
+        /* MOCKUP PREVIEW */
+        .mockup-preview {
+            margin-top: 24px;
+        }
+        .mockup-iframe {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #222;
+            border-radius: 12px;
+            background: #fff;
+        }
+        .mockup-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        /* ALERT */
         .alert {
             padding: 12px 16px;
             border-radius: 8px;
-            font-size: 13px;
             margin-bottom: 16px;
+            font-size: 14px;
         }
-        .alert-error { background: #1a0505; color: #ff4444; border: 1px solid #ff4444; }
-        .alert-success { background: #0a1a0f; color: #00ff88; border: 1px solid #00ff88; }
-        .alert-info { background: #0a0a1a; color: #4488ff; border: 1px solid #4488ff; }
-
-        /* SINGLE EMAIL OUTPUT */
-        .output-card {
-            background: #0d0d0d;
-            border: 1px solid #00ff88;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 16px;
-        }
-        .output-card .label { font-size: 11px; font-weight: 700; color: #00ff88; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
-        .output-card .value { font-size: 14px; color: #ccc; white-space: pre-wrap; line-height: 1.6; }
-        .output-card .subject-line { font-size: 16px; font-weight: 700; color: #e0e0e0; margin-bottom: 14px; }
-        .copy-btn { margin-top: 8px; }
-
-        .personalization-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-        .ptag {
-            background: #0a1a0f;
+        .alert-success {
+            background: rgba(0,255,136,0.1);
             color: #00ff88;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 500;
-            border: 1px solid #00ff8855;
+            border: 1px solid rgba(0,255,136,0.2);
         }
-
-        .checkbox-col { width: 36px; }
-        input[type="checkbox"] { width: 15px; height: 15px; cursor: pointer; accent-color: #00ff88; }
-
-        .progress-bar-wrap { background: #1a1a1a; border-radius: 6px; height: 8px; margin: 8px 0; }
-        .progress-bar { height: 8px; background: #00ff88; border-radius: 6px; transition: width 0.3s; }
-
-        @media (max-width: 640px) {
-            .form-row { flex-direction: column; }
-            .stats-bar { flex-wrap: wrap; }
+        .alert-error {
+            background: rgba(255,50,50,0.1);
+            color: #ff5555;
+            border: 1px solid rgba(255,50,50,0.2);
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="header">
-        <h1>Cold Outreach Engine</h1>
-        <p>Find local businesses on Google &bull; Detect missing websites &bull; Generate personalized emails with Gemini AI</p>
-    </div>
-
-    <!-- TABS -->
-    <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('find-leads')">🔍 Find Leads</button>
-        <button class="tab-btn" onclick="switchTab('single-url')">✉️ Single URL Email</button>
-    </div>
-
-    <!-- ================================================================ -->
-    <!-- TAB 1: FIND LEADS                                                 -->
-    <!-- ================================================================ -->
-    <div id="tab-find-leads" class="tab-panel active">
-
-        <!-- Search Form -->
-        <div class="card">
-            <h2>Find Local Business Leads</h2>
-            <div class="form-row">
-                <div class="field">
-                    <label>Business Type / Keyword</label>
-                    <input type="text" id="keyword" placeholder="e.g. plumbers, landscapers, dentists, restaurants..." />
-                </div>
-                <div class="field">
-                    <label>City</label>
-                    <input type="text" id="city" placeholder="e.g. Halifax, Toronto, Austin..." />
-                </div>
-                <div class="field" style="max-width:120px">
-                    <label>Max Results</label>
-                    <input type="number" id="max-results" value="20" min="5" max="60" />
-                </div>
-            </div>
-            <button class="btn btn-primary" id="search-btn" onclick="searchLeads()">
-                🔍 Search Google for Leads
-            </button>
+    <div class="container">
+        <div class="header">
+            <h1>Cold Outreach Engine</h1>
+            <p>AI-powered lead generation with personalized outreach</p>
         </div>
 
-        <!-- Results -->
-        <div id="leads-section" style="display:none">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="search">1. Search Leads</button>
+            <button class="tab-btn" data-tab="enrich">2. AI Enrich</button>
+            <button class="tab-btn" data-tab="export">3. Export</button>
+            <button class="tab-btn" data-tab="mockup">4. Mockup</button>
+        </div>
+
+        <!-- TAB 1: SEARCH -->
+        <div class="tab-panel active" id="search-panel">
             <div class="card">
-                <!-- Stats -->
-                <div id="leads-stats" class="stats-bar"></div>
-
-                <!-- Toolbar -->
-                <div class="leads-toolbar">
-                    <input type="checkbox" id="select-all" onchange="toggleSelectAll(this)" title="Select all">
-                    <label for="select-all" style="margin:0;font-size:13px;color:#555;cursor:pointer">Select all</label>
-                    <span id="selected-count" style="font-size:12px;color:#888"></span>
-                    <div class="spacer"></div>
-                    <button class="btn btn-secondary btn-sm" onclick="filterLeads('all')" id="filter-all">All</button>
-                    <button class="btn btn-sm" style="background:#fef3c7;color:#b45309;border:1px solid #fcd34d" onclick="filterLeads('hot')" id="filter-hot">🔥 Hot Only</button>
-                    <button class="btn btn-sm" style="background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd" onclick="filterLeads('warm')" id="filter-warm">Warm Only</button>
-                </div>
-
-                <!-- Table -->
-                <div class="leads-table-wrap">
-                    <table id="leads-table">
-                        <thead>
-                            <tr>
-                                <th class="checkbox-col"></th>
-                                <th>Business</th>
-                                <th>Category</th>
-                                <th>Rating</th>
-                                <th>Website</th>
-                                <th>Phone</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="leads-tbody"></tbody>
-                    </table>
-                </div>
-
-                <!-- Generate Emails -->
-                <div style="margin-top:20px;padding-top:20px;border-top:1px solid #e5e7eb;">
+                <h2>Search for Leads</h2>
+                <div class="form-row">
                     <div class="field">
-                        <label>Your Offer / Sender Context <span style="font-weight:400;color:#999">(optional — leave blank for default web design pitch)</span></label>
-                        <textarea id="bulk-sender-context" rows="2" placeholder="e.g. I build websites and run Google Ads for local trades businesses. Packages from $500."></textarea>
+                        <label>Keyword/Business Type</label>
+                        <input type="text" id="search-keyword" placeholder="e.g., dentist, plumber, restaurant">
                     </div>
-                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-                        <label style="display:flex;align-items:center;gap:6px;margin:0;font-size:13px;cursor:pointer">
-                            <input type="checkbox" id="scrape-websites" style="width:14px;height:14px">
-                            Scrape websites for deeper personalization <span style="color:#999">(slower)</span>
-                        </label>
+                    <div class="field">
+                        <label>City/Location</label>
+                        <input type="text" id="search-city" placeholder="e.g., Halifax, Toronto">
                     </div>
-                    <div style="margin-top:14px">
-                        <button class="btn btn-primary" id="generate-btn" onclick="bulkGenerate()" style="max-width:320px">
-                            ⚡ Generate Emails for Selected Leads
-                        </button>
-                    </div>
-                    <div id="generate-progress" style="display:none;margin-top:12px">
-                        <div style="font-size:13px;color:#6b7280;margin-bottom:4px" id="progress-label">Generating...</div>
-                        <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar" style="width:0%"></div></div>
+                    <div class="field" style="flex: 0 0 140px;">
+                        <label>Max Results</label>
+                        <input type="number" id="search-max" value="20" min="1" max="50">
                     </div>
                 </div>
+                <button class="btn btn-primary" id="search-btn">
+                    Search Leads
+                </button>
             </div>
 
-            <!-- Bulk Results -->
-            <div id="bulk-results-section" style="display:none">
-                <div class="card">
-                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-                        <h2 style="margin:0">Generated Emails</h2>
-                        <div style="display:flex;gap:8px">
-                            <button class="btn btn-secondary btn-sm" onclick="copyAllEmails()">📋 Copy All</button>
-                            <button class="btn btn-success btn-sm" onclick="exportCSV()">⬇️ Export CSV</button>
+            <div id="search-results" style="display: none;">
+                <div class="results-container">
+                    <div class="results-header">
+                        <h3>Search Results (<span id="search-count">0</span>)</h3>
+                        <div class="results-actions">
+                            <button class="btn btn-secondary" id="select-all-search">Select All</button>
+                            <button class="btn btn-primary" id="enrich-selected">Enrich Selected</button>
                         </div>
                     </div>
-                    <div id="bulk-results-list"></div>
+                    <div style="overflow-x: auto;">
+                        <table id="search-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;"><input type="checkbox" id="select-all-checkbox"></th>
+                                    <th>Name</th>
+                                    <th>Address</th>
+                                    <th>Phone</th>
+                                    <th>Website</th>
+                                    <th>Rating</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
-    </div>
-
-    <!-- ================================================================ -->
-    <!-- TAB 2: SINGLE URL EMAIL                                           -->
-    <!-- ================================================================ -->
-    <div id="tab-single-url" class="tab-panel">
-        <div class="card">
-            <h2>Generate Email from URL</h2>
-            <div class="field">
-                <label>Prospect URL</label>
-                <input type="text" id="prospect-url" placeholder="https://linkedin.com/in/someone  or  https://theirwebsite.com" />
-                <div class="help-text">Works with LinkedIn profiles and any company website.</div>
-            </div>
-            <div class="field">
-                <label>Your Offer / Context <span style="font-weight:400;color:#999">(optional)</span></label>
-                <textarea id="sender-context" rows="3" placeholder="Describe what you're selling or leave blank for a default AI/automation pitch."></textarea>
-            </div>
-            <button class="btn btn-primary" id="single-btn" onclick="generateSingle()" style="max-width:280px">
-                ✉️ Generate Cold Email
-            </button>
-        </div>
-
-        <div id="single-result" style="display:none">
+        <!-- TAB 2: ENRICH -->
+        <div class="tab-panel" id="enrich-panel">
             <div class="card">
-                <h2>Your Personalized Email</h2>
-                <div class="output-card">
-                    <div class="label">Subject Line</div>
-                    <div class="subject-line" id="result-subject"></div>
-                    <div class="label">Email Body</div>
-                    <div class="value" id="result-body"></div>
-                    <div class="email-actions">
-                        <button class="btn btn-secondary btn-sm copy-btn" onclick="copyEmail()">📋 Copy Email</button>
-                        <button class="btn btn-secondary btn-sm" onclick="copySubject()">📋 Copy Subject</button>
+                <h2>AI-Enriched Leads</h2>
+                <p style="color: #666; font-size: 14px; margin-bottom: 16px;">
+                    Select leads from Search tab and click "Enrich Selected" to analyze websites and generate personalized emails.
+                </p>
+                <div id="enrich-status" style="display: none;"></div>
+            </div>
+
+            <div id="enrich-results" style="display: none;">
+                <div class="results-container">
+                    <div class="results-header">
+                        <h3>Enriched Leads (<span id="enrich-count">0</span>)</h3>
+                        <div class="results-actions">
+                            <button class="btn btn-secondary" id="select-all-enrich">Select All</button>
+                            <button class="btn btn-primary" id="export-selected">Export Selected</button>
+                        </div>
+                    </div>
+                    <div id="enrich-table-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: EXPORT -->
+        <div class="tab-panel" id="export-panel">
+            <div class="card">
+                <h2>Export Leads</h2>
+                <p style="color: #666; font-size: 14px; margin-bottom: 20px;">
+                    Export your enriched leads to CSV or JSON format.
+                </p>
+                <div class="field">
+                    <label>Export Format</label>
+                    <select id="export-format">
+                        <option value="csv">CSV (Spreadsheet)</option>
+                        <option value="json">JSON (Developer)</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" id="export-btn" disabled>
+                    Download Export
+                </button>
+                <p class="help-text" style="margin-top: 12px;">
+                    You need to enrich at least one lead before exporting.
+                </p>
+            </div>
+        </div>
+
+        <!-- TAB 4: MOCKUP GENERATOR -->
+        <div class="tab-panel" id="mockup-panel">
+            <div class="card">
+                <h2>Website Mockup Generator</h2>
+                <p style="color: #666; font-size: 14px; margin-bottom: 20px;">
+                    Generate a professional website mockup for any business in seconds.
+                </p>
+                
+                <div class="form-row">
+                    <div class="field">
+                        <label>Business Name *</label>
+                        <input type="text" id="mockup-name" placeholder="e.g., Joe's Plumbing">
+                    </div>
+                    <div class="field">
+                        <label>City *</label>
+                        <input type="text" id="mockup-city" placeholder="e.g., Halifax">
                     </div>
                 </div>
-                <div class="personalization-tags" id="result-tags"></div>
+
+                <div class="form-row">
+                    <div class="field">
+                        <label>Category/Type *</label>
+                        <input type="text" id="mockup-category" placeholder="e.g., restaurant, plumber, dentist">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="field">
+                        <label>Phone (optional)</label>
+                        <input type="text" id="mockup-phone" placeholder="e.g., (902) 555-0123">
+                    </div>
+                    <div class="field">
+                        <label>Address (optional)</label>
+                        <input type="text" id="mockup-address" placeholder="e.g., 123 Main St, Halifax NS">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" id="mockup-generate-btn">
+                    Generate Mockup
+                </button>
+
+                <div id="mockup-preview-container" style="display: none;">
+                    <div class="mockup-preview">
+                        <iframe id="mockup-iframe" class="mockup-iframe"></iframe>
+                        <div class="mockup-actions">
+                            <button class="btn btn-primary" id="mockup-fullscreen">Open Full Screen</button>
+                            <button class="btn btn-secondary" id="mockup-copy-html">Copy HTML</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-</div>
+    <script>
+        // STATE
+        let searchResults = [];
+        let enrichedResults = [];
+        let selectedSearchIndices = new Set();
+        let selectedEnrichIndices = new Set();
+        let currentMockupHTML = '';
 
-<script>
-    // -----------------------------------------------------------------------
-    // STATE
-    // -----------------------------------------------------------------------
-    let allLeads = [];
-    let bulkResults = [];
-    let currentFilter = 'all';
-
-    // -----------------------------------------------------------------------
-    // TAB SWITCHING
-    // -----------------------------------------------------------------------
-    function switchTab(tab) {
-        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('tab-' + tab).classList.add('active');
-        event.target.classList.add('active');
-    }
-
-    // -----------------------------------------------------------------------
-    // ALERTS
-    // -----------------------------------------------------------------------
-    function showAlert(containerId, type, msg) {
-        const el = document.getElementById(containerId);
-        if (!el) return;
-        el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
-    }
-
-    // -----------------------------------------------------------------------
-    // SEARCH LEADS
-    // -----------------------------------------------------------------------
-    async function searchLeads() {
-        const keyword = document.getElementById('keyword').value.trim();
-        const city = document.getElementById('city').value.trim();
-        const maxResults = parseInt(document.getElementById('max-results').value) || 20;
-
-        if (!keyword || !city) {
-            alert('Please enter both a keyword and a city.');
-            return;
-        }
-
-        const btn = document.getElementById('search-btn');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner"></span>Searching Google Places...';
-        document.getElementById('leads-section').style.display = 'none';
-        const brs = document.getElementById('bulk-results-section');
-        if (brs) brs.style.display = 'none';
-
-        try {
-            const res = await fetch('/api/search-leads', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({keyword, city, max_results: maxResults})
+        // TAB SWITCHING
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.dataset.tab;
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(tab + '-panel').classList.add('active');
             });
-            const data = await res.json();
-
-            if (!data.success) throw new Error(data.error || 'Search failed');
-
-            allLeads = data.leads;
-            renderLeads(allLeads);
-
-            document.getElementById('leads-stats').innerHTML = `
-                <span class="stat-pill total">📊 ${data.total} Total</span>
-                <span class="stat-pill hot">🔥 ${data.hot_leads} Hot Leads (no website)</span>
-                <span class="stat-pill warm">🌊 ${data.warm_leads} Warm Leads</span>
-            `;
-            document.getElementById('leads-section').style.display = 'block';
-            updateSelectedCount();
-        } catch (err) {
-            alert('Error: ' + err.message);
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '🔍 Search Google for Leads';
-        }
-    }
-
-    // -----------------------------------------------------------------------
-    // RENDER LEADS TABLE
-    // -----------------------------------------------------------------------
-    function renderLeads(leads) {
-        const tbody = document.getElementById('leads-tbody');
-        tbody.innerHTML = '';
-
-        if (!leads.length) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:#999">No leads found.</td></tr>';
-            return;
-        }
-
-        leads.forEach((lead, idx) => {
-            const globalIdx = allLeads.indexOf(lead);
-            const badgeHtml = lead.is_hot_lead
-                ? '<span class="badge badge-hot">🔥 Hot Lead</span>'
-                : '<span class="badge badge-warm">Warm</span>';
-            const websiteHtml = lead.has_website
-                ? `<div class="has-website"><a href="${lead.website}" target="_blank">${truncate(lead.website, 28)}</a></div>`
-                : `<div class="no-website">❌ No website</div>`;
-            const ratingHtml = lead.rating
-                ? `<span class="stars">${'★'.repeat(Math.round(lead.rating))}</span> <span style="font-size:12px;color:#888">${lead.rating} (${lead.review_count})</span>`
-                : '<span style="color:#bbb;font-size:12px">No rating</span>';
-
-            const tr = document.createElement('tr');
-            tr.dataset.idx = globalIdx;
-            tr.innerHTML = `
-                <td class="checkbox-col"><input type="checkbox" class="lead-check" data-idx="${globalIdx}" onchange="updateSelectedCount()"></td>
-                <td><div style="font-weight:600;font-size:13px">${lead.name}</div><div style="font-size:11px;color:#888;margin-top:2px">${truncate(lead.address, 40)}</div></td>
-                <td style="color:#6b7280;font-size:12px">${lead.category || '—'}</td>
-                <td>${ratingHtml}</td>
-                <td>${websiteHtml}</td>
-                <td style="font-size:12px;color:#374151">${lead.phone || '—'}</td>
-                <td>${badgeHtml}</td>
-            `;
-            tbody.appendChild(tr);
         });
-    }
 
-    // -----------------------------------------------------------------------
-    // FILTERS
-    // -----------------------------------------------------------------------
-    function filterLeads(filter) {
-        currentFilter = filter;
-        ['all','hot','warm'].forEach(f => {
-            document.getElementById('filter-' + f).style.fontWeight = f === filter ? '800' : '400';
+        // SEARCH
+        document.getElementById('search-btn').addEventListener('click', async () => {
+            const keyword = document.getElementById('search-keyword').value.trim();
+            const city = document.getElementById('search-city').value.trim();
+            const maxResults = parseInt(document.getElementById('search-max').value);
+
+            if (!keyword || !city) {
+                alert('Please enter both keyword and city');
+                return;
+            }
+
+            const btn = document.getElementById('search-btn');
+            btn.disabled = true;
+            btn.innerHTML = 'Searching<span class="spinner"></span>';
+
+            try {
+                const response = await fetch('/api/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ keyword, city, max_results: maxResults })
+                });
+
+                const data = await response.json();
+                searchResults = data.results || [];
+                selectedSearchIndices.clear();
+                renderSearchResults();
+
+                document.getElementById('search-results').style.display = 'block';
+            } catch (error) {
+                alert('Search failed: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Search Leads';
+            }
         });
-        let filtered = allLeads;
-        if (filter === 'hot') filtered = allLeads.filter(l => l.is_hot_lead);
-        if (filter === 'warm') filtered = allLeads.filter(l => !l.is_hot_lead);
-        renderLeads(filtered);
-        updateSelectedCount();
-    }
 
-    // -----------------------------------------------------------------------
-    // SELECT ALL / COUNT
-    // -----------------------------------------------------------------------
-    function toggleSelectAll(cb) {
-        document.querySelectorAll('.lead-check').forEach(c => c.checked = cb.checked);
-        updateSelectedCount();
-    }
-
-    function updateSelectedCount() {
-        const checked = document.querySelectorAll('.lead-check:checked').length;
-        const total = document.querySelectorAll('.lead-check').length;
-        document.getElementById('selected-count').textContent = checked > 0 ? `${checked} of ${total} selected` : '';
-    }
-
-    function getSelectedLeads() {
-        const idxs = Array.from(document.querySelectorAll('.lead-check:checked')).map(c => parseInt(c.dataset.idx));
-        return idxs.map(i => allLeads[i]).filter(Boolean);
-    }
-
-    // -----------------------------------------------------------------------
-    // BULK GENERATE
-    // -----------------------------------------------------------------------
-    async function bulkGenerate() {
-        const selected = getSelectedLeads();
-        if (!selected.length) {
-            alert('Please select at least one lead.');
-            return;
-        }
-
-        const senderContext = document.getElementById('bulk-sender-context').value.trim() || null;
-        const scrapeWebsites = document.getElementById('scrape-websites').checked;
-
-        const btn = document.getElementById('generate-btn');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner"></span>Generating emails...';
-
-        const progressWrap = document.getElementById('generate-progress');
-        const progressBar = document.getElementById('progress-bar');
-        const progressLabel = document.getElementById('progress-label');
-        progressWrap.style.display = 'block';
-        progressBar.style.width = '10%';
-        progressLabel.textContent = `Generating emails for ${selected.length} businesses...`;
-
-        try {
-            const res = await fetch('/api/bulk-generate', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    leads: selected,
-                    sender_context: senderContext,
-                    scrape_websites: scrapeWebsites
-                })
+        function renderSearchResults() {
+            const tbody = document.querySelector('#search-table tbody');
+            tbody.innerHTML = '';
+            
+            searchResults.forEach((biz, idx) => {
+                const tr = document.createElement('tr');
+                if (selectedSearchIndices.has(idx)) tr.classList.add('selected');
+                
+                tr.innerHTML = `
+                    <td><input type="checkbox" class="row-select" data-index="${idx}" ${selectedSearchIndices.has(idx) ? 'checked' : ''}></td>
+                    <td>${biz.name || ''}</td>
+                    <td>${biz.address || ''}</td>
+                    <td>${biz.phone || ''}</td>
+                    <td>${biz.website ? `<a href="${biz.website}" target="_blank" style="color: #00ff88;">${biz.website}</a>` : ''}</td>
+                    <td>${biz.rating ? `⭐ ${biz.rating} (${biz.reviews || 0})` : ''}</td>
+                `;
+                tbody.appendChild(tr);
             });
-            const data = await res.json();
-            if (!data.success) throw new Error(data.error || 'Generation failed');
 
-            bulkResults = data.results;
-            progressBar.style.width = '100%';
-            progressLabel.textContent = `✅ Generated ${data.generated} of ${data.total} emails`;
+            document.getElementById('search-count').textContent = searchResults.length;
 
-            renderBulkResults(bulkResults);
-            document.getElementById('bulk-results-section').style.display = 'block';
-            document.getElementById('bulk-results-section').scrollIntoView({behavior: 'smooth'});
-        } catch (err) {
-            progressLabel.textContent = '❌ Error: ' + err.message;
-            progressBar.style.background = '#fca5a5';
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '⚡ Generate Emails for Selected Leads';
+            document.querySelectorAll('#search-table .row-select').forEach(cb => {
+                cb.addEventListener('change', (e) => {
+                    const idx = parseInt(e.target.dataset.index);
+                    if (e.target.checked) {
+                        selectedSearchIndices.add(idx);
+                    } else {
+                        selectedSearchIndices.delete(idx);
+                    }
+                    renderSearchResults();
+                });
+            });
         }
-    }
 
-    // -----------------------------------------------------------------------
-    // RENDER BULK RESULTS
-    // -----------------------------------------------------------------------
-    function renderBulkResults(results) {
-        const container = document.getElementById('bulk-results-list');
-        container.innerHTML = '';
+        document.getElementById('select-all-checkbox').addEventListener('change', (e) => {
+            if (e.target.checked) {
+                searchResults.forEach((_, idx) => selectedSearchIndices.add(idx));
+            } else {
+                selectedSearchIndices.clear();
+            }
+            renderSearchResults();
+        });
 
-        results.forEach((r, i) => {
-            const lead = r.lead;
-            const email = r.email;
-            const badge = lead.is_hot_lead
-                ? '<span class="badge badge-hot">🔥 Hot</span>'
-                : '<span class="badge badge-warm">Warm</span>';
-            const statusBadge = r.success
-                ? '<span class="badge badge-generated">✓ Generated</span>'
-                : '<span class="badge" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5">Failed</span>';
+        document.getElementById('select-all-search').addEventListener('click', () => {
+            searchResults.forEach((_, idx) => selectedSearchIndices.add(idx));
+            renderSearchResults();
+            document.getElementById('select-all-checkbox').checked = true;
+        });
 
-            const div = document.createElement('div');
-            div.className = 'bulk-result-item';
-            div.innerHTML = `
-                <div class="bulk-result-header" onclick="toggleResultBody(${i})">
-                    <span class="biz-name">${lead.name}</span>
-                    ${badge}
-                    ${statusBadge}
-                    <span style="font-size:12px;color:#999;margin-left:auto">${lead.city || ''} ▾</span>
-                </div>
-                <div class="bulk-result-body" id="result-body-${i}">
-                    ${r.success && email ? `
-                        <div style="margin-bottom:8px">
-                            <div class="label" style="font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.08em">Subject</div>
-                            <div style="font-weight:600;font-size:14px;margin-top:2px">${email.subject}</div>
+        // ENRICH
+        document.getElementById('enrich-selected').addEventListener('click', async () => {
+            if (selectedSearchIndices.size === 0) {
+                alert('Please select at least one lead to enrich');
+                return;
+            }
+
+            const selected = Array.from(selectedSearchIndices).map(idx => searchResults[idx]);
+
+            const btn = document.getElementById('enrich-selected');
+            btn.disabled = true;
+            btn.innerHTML = 'Enriching<span class="spinner"></span>';
+
+            const statusDiv = document.getElementById('enrich-status');
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = '<div class="alert alert-success">Enriching ' + selected.length + ' leads with AI... This may take 30-60 seconds.</div>';
+
+            // Switch to enrich tab
+            document.querySelector('[data-tab="enrich"]').click();
+
+            try {
+                const response = await fetch('/api/enrich', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ businesses: selected })
+                });
+
+                const data = await response.json();
+                enrichedResults = data.results || [];
+                selectedEnrichIndices.clear();
+                renderEnrichResults();
+
+                document.getElementById('enrich-results').style.display = 'block';
+                document.getElementById('export-btn').disabled = false;
+                statusDiv.innerHTML = '<div class="alert alert-success">✓ Successfully enriched ' + enrichedResults.length + ' leads!</div>';
+            } catch (error) {
+                statusDiv.innerHTML = '<div class="alert alert-error">Enrichment failed: ' + error.message + '</div>';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Enrich Selected';
+            }
+        });
+
+        function renderEnrichResults() {
+            const container = document.getElementById('enrich-table-container');
+            container.innerHTML = '';
+
+            enrichedResults.forEach((biz, idx) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.marginBottom = '16px';
+                card.style.background = selectedEnrichIndices.has(idx) ? '#0d1a14' : '#111';
+
+                const painPoints = Array.isArray(biz.pain_points) ? biz.pain_points : [];
+                const painPointsHTML = painPoints.length > 0 
+                    ? `<ul class="pain-points-list">${painPoints.map(p => `<li>${p}</li>`).join('')}</ul>`
+                    : '<span style="color: #555;">No pain points identified</span>';
+
+                card.innerHTML = `
+                    <div style="display: flex; align-items: start; gap: 12px; margin-bottom: 12px;">
+                        <input type="checkbox" class="enrich-select" data-index="${idx}" ${selectedEnrichIndices.has(idx) ? 'checked' : ''}>
+                        <div style="flex: 1;">
+                            <h3 style="font-size: 16px; margin-bottom: 4px; color: #00ff88;">${biz.name}</h3>
+                            <p style="font-size: 13px; color: #888; margin-bottom: 8px;">
+                                ${biz.address || 'No address'} ${biz.phone ? '• ' + biz.phone : ''} ${biz.website ? '• <a href="' + biz.website + '" target="_blank" style="color: #00ff88;">' + biz.website + '</a>' : ''}
+                            </p>
                         </div>
-                        <div style="margin-bottom:10px">
-                            <div class="label" style="font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.08em">Body</div>
-                            <div style="font-size:13px;white-space:pre-wrap;color:#374151;line-height:1.6;margin-top:4px">${email.body}</div>
-                        </div>
-                        <div style="display:flex;gap:8px;flex-wrap:wrap">
-                            <button class="btn btn-secondary btn-sm" onclick="copyResultEmail(${i})">📋 Copy Email</button>
-                            <button class="btn btn-secondary btn-sm" onclick="copyResultSubject(${i})">📋 Copy Subject</button>
-                        </div>
-                        <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:5px">
-                            ${(email.personalization_notes || []).map(n => `<span class="ptag">${n}</span>`).join('')}
-                        </div>
-                    ` : `<div class="alert alert-error">Failed: ${r.error || 'Unknown error'}</div>`}
-                    <div style="margin-top:12px;padding-top:12px;border-top:1px solid #f3f4f6;font-size:12px;color:#9ca3af">
-                        📍 ${lead.address || '—'} &nbsp;|&nbsp; 📞 ${lead.phone || '—'} &nbsp;|&nbsp;
-                        ${lead.has_website ? `🌐 <a href="${lead.website}" target="_blank" style="color:#6366f1">${truncate(lead.website,40)}</a>` : '❌ No website'}
-                        ${lead.rating ? `&nbsp;|&nbsp; ⭐ ${lead.rating} (${lead.review_count} reviews)` : ''}
+                        ${biz.pain_points && biz.pain_points.length > 0 ? '<span class="badge badge-success">Analyzed</span>' : '<span class="badge badge-warning">No Website</span>'}
                     </div>
-                </div>
-            `;
-            container.appendChild(div);
-        });
-    }
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
+                        <div>
+                            <label style="display: block; font-size: 12px; font-weight: 600; color: #888; margin-bottom: 6px;">Pain Points Identified</label>
+                            ${painPointsHTML}
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 12px; font-weight: 600; color: #888; margin-bottom: 6px;">Generated Outreach Email</label>
+                            <div class="email-preview">${biz.outreach_email || 'No email generated'}</div>
+                        </div>
+                    </div>
+                `;
 
-    function toggleResultBody(i) {
-        const body = document.getElementById('result-body-' + i);
-        body.classList.toggle('open');
-    }
-
-    // -----------------------------------------------------------------------
-    // COPY HELPERS
-    // -----------------------------------------------------------------------
-    function copyResultEmail(i) {
-        const r = bulkResults[i];
-        if (!r?.email) return;
-        navigator.clipboard.writeText(`Subject: ${r.email.subject}\n\n${r.email.body}`);
-        showToast('Email copied!');
-    }
-    function copyResultSubject(i) {
-        const r = bulkResults[i];
-        if (!r?.email) return;
-        navigator.clipboard.writeText(r.email.subject);
-        showToast('Subject copied!');
-    }
-    function copyAllEmails() {
-        const text = bulkResults.filter(r => r.success && r.email).map((r, i) =>
-            `--- ${r.lead.name} ---\nSubject: ${r.email.subject}\n\n${r.email.body}`
-        ).join('\n\n\n');
-        navigator.clipboard.writeText(text);
-        showToast(`Copied ${bulkResults.filter(r=>r.success).length} emails!`);
-    }
-
-    // -----------------------------------------------------------------------
-    // EXPORT CSV
-    // -----------------------------------------------------------------------
-    async function exportCSV() {
-        if (!bulkResults.length) return;
-        try {
-            const res = await fetch('/api/export-csv', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({results: bulkResults})
+                container.appendChild(card);
             });
-            if (!res.ok) throw new Error('Export failed');
-            const blob = await res.blob();
+
+            document.getElementById('enrich-count').textContent = enrichedResults.length;
+
+            document.querySelectorAll('.enrich-select').forEach(cb => {
+                cb.addEventListener('change', (e) => {
+                    const idx = parseInt(e.target.dataset.index);
+                    if (e.target.checked) {
+                        selectedEnrichIndices.add(idx);
+                    } else {
+                        selectedEnrichIndices.delete(idx);
+                    }
+                    renderEnrichResults();
+                });
+            });
+        }
+
+        document.getElementById('select-all-enrich').addEventListener('click', () => {
+            enrichedResults.forEach((_, idx) => selectedEnrichIndices.add(idx));
+            renderEnrichResults();
+        });
+
+        // EXPORT
+        document.getElementById('export-selected').addEventListener('click', () => {
+            if (selectedEnrichIndices.size === 0) {
+                alert('Please select at least one enriched lead to export');
+                return;
+            }
+            document.querySelector('[data-tab="export"]').click();
+        });
+
+        document.getElementById('export-btn').addEventListener('click', async () => {
+            const toExport = selectedEnrichIndices.size > 0 
+                ? Array.from(selectedEnrichIndices).map(idx => enrichedResults[idx])
+                : enrichedResults;
+
+            const format = document.getElementById('export-format').value;
+
+            try {
+                const response = await fetch('/api/export', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ businesses: toExport, format })
+                });
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `leads.${format}`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                alert('Export failed: ' + error.message);
+            }
+        });
+
+        // MOCKUP GENERATOR
+        document.getElementById('mockup-generate-btn').addEventListener('click', async () => {
+            const name = document.getElementById('mockup-name').value.trim();
+            const city = document.getElementById('mockup-city').value.trim();
+            const category = document.getElementById('mockup-category').value.trim();
+            const phone = document.getElementById('mockup-phone').value.trim();
+            const address = document.getElementById('mockup-address').value.trim();
+
+            if (!name || !city || !category) {
+                alert('Please fill in Business Name, City, and Category');
+                return;
+            }
+
+            const btn = document.getElementById('mockup-generate-btn');
+            btn.disabled = true;
+            btn.innerHTML = 'Generating<span class="spinner"></span>';
+
+            try {
+                const response = await fetch('/api/mockup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, city, category, phone, address })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Mockup generation failed');
+                }
+
+                const data = await response.json();
+                currentMockupHTML = data.html;
+
+                // Display in iframe
+                const iframe = document.getElementById('mockup-iframe');
+                iframe.srcdoc = currentMockupHTML;
+
+                document.getElementById('mockup-preview-container').style.display = 'block';
+            } catch (error) {
+                alert('Mockup generation failed: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Generate Mockup';
+            }
+        });
+
+        document.getElementById('mockup-fullscreen').addEventListener('click', () => {
+            const blob = new Blob([currentMockupHTML], { type: 'text/html' });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'cold_outreach_leads.csv';
-            a.click();
-            URL.revokeObjectURL(url);
-            showToast('CSV exported!');
-        } catch (err) {
-            alert('Export error: ' + err.message);
-        }
-    }
-
-    // -----------------------------------------------------------------------
-    // SINGLE URL EMAIL
-    // -----------------------------------------------------------------------
-    async function generateSingle() {
-        const url = document.getElementById('prospect-url').value.trim();
-        const senderContext = document.getElementById('sender-context').value.trim() || null;
-        if (!url) { alert('Please enter a URL.'); return; }
-
-        const btn = document.getElementById('single-btn');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner"></span>Analyzing & generating...';
-        document.getElementById('single-result').style.display = 'none';
-
-        try {
-            const res = await fetch('/api/generate', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({url, sender_context: senderContext})
-            });
-            const data = await res.json();
-            if (!data.success) throw new Error(data.error);
-
-            document.getElementById('result-subject').textContent = data.data.subject;
-            document.getElementById('result-body').textContent = data.data.body;
-
-            const tags = document.getElementById('result-tags');
-            tags.innerHTML = (data.data.personalization_notes || []).map(n => `<span class="ptag">${n}</span>`).join('');
-
-            document.getElementById('single-result').style.display = 'block';
-            document.getElementById('single-result').scrollIntoView({behavior: 'smooth'});
-        } catch (err) {
-            alert('Error: ' + err.message);
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '✉️ Generate Cold Email';
-        }
-    }
-
-    function copyEmail() {
-        const subject = document.getElementById('result-subject').textContent;
-        const body = document.getElementById('result-body').textContent;
-        navigator.clipboard.writeText(`Subject: ${subject}\n\n${body}`);
-        showToast('Email copied!');
-    }
-    function copySubject() {
-        navigator.clipboard.writeText(document.getElementById('result-subject').textContent);
-        showToast('Subject copied!');
-    }
-
-    // -----------------------------------------------------------------------
-    // TOAST
-    // -----------------------------------------------------------------------
-    function showToast(msg) {
-        const t = document.createElement('div');
-        t.textContent = msg;
-        Object.assign(t.style, {
-            position:'fixed', bottom:'24px', right:'24px',
-            background:'#1f2937', color:'white',
-            padding:'10px 20px', borderRadius:'8px',
-            fontSize:'13px', fontWeight:'600',
-            boxShadow:'0 4px 12px rgba(0,0,0,0.3)',
-            zIndex:'9999', opacity:'0',
-            transition:'opacity 0.2s'
+            window.open(url, '_blank');
         });
-        document.body.appendChild(t);
-        requestAnimationFrame(() => t.style.opacity = '1');
-        setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 200); }, 2000);
-    }
 
-    // -----------------------------------------------------------------------
-    // UTILS
-    // -----------------------------------------------------------------------
-    function truncate(str, n) {
-        if (!str) return '';
-        return str.length > n ? str.slice(0, n) + '…' : str;
-    }
-</script>
+        document.getElementById('mockup-copy-html').addEventListener('click', () => {
+            navigator.clipboard.writeText(currentMockupHTML).then(() => {
+                const btn = document.getElementById('mockup-copy-html');
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            }).catch(err => {
+                alert('Failed to copy: ' + err.message);
+            });
+        });
+    </script>
 </body>
 </html>
