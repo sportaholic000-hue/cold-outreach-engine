@@ -3,191 +3,834 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Cold Outreach Personalization Engine</title>
+    <title>Cold Outreach Engine</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
             min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        .header {
+            text-align: center;
+            padding: 40px 0 30px;
+            color: white;
+        }
+        .header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, #a78bfa, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header p { color: #a0aec0; font-size: 15px; }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 24px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            background: transparent;
+            color: #a0aec0;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #a78bfa, #60a5fa);
+            color: white;
+        }
+        .tab-btn:hover:not(.active) { background: rgba(255,255,255,0.08); color: white; }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* CARD */
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        .card h2 { font-size: 18px; font-weight: 700; margin-bottom: 18px; color: #1a1a2e; }
+
+        /* FORM ELEMENTS */
+        .form-row { display: flex; gap: 12px; margin-bottom: 14px; }
+        .form-row .field { flex: 1; }
+        .field { margin-bottom: 14px; }
+        label { display: block; font-size: 13px; font-weight: 600; color: #555; margin-bottom: 6px; }
+        input[type="text"], input[type="number"], textarea, select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            color: #333;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #a78bfa;
+        }
+        textarea { resize: vertical; min-height: 80px; }
+        .help-text { font-size: 12px; color: #999; margin-top: 4px; }
+
+        /* BUTTONS */
+        .btn {
+            padding: 11px 22px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #a78bfa, #60a5fa);
+            color: white;
+            width: 100%;
+        }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+        .btn-secondary:hover { background: #e5e7eb; }
+        .btn-danger { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
+        .btn-success { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+        .btn-sm { padding: 6px 14px; font-size: 12px; }
+
+        /* LOADING SPINNER */
+        .spinner {
+            display: inline-block;
+            width: 16px; height: 16px;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* STATS BAR */
+        .stats-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .stat-pill {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .stat-pill.total { background: #ede9fe; color: #7c3aed; }
+        .stat-pill.hot { background: #fef3c7; color: #d97706; }
+        .stat-pill.warm { background: #dbeafe; color: #1d4ed8; }
+
+        /* LEADS TABLE */
+        .leads-toolbar {
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .leads-toolbar .spacer { flex: 1; }
+
+        .leads-table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid #e5e7eb; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        thead { background: #f9fafb; }
+        th {
+            padding: 10px 14px;
+            text-align: left;
+            font-weight: 600;
+            color: #6b7280;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid #e5e7eb;
+            white-space: nowrap;
+        }
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #f3f4f6;
+            vertical-align: middle;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #fafafa; }
+        tr.selected td { background: #f5f3ff; }
+
+        /* BADGES */
+        .badge {
+            display: inline-block;
+            padding: 3px 9px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .badge-hot { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
+        .badge-warm { background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; }
+        .badge-generated { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+
+        .stars { color: #f59e0b; font-size: 12px; }
+        .no-website { color: #dc2626; font-size: 12px; font-style: italic; }
+        .has-website { font-size: 12px; }
+        .has-website a { color: #6366f1; text-decoration: none; }
+        .has-website a:hover { text-decoration: underline; }
+
+        /* EMAIL RESULT PANEL */
+        .email-result {
+            background: #f8f7ff;
+            border: 1px solid #e0e7ff;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+        .email-result .subject {
+            font-size: 13px;
+            font-weight: 700;
+            color: #4338ca;
+            margin-bottom: 8px;
+        }
+        .email-result .body {
+            font-size: 13px;
+            color: #374151;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+        .email-actions { display: flex; gap: 8px; margin-top: 10px; }
+
+        /* BULK RESULTS */
+        .bulk-result-item {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+        .bulk-result-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: #f9fafb;
+            cursor: pointer;
+            user-select: none;
+        }
+        .bulk-result-header:hover { background: #f3f4f6; }
+        .bulk-result-header .biz-name { font-weight: 700; font-size: 14px; flex: 1; }
+        .bulk-result-body { padding: 16px; display: none; }
+        .bulk-result-body.open { display: block; }
+
+        /* ALERTS */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+        .alert-error { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
+        .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+        .alert-info { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+
+        /* SINGLE EMAIL OUTPUT */
+        .output-card {
+            background: #f8f7ff;
+            border: 2px solid #c4b5fd;
+            border-radius: 12px;
             padding: 20px;
+            margin-top: 16px;
         }
-        .container {
-            background: white;
+        .output-card .label { font-size: 11px; font-weight: 700; color: #7c3aed; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+        .output-card .value { font-size: 14px; color: #1f2937; white-space: pre-wrap; line-height: 1.6; }
+        .output-card .subject-line { font-size: 16px; font-weight: 700; color: #1f2937; margin-bottom: 14px; }
+        .copy-btn { margin-top: 8px; }
+
+        .personalization-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+        .ptag {
+            background: #ede9fe;
+            color: #6d28d9;
+            padding: 3px 10px;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 900px;
-            width: 100%;
-            padding: 40px;
+            font-size: 11px;
+            font-weight: 500;
         }
-        h1 { color: #333; margin-bottom: 10px; font-size: 28px; }
-        .subtitle { color: #666; margin-bottom: 30px; font-size: 14px; }
-        .input-section { margin-bottom: 30px; }
-        label { display: block; margin-bottom: 8px; color: #333; font-weight: 600; font-size: 14px; }
-        input[type="text"], textarea {
-            width: 100%; padding: 12px 16px;
-            border: 2px solid #e0e0e0; border-radius: 8px;
-            font-size: 14px; transition: border-color 0.3s; font-family: inherit;
+
+        .checkbox-col { width: 36px; }
+        input[type="checkbox"] { width: 15px; height: 15px; cursor: pointer; accent-color: #7c3aed; }
+
+        .progress-bar-wrap { background: #e5e7eb; border-radius: 6px; height: 8px; margin: 8px 0; }
+        .progress-bar { height: 8px; background: linear-gradient(90deg, #a78bfa, #60a5fa); border-radius: 6px; transition: width 0.3s; }
+
+        @media (max-width: 640px) {
+            .form-row { flex-direction: column; }
+            .stats-bar { flex-wrap: wrap; }
         }
-        input[type="text"]:focus, textarea:focus { outline: none; border-color: #667eea; }
-        textarea { resize: vertical; min-height: 80px; }
-        .help-text { font-size: 12px; color: #888; margin-top: 4px; }
-        button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white; border: none; padding: 14px 32px;
-            border-radius: 8px; font-size: 16px; font-weight: 600;
-            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; width: 100%;
-        }
-        button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(102,126,234,0.3); }
-        button:disabled { opacity: 0.6; cursor: not-allowed; }
-        .loading { display: none; text-align: center; margin: 20px 0; }
-        .loading.active { display: block; }
-        .spinner {
-            border: 3px solid #f3f3f3; border-top: 3px solid #667eea;
-            border-radius: 50%; width: 40px; height: 40px;
-            animation: spin 1s linear infinite; margin: 0 auto 10px;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .result { display: none; margin-top: 30px; padding-top: 30px; border-top: 2px solid #f0f0f0; }
-        .result.active { display: block; }
-        .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .result-title { font-size: 20px; color: #333; font-weight: 600; }
-        .copy-btn {
-            background: #f0f0f0; color: #333; border: none;
-            padding: 8px 16px; border-radius: 6px; font-size: 13px;
-            cursor: pointer; transition: background 0.2s; width: auto;
-        }
-        .copy-btn:hover { background: #e0e0e0; }
-        .copy-btn.copied { background: #4caf50; color: white; }
-        .email-field { background: #f9f9f9; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
-        .field-label { font-size: 12px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-        .field-content { color: #333; line-height: 1.6; white-space: pre-wrap; }
-        .subject-line { font-weight: 600; font-size: 16px; }
-        .personalization-notes { background: #e8f5e9; border-left: 4px solid #4caf50; padding: 12px; border-radius: 4px; margin-top: 16px; }
-        .personalization-notes ul { margin-left: 20px; margin-top: 8px; }
-        .personalization-notes li { color: #2e7d32; font-size: 13px; margin-bottom: 4px; }
-        .error { display: none; background: #ffebee; color: #c62828; padding: 12px 16px; border-radius: 8px; margin-top: 16px; border-left: 4px solid #c62828; }
-        .error.active { display: block; }
-        .prospect-info { background: #e3f2fd; border-radius: 8px; padding: 12px; margin-bottom: 16px; font-size: 13px; color: #1565c0; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>AI Cold Outreach Engine</h1>
-        <p class="subtitle">Generate hyper-personalized cold emails powered by Google Gemini</p>
-        
-        <form id="outreachForm">
-            <div class="input-section">
-                <label for="url">Prospect URL</label>
-                <input type="text" id="url" name="url" placeholder="https://linkedin.com/in/john-doe or https://company.com" required>
-                <p class="help-text">Enter a LinkedIn profile or company website URL</p>
+<div class="container">
+    <div class="header">
+        <h1>Cold Outreach Engine</h1>
+        <p>Find local businesses on Google &bull; Detect missing websites &bull; Generate personalized emails with Gemini AI</p>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('find-leads')">🔍 Find Leads</button>
+        <button class="tab-btn" onclick="switchTab('single-url')">✉️ Single URL Email</button>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- TAB 1: FIND LEADS                                                 -->
+    <!-- ================================================================ -->
+    <div id="tab-find-leads" class="tab-panel active">
+
+        <!-- Search Form -->
+        <div class="card">
+            <h2>Find Local Business Leads</h2>
+            <div class="form-row">
+                <div class="field">
+                    <label>Business Type / Keyword</label>
+                    <input type="text" id="keyword" placeholder="e.g. plumbers, landscapers, dentists, restaurants..." />
+                </div>
+                <div class="field">
+                    <label>City</label>
+                    <input type="text" id="city" placeholder="e.g. Halifax, Toronto, Austin..." />
+                </div>
+                <div class="field" style="max-width:120px">
+                    <label>Max Results</label>
+                    <input type="number" id="max-results" value="20" min="5" max="60" />
+                </div>
             </div>
-            <div class="input-section">
-                <label for="senderContext">Your Value Proposition (Optional)</label>
-                <textarea id="senderContext" name="senderContext" placeholder="E.g., I help SaaS companies automate their customer onboarding with AI agents..."></textarea>
-                <p class="help-text">Describe what you offer. Leave blank to use default pitch.</p>
-            </div>
-            <button type="submit" id="generateBtn">Generate Personalized Email</button>
-        </form>
-        
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Analyzing prospect and crafting personalized email...</p>
+            <button class="btn btn-primary" id="search-btn" onclick="searchLeads()">
+                🔍 Search Google for Leads
+            </button>
         </div>
-        
-        <div class="error" id="error"></div>
-        
-        <div class="result" id="result">
-            <div class="result-header">
-                <h2 class="result-title">Your Personalized Email</h2>
-                <button class="copy-btn" id="copyBtn">Copy Email</button>
+
+        <!-- Results -->
+        <div id="leads-section" style="display:none">
+            <div class="card">
+                <!-- Stats -->
+                <div id="leads-stats" class="stats-bar"></div>
+
+                <!-- Toolbar -->
+                <div class="leads-toolbar">
+                    <input type="checkbox" id="select-all" onchange="toggleSelectAll(this)" title="Select all">
+                    <label for="select-all" style="margin:0;font-size:13px;color:#555;cursor:pointer">Select all</label>
+                    <span id="selected-count" style="font-size:12px;color:#888"></span>
+                    <div class="spacer"></div>
+                    <button class="btn btn-secondary btn-sm" onclick="filterLeads('all')" id="filter-all">All</button>
+                    <button class="btn btn-sm" style="background:#fef3c7;color:#b45309;border:1px solid #fcd34d" onclick="filterLeads('hot')" id="filter-hot">🔥 Hot Only</button>
+                    <button class="btn btn-sm" style="background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd" onclick="filterLeads('warm')" id="filter-warm">Warm Only</button>
+                </div>
+
+                <!-- Table -->
+                <div class="leads-table-wrap">
+                    <table id="leads-table">
+                        <thead>
+                            <tr>
+                                <th class="checkbox-col"></th>
+                                <th>Business</th>
+                                <th>Category</th>
+                                <th>Rating</th>
+                                <th>Website</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leads-tbody"></tbody>
+                    </table>
+                </div>
+
+                <!-- Generate Emails -->
+                <div style="margin-top:20px;padding-top:20px;border-top:1px solid #e5e7eb;">
+                    <div class="field">
+                        <label>Your Offer / Sender Context <span style="font-weight:400;color:#999">(optional — leave blank for default web design pitch)</span></label>
+                        <textarea id="bulk-sender-context" rows="2" placeholder="e.g. I build websites and run Google Ads for local trades businesses. Packages from $500."></textarea>
+                    </div>
+                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+                        <label style="display:flex;align-items:center;gap:6px;margin:0;font-size:13px;cursor:pointer">
+                            <input type="checkbox" id="scrape-websites" style="width:14px;height:14px">
+                            Scrape websites for deeper personalization <span style="color:#999">(slower)</span>
+                        </label>
+                    </div>
+                    <div style="margin-top:14px">
+                        <button class="btn btn-primary" id="generate-btn" onclick="bulkGenerate()" style="max-width:320px">
+                            ⚡ Generate Emails for Selected Leads
+                        </button>
+                    </div>
+                    <div id="generate-progress" style="display:none;margin-top:12px">
+                        <div style="font-size:13px;color:#6b7280;margin-bottom:4px" id="progress-label">Generating...</div>
+                        <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar" style="width:0%"></div></div>
+                    </div>
+                </div>
             </div>
-            <div class="prospect-info" id="prospectInfo"></div>
-            <div class="email-field">
-                <div class="field-label">Subject Line</div>
-                <div class="field-content subject-line" id="subject"></div>
+
+            <!-- Bulk Results -->
+            <div id="bulk-results-section" style="display:none">
+                <div class="card">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+                        <h2 style="margin:0">Generated Emails</h2>
+                        <div style="display:flex;gap:8px">
+                            <button class="btn btn-secondary btn-sm" onclick="copyAllEmails()">📋 Copy All</button>
+                            <button class="btn btn-success btn-sm" onclick="exportCSV()">⬇️ Export CSV</button>
+                        </div>
+                    </div>
+                    <div id="bulk-results-list"></div>
+                </div>
             </div>
-            <div class="email-field">
-                <div class="field-label">Email Body</div>
-                <div class="field-content" id="body"></div>
+        </div>
+
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- TAB 2: SINGLE URL EMAIL                                           -->
+    <!-- ================================================================ -->
+    <div id="tab-single-url" class="tab-panel">
+        <div class="card">
+            <h2>Generate Email from URL</h2>
+            <div class="field">
+                <label>Prospect URL</label>
+                <input type="text" id="prospect-url" placeholder="https://linkedin.com/in/someone  or  https://theirwebsite.com" />
+                <div class="help-text">Works with LinkedIn profiles and any company website.</div>
             </div>
-            <div class="personalization-notes">
-                <div class="field-label">Personalization Signals Used</div>
-                <ul id="personalizationNotes"></ul>
+            <div class="field">
+                <label>Your Offer / Context <span style="font-weight:400;color:#999">(optional)</span></label>
+                <textarea id="sender-context" rows="3" placeholder="Describe what you're selling or leave blank for a default AI/automation pitch."></textarea>
+            </div>
+            <button class="btn btn-primary" id="single-btn" onclick="generateSingle()" style="max-width:280px">
+                ✉️ Generate Cold Email
+            </button>
+        </div>
+
+        <div id="single-result" style="display:none">
+            <div class="card">
+                <h2>Your Personalized Email</h2>
+                <div class="output-card">
+                    <div class="label">Subject Line</div>
+                    <div class="subject-line" id="result-subject"></div>
+                    <div class="label">Email Body</div>
+                    <div class="value" id="result-body"></div>
+                    <div class="email-actions">
+                        <button class="btn btn-secondary btn-sm copy-btn" onclick="copyEmail()">📋 Copy Email</button>
+                        <button class="btn btn-secondary btn-sm" onclick="copySubject()">📋 Copy Subject</button>
+                    </div>
+                </div>
+                <div class="personalization-tags" id="result-tags"></div>
             </div>
         </div>
     </div>
-    
-    <script>
-        const form = document.getElementById('outreachForm');
-        const loading = document.getElementById('loading');
-        const result = document.getElementById('result');
-        const error = document.getElementById('error');
-        const generateBtn = document.getElementById('generateBtn');
-        const copyBtn = document.getElementById('copyBtn');
-        
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const url = document.getElementById('url').value.trim();
-            const senderContext = document.getElementById('senderContext').value.trim();
-            
-            loading.classList.add('active');
-            result.classList.remove('active');
-            error.classList.remove('active');
-            generateBtn.disabled = true;
-            
-            try {
-                const response = await fetch('/api/generate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url, sender_context: senderContext || null })
-                });
-                const data = await response.json();
-                if (!response.ok || !data.success) throw new Error(data.error || 'Failed to generate email');
-                displayResult(data.data, data.prospect);
-            } catch (err) {
-                showError(err.message);
-            } finally {
-                loading.classList.remove('active');
-                generateBtn.disabled = false;
-            }
-        });
-        
-        function displayResult(emailData, prospectData) {
-            document.getElementById('subject').textContent = emailData.subject;
-            document.getElementById('body').textContent = emailData.body;
-            if (prospectData) {
-                document.getElementById('prospectInfo').innerHTML = `<strong>Analyzed:</strong> ${prospectData.domain || prospectData.url}`;
-            }
-            const notesList = document.getElementById('personalizationNotes');
-            notesList.innerHTML = '';
-            emailData.personalization_notes.forEach(note => {
-                const li = document.createElement('li');
-                li.textContent = note;
-                notesList.appendChild(li);
-            });
-            result.classList.add('active');
+
+</div>
+
+<script>
+    // -----------------------------------------------------------------------
+    // STATE
+    // -----------------------------------------------------------------------
+    let allLeads = [];
+    let bulkResults = [];
+    let currentFilter = 'all';
+
+    // -----------------------------------------------------------------------
+    // TAB SWITCHING
+    // -----------------------------------------------------------------------
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-' + tab).classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    // -----------------------------------------------------------------------
+    // ALERTS
+    // -----------------------------------------------------------------------
+    function showAlert(containerId, type, msg) {
+        const el = document.getElementById(containerId);
+        if (!el) return;
+        el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+    }
+
+    // -----------------------------------------------------------------------
+    // SEARCH LEADS
+    // -----------------------------------------------------------------------
+    async function searchLeads() {
+        const keyword = document.getElementById('keyword').value.trim();
+        const city = document.getElementById('city').value.trim();
+        const maxResults = parseInt(document.getElementById('max-results').value) || 20;
+
+        if (!keyword || !city) {
+            alert('Please enter both a keyword and a city.');
+            return;
         }
-        
-        function showError(message) {
-            const errorEl = document.getElementById('error');
-            errorEl.textContent = message;
-            errorEl.classList.add('active');
-        }
-        
-        copyBtn.addEventListener('click', () => {
-            const subject = document.getElementById('subject').textContent;
-            const body = document.getElementById('body').textContent;
-            const fullEmail = `Subject: ${subject}\n\n${body}`;
-            navigator.clipboard.writeText(fullEmail).then(() => {
-                copyBtn.textContent = 'Copied!';
-                copyBtn.classList.add('copied');
-                setTimeout(() => { copyBtn.textContent = 'Copy Email'; copyBtn.classList.remove('copied'); }, 2000);
+
+        const btn = document.getElementById('search-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span>Searching Google Places...';
+        document.getElementById('leads-section').style.display = 'none';
+        document.getElementById('bulk-results-section').style.display = 'none';
+
+        try {
+            const res = await fetch('/api/search-leads', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({keyword, city, max_results: maxResults})
             });
+            const data = await res.json();
+
+            if (!data.success) throw new Error(data.error || 'Search failed');
+
+            allLeads = data.leads;
+            renderLeads(allLeads);
+
+            document.getElementById('leads-stats').innerHTML = `
+                <span class="stat-pill total">📊 ${data.total} Total</span>
+                <span class="stat-pill hot">🔥 ${data.hot_leads} Hot Leads (no website)</span>
+                <span class="stat-pill warm">🌊 ${data.warm_leads} Warm Leads</span>
+            `;
+            document.getElementById('leads-section').style.display = 'block';
+            updateSelectedCount();
+        } catch (err) {
+            alert('Error: ' + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '🔍 Search Google for Leads';
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // RENDER LEADS TABLE
+    // -----------------------------------------------------------------------
+    function renderLeads(leads) {
+        const tbody = document.getElementById('leads-tbody');
+        tbody.innerHTML = '';
+
+        if (!leads.length) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:#999">No leads found.</td></tr>';
+            return;
+        }
+
+        leads.forEach((lead, idx) => {
+            const globalIdx = allLeads.indexOf(lead);
+            const badgeHtml = lead.is_hot_lead
+                ? '<span class="badge badge-hot">🔥 Hot Lead</span>'
+                : '<span class="badge badge-warm">Warm</span>';
+            const websiteHtml = lead.has_website
+                ? `<div class="has-website"><a href="${lead.website}" target="_blank">${truncate(lead.website, 28)}</a></div>`
+                : `<div class="no-website">❌ No website</div>`;
+            const ratingHtml = lead.rating
+                ? `<span class="stars">${'★'.repeat(Math.round(lead.rating))}</span> <span style="font-size:12px;color:#888">${lead.rating} (${lead.review_count})</span>`
+                : '<span style="color:#bbb;font-size:12px">No rating</span>';
+
+            const tr = document.createElement('tr');
+            tr.dataset.idx = globalIdx;
+            tr.innerHTML = `
+                <td class="checkbox-col"><input type="checkbox" class="lead-check" data-idx="${globalIdx}" onchange="updateSelectedCount()"></td>
+                <td><div style="font-weight:600;font-size:13px">${lead.name}</div><div style="font-size:11px;color:#888;margin-top:2px">${truncate(lead.address, 40)}</div></td>
+                <td style="color:#6b7280;font-size:12px">${lead.category || '—'}</td>
+                <td>${ratingHtml}</td>
+                <td>${websiteHtml}</td>
+                <td style="font-size:12px;color:#374151">${lead.phone || '—'}</td>
+                <td>${badgeHtml}</td>
+            `;
+            tbody.appendChild(tr);
         });
-    </script>
+    }
+
+    // -----------------------------------------------------------------------
+    // FILTERS
+    // -----------------------------------------------------------------------
+    function filterLeads(filter) {
+        currentFilter = filter;
+        ['all','hot','warm'].forEach(f => {
+            document.getElementById('filter-' + f).style.fontWeight = f === filter ? '800' : '400';
+        });
+        let filtered = allLeads;
+        if (filter === 'hot') filtered = allLeads.filter(l => l.is_hot_lead);
+        if (filter === 'warm') filtered = allLeads.filter(l => !l.is_hot_lead);
+        renderLeads(filtered);
+        updateSelectedCount();
+    }
+
+    // -----------------------------------------------------------------------
+    // SELECT ALL / COUNT
+    // -----------------------------------------------------------------------
+    function toggleSelectAll(cb) {
+        document.querySelectorAll('.lead-check').forEach(c => c.checked = cb.checked);
+        updateSelectedCount();
+    }
+
+    function updateSelectedCount() {
+        const checked = document.querySelectorAll('.lead-check:checked').length;
+        const total = document.querySelectorAll('.lead-check').length;
+        document.getElementById('selected-count').textContent = checked > 0 ? `${checked} of ${total} selected` : '';
+    }
+
+    function getSelectedLeads() {
+        const idxs = Array.from(document.querySelectorAll('.lead-check:checked')).map(c => parseInt(c.dataset.idx));
+        return idxs.map(i => allLeads[i]).filter(Boolean);
+    }
+
+    // -----------------------------------------------------------------------
+    // BULK GENERATE
+    // -----------------------------------------------------------------------
+    async function bulkGenerate() {
+        const selected = getSelectedLeads();
+        if (!selected.length) {
+            alert('Please select at least one lead.');
+            return;
+        }
+
+        const senderContext = document.getElementById('bulk-sender-context').value.trim() || null;
+        const scrapeWebsites = document.getElementById('scrape-websites').checked;
+
+        const btn = document.getElementById('generate-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span>Generating emails...';
+
+        const progressWrap = document.getElementById('generate-progress');
+        const progressBar = document.getElementById('progress-bar');
+        const progressLabel = document.getElementById('progress-label');
+        progressWrap.style.display = 'block';
+        progressBar.style.width = '10%';
+        progressLabel.textContent = `Generating emails for ${selected.length} businesses...`;
+
+        try {
+            const res = await fetch('/api/bulk-generate', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    leads: selected,
+                    sender_context: senderContext,
+                    scrape_websites: scrapeWebsites
+                })
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.error || 'Generation failed');
+
+            bulkResults = data.results;
+            progressBar.style.width = '100%';
+            progressLabel.textContent = `✅ Generated ${data.generated} of ${data.total} emails`;
+
+            renderBulkResults(bulkResults);
+            document.getElementById('bulk-results-section').style.display = 'block';
+            document.getElementById('bulk-results-section').scrollIntoView({behavior: 'smooth'});
+        } catch (err) {
+            progressLabel.textContent = '❌ Error: ' + err.message;
+            progressBar.style.background = '#fca5a5';
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '⚡ Generate Emails for Selected Leads';
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // RENDER BULK RESULTS
+    // -----------------------------------------------------------------------
+    function renderBulkResults(results) {
+        const container = document.getElementById('bulk-results-list');
+        container.innerHTML = '';
+
+        results.forEach((r, i) => {
+            const lead = r.lead;
+            const email = r.email;
+            const badge = lead.is_hot_lead
+                ? '<span class="badge badge-hot">🔥 Hot</span>'
+                : '<span class="badge badge-warm">Warm</span>';
+            const statusBadge = r.success
+                ? '<span class="badge badge-generated">✓ Generated</span>'
+                : '<span class="badge" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5">Failed</span>';
+
+            const div = document.createElement('div');
+            div.className = 'bulk-result-item';
+            div.innerHTML = `
+                <div class="bulk-result-header" onclick="toggleResultBody(${i})">
+                    <span class="biz-name">${lead.name}</span>
+                    ${badge}
+                    ${statusBadge}
+                    <span style="font-size:12px;color:#999;margin-left:auto">${lead.city || ''} ▾</span>
+                </div>
+                <div class="bulk-result-body" id="result-body-${i}">
+                    ${r.success && email ? `
+                        <div style="margin-bottom:8px">
+                            <div class="label" style="font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.08em">Subject</div>
+                            <div style="font-weight:600;font-size:14px;margin-top:2px">${email.subject}</div>
+                        </div>
+                        <div style="margin-bottom:10px">
+                            <div class="label" style="font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.08em">Body</div>
+                            <div style="font-size:13px;white-space:pre-wrap;color:#374151;line-height:1.6;margin-top:4px">${email.body}</div>
+                        </div>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap">
+                            <button class="btn btn-secondary btn-sm" onclick="copyResultEmail(${i})">📋 Copy Email</button>
+                            <button class="btn btn-secondary btn-sm" onclick="copyResultSubject(${i})">📋 Copy Subject</button>
+                        </div>
+                        <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:5px">
+                            ${(email.personalization_notes || []).map(n => `<span class="ptag">${n}</span>`).join('')}
+                        </div>
+                    ` : `<div class="alert alert-error">Failed: ${r.error || 'Unknown error'}</div>`}
+                    <div style="margin-top:12px;padding-top:12px;border-top:1px solid #f3f4f6;font-size:12px;color:#9ca3af">
+                        📍 ${lead.address || '—'} &nbsp;|&nbsp; 📞 ${lead.phone || '—'} &nbsp;|&nbsp;
+                        ${lead.has_website ? `🌐 <a href="${lead.website}" target="_blank" style="color:#6366f1">${truncate(lead.website,40)}</a>` : '❌ No website'}
+                        ${lead.rating ? `&nbsp;|&nbsp; ⭐ ${lead.rating} (${lead.review_count} reviews)` : ''}
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function toggleResultBody(i) {
+        const body = document.getElementById('result-body-' + i);
+        body.classList.toggle('open');
+    }
+
+    // -----------------------------------------------------------------------
+    // COPY HELPERS
+    // -----------------------------------------------------------------------
+    function copyResultEmail(i) {
+        const r = bulkResults[i];
+        if (!r?.email) return;
+        navigator.clipboard.writeText(`Subject: ${r.email.subject}\n\n${r.email.body}`);
+        showToast('Email copied!');
+    }
+    function copyResultSubject(i) {
+        const r = bulkResults[i];
+        if (!r?.email) return;
+        navigator.clipboard.writeText(r.email.subject);
+        showToast('Subject copied!');
+    }
+    function copyAllEmails() {
+        const text = bulkResults.filter(r => r.success && r.email).map((r, i) =>
+            `--- ${r.lead.name} ---\nSubject: ${r.email.subject}\n\n${r.email.body}`
+        ).join('\n\n\n');
+        navigator.clipboard.writeText(text);
+        showToast(`Copied ${bulkResults.filter(r=>r.success).length} emails!`);
+    }
+
+    // -----------------------------------------------------------------------
+    // EXPORT CSV
+    // -----------------------------------------------------------------------
+    async function exportCSV() {
+        if (!bulkResults.length) return;
+        try {
+            const res = await fetch('/api/export-csv', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({results: bulkResults})
+            });
+            if (!res.ok) throw new Error('Export failed');
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'cold_outreach_leads.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('CSV exported!');
+        } catch (err) {
+            alert('Export error: ' + err.message);
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // SINGLE URL EMAIL
+    // -----------------------------------------------------------------------
+    async function generateSingle() {
+        const url = document.getElementById('prospect-url').value.trim();
+        const senderContext = document.getElementById('sender-context').value.trim() || null;
+        if (!url) { alert('Please enter a URL.'); return; }
+
+        const btn = document.getElementById('single-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span>Analyzing & generating...';
+        document.getElementById('single-result').style.display = 'none';
+
+        try {
+            const res = await fetch('/api/generate', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({url, sender_context: senderContext})
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.error);
+
+            document.getElementById('result-subject').textContent = data.data.subject;
+            document.getElementById('result-body').textContent = data.data.body;
+
+            const tags = document.getElementById('result-tags');
+            tags.innerHTML = (data.data.personalization_notes || []).map(n => `<span class="ptag">${n}</span>`).join('');
+
+            document.getElementById('single-result').style.display = 'block';
+            document.getElementById('single-result').scrollIntoView({behavior: 'smooth'});
+        } catch (err) {
+            alert('Error: ' + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '✉️ Generate Cold Email';
+        }
+    }
+
+    function copyEmail() {
+        const subject = document.getElementById('result-subject').textContent;
+        const body = document.getElementById('result-body').textContent;
+        navigator.clipboard.writeText(`Subject: ${subject}\n\n${body}`);
+        showToast('Email copied!');
+    }
+    function copySubject() {
+        navigator.clipboard.writeText(document.getElementById('result-subject').textContent);
+        showToast('Subject copied!');
+    }
+
+    // -----------------------------------------------------------------------
+    // TOAST
+    // -----------------------------------------------------------------------
+    function showToast(msg) {
+        const t = document.createElement('div');
+        t.textContent = msg;
+        Object.assign(t.style, {
+            position:'fixed', bottom:'24px', right:'24px',
+            background:'#1f2937', color:'white',
+            padding:'10px 20px', borderRadius:'8px',
+            fontSize:'13px', fontWeight:'600',
+            boxShadow:'0 4px 12px rgba(0,0,0,0.3)',
+            zIndex:'9999', opacity:'0',
+            transition:'opacity 0.2s'
+        });
+        document.body.appendChild(t);
+        requestAnimationFrame(() => t.style.opacity = '1');
+        setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 200); }, 2000);
+    }
+
+    // -----------------------------------------------------------------------
+    // UTILS
+    // -----------------------------------------------------------------------
+    function truncate(str, n) {
+        if (!str) return '';
+        return str.length > n ? str.slice(0, n) + '…' : str;
+    }
+</script>
 </body>
 </html>
