@@ -303,12 +303,185 @@ def api_export():
         response.headers['Content-Disposition'] = 'attachment; filename=leads.json'
         return response
 
+
+# ---------------------------------------------------------------------------
+# INDUSTRY THEME ENGINE
+# ---------------------------------------------------------------------------
+INDUSTRY_THEMES = {
+    'restaurant': {
+        'primary': '#D4A373', 'secondary': '#FAEDCD', 'accent': '#E63946',
+        'bg': '#1a1410', 'card': '#2a2218', 'text': '#FAEDCD', 'muted': '#a89279',
+        'font': "'Playfair Display', Georgia, serif",
+        'hero_cta': 'View Our Menu', 'hero_cta2': 'Reserve a Table',
+        'hero_icon': 'fa-utensils', 'hero_icon2': 'fa-calendar-check',
+        'section_order': ['menu_highlights', 'about', 'testimonials', 'gallery', 'contact'],
+        'unsplash': 'restaurant,fine-dining,food-plating',
+    },
+    'cafe': {
+        'primary': '#C8A96E', 'secondary': '#FFF8F0', 'accent': '#6B4226',
+        'bg': '#1c1816', 'card': '#2c2420', 'text': '#FFF8F0', 'muted': '#a09080',
+        'font': "'Playfair Display', Georgia, serif",
+        'hero_cta': 'See Our Menu', 'hero_cta2': 'Order Online',
+        'hero_icon': 'fa-mug-hot', 'hero_icon2': 'fa-bag-shopping',
+        'section_order': ['menu_highlights', 'about', 'testimonials', 'contact'],
+        'unsplash': 'cafe,coffee-shop,latte-art',
+    },
+    'plumber': {
+        'primary': '#2196F3', 'secondary': '#E3F2FD', 'accent': '#FF6F00',
+        'bg': '#0c1929', 'card': '#142640', 'text': '#E3F2FD', 'muted': '#7da8cc',
+        'font': "'Inter', 'Segoe UI', sans-serif",
+        'hero_cta': 'Get a Free Quote', 'hero_cta2': 'Emergency Service',
+        'hero_icon': 'fa-phone', 'hero_icon2': 'fa-bolt',
+        'section_order': ['services', 'before_after', 'testimonials', 'service_area', 'contact'],
+        'unsplash': 'plumbing,pipe-repair,water',
+    },
+    'electrician': {
+        'primary': '#FFD600', 'secondary': '#FFF9C4', 'accent': '#FF6F00',
+        'bg': '#141414', 'card': '#1e1e1e', 'text': '#FFF9C4', 'muted': '#b8a840',
+        'font': "'Inter', 'Segoe UI', sans-serif",
+        'hero_cta': 'Request a Quote', 'hero_cta2': '24/7 Emergency',
+        'hero_icon': 'fa-phone', 'hero_icon2': 'fa-bolt',
+        'section_order': ['services', 'about', 'testimonials', 'service_area', 'contact'],
+        'unsplash': 'electrician,electrical-work,wiring',
+    },
+    'dentist': {
+        'primary': '#26C6DA', 'secondary': '#E0F7FA', 'accent': '#00838F',
+        'bg': '#0a1a1e', 'card': '#122a30', 'text': '#E0F7FA', 'muted': '#6aacb8',
+        'font': "'DM Sans', 'Segoe UI', sans-serif",
+        'hero_cta': 'Book Appointment', 'hero_cta2': 'Meet Our Team',
+        'hero_icon': 'fa-calendar-check', 'hero_icon2': 'fa-user-doctor',
+        'section_order': ['services', 'about', 'testimonials', 'team', 'contact'],
+        'unsplash': 'dental-office,dentist,smile',
+    },
+    'salon': {
+        'primary': '#E91E63', 'secondary': '#FCE4EC', 'accent': '#880E4F',
+        'bg': '#1a0a12', 'card': '#2a1420', 'text': '#FCE4EC', 'muted': '#c07090',
+        'font': "'Playfair Display', Georgia, serif",
+        'hero_cta': 'Book Now', 'hero_cta2': 'View Gallery',
+        'hero_icon': 'fa-calendar-check', 'hero_icon2': 'fa-images',
+        'section_order': ['services', 'gallery', 'testimonials', 'about', 'contact'],
+        'unsplash': 'hair-salon,beauty,hairstyle',
+    },
+    'gym': {
+        'primary': '#FF5722', 'secondary': '#FBE9E7', 'accent': '#DD2C00',
+        'bg': '#120c0a', 'card': '#201510', 'text': '#FBE9E7', 'muted': '#c08060',
+        'font': "'Oswald', 'Impact', sans-serif",
+        'hero_cta': 'Start Free Trial', 'hero_cta2': 'View Classes',
+        'hero_icon': 'fa-dumbbell', 'hero_icon2': 'fa-calendar',
+        'section_order': ['services', 'about', 'testimonials', 'pricing', 'contact'],
+        'unsplash': 'gym,fitness,workout',
+    },
+    'lawyer': {
+        'primary': '#37474F', 'secondary': '#ECEFF1', 'accent': '#B8860B',
+        'bg': '#0e1114', 'card': '#1a1f24', 'text': '#ECEFF1', 'muted': '#78909C',
+        'font': "'Libre Baskerville', Georgia, serif",
+        'hero_cta': 'Free Consultation', 'hero_cta2': 'Our Practice Areas',
+        'hero_icon': 'fa-phone', 'hero_icon2': 'fa-scale-balanced',
+        'section_order': ['services', 'about', 'testimonials', 'team', 'contact'],
+        'unsplash': 'law-office,legal,courthouse',
+    },
+    'realtor': {
+        'primary': '#1B5E20', 'secondary': '#E8F5E9', 'accent': '#B8860B',
+        'bg': '#0c1a0e', 'card': '#14281a', 'text': '#E8F5E9', 'muted': '#6a9a70',
+        'font': "'DM Sans', 'Segoe UI', sans-serif",
+        'hero_cta': 'View Listings', 'hero_cta2': 'Free Home Valuation',
+        'hero_icon': 'fa-house', 'hero_icon2': 'fa-chart-line',
+        'section_order': ['services', 'about', 'testimonials', 'service_area', 'contact'],
+        'unsplash': 'real-estate,luxury-home,house',
+    },
+    'auto': {
+        'primary': '#D32F2F', 'secondary': '#FFEBEE', 'accent': '#FF6F00',
+        'bg': '#140c0c', 'card': '#201414', 'text': '#FFEBEE', 'muted': '#c07070',
+        'font': "'Oswald', 'Impact', sans-serif",
+        'hero_cta': 'Get an Estimate', 'hero_cta2': 'Our Services',
+        'hero_icon': 'fa-phone', 'hero_icon2': 'fa-car',
+        'section_order': ['services', 'about', 'testimonials', 'contact'],
+        'unsplash': 'auto-repair,mechanic,garage',
+    },
+    'landscaping': {
+        'primary': '#4CAF50', 'secondary': '#E8F5E9', 'accent': '#33691E',
+        'bg': '#0c1a0e', 'card': '#14281a', 'text': '#E8F5E9', 'muted': '#6a9a70',
+        'font': "'Inter', 'Segoe UI', sans-serif",
+        'hero_cta': 'Free Estimate', 'hero_cta2': 'View Our Work',
+        'hero_icon': 'fa-phone', 'hero_icon2': 'fa-images',
+        'section_order': ['services', 'before_after', 'testimonials', 'service_area', 'contact'],
+        'unsplash': 'landscaping,garden-design,lawn',
+    },
+    'cleaning': {
+        'primary': '#00BCD4', 'secondary': '#E0F7FA', 'accent': '#006064',
+        'bg': '#0a1a1e', 'card': '#122a30', 'text': '#E0F7FA', 'muted': '#6aacb8',
+        'font': "'DM Sans', 'Segoe UI', sans-serif",
+        'hero_cta': 'Book a Cleaning', 'hero_cta2': 'Get a Quote',
+        'hero_icon': 'fa-calendar-check', 'hero_icon2': 'fa-phone',
+        'section_order': ['services', 'about', 'before_after', 'testimonials', 'contact'],
+        'unsplash': 'cleaning-service,clean-home,housekeeping',
+    },
+    'construction': {
+        'primary': '#FF8F00', 'secondary': '#FFF3E0', 'accent': '#E65100',
+        'bg': '#1a1408', 'card': '#2a2010', 'text': '#FFF3E0', 'muted': '#b89050',
+        'font': "'Oswald', 'Impact', sans-serif",
+        'hero_cta': 'Request a Bid', 'hero_cta2': 'View Projects',
+        'hero_icon': 'fa-phone', 'hero_icon2': 'fa-images',
+        'section_order': ['services', 'before_after', 'about', 'testimonials', 'contact'],
+        'unsplash': 'construction,building,architecture',
+    },
+    'spa': {
+        'primary': '#9C27B0', 'secondary': '#F3E5F5', 'accent': '#4A148C',
+        'bg': '#160a1a', 'card': '#24142a', 'text': '#F3E5F5', 'muted': '#a070b0',
+        'font': "'Playfair Display', Georgia, serif",
+        'hero_cta': 'Book Treatment', 'hero_cta2': 'View Packages',
+        'hero_icon': 'fa-calendar-check', 'hero_icon2': 'fa-spa',
+        'section_order': ['services', 'gallery', 'testimonials', 'about', 'contact'],
+        'unsplash': 'spa,wellness,massage',
+    },
+    'default': {
+        'primary': '#6366F1', 'secondary': '#EEF2FF', 'accent': '#4338CA',
+        'bg': '#0e0e1a', 'card': '#1a1a2e', 'text': '#EEF2FF', 'muted': '#8888bb',
+        'font': "'Inter', 'Segoe UI', sans-serif",
+        'hero_cta': 'Get Started', 'hero_cta2': 'Learn More',
+        'hero_icon': 'fa-phone', 'hero_icon2': 'fa-arrow-down',
+        'section_order': ['services', 'about', 'testimonials', 'contact'],
+        'unsplash': 'business,office,professional',
+    },
+}
+
+def get_industry_theme(category):
+    """Match a business category to the best industry theme."""
+    cat = category.lower()
+    # Direct match
+    if cat in INDUSTRY_THEMES:
+        return INDUSTRY_THEMES[cat]
+    # Fuzzy match
+    keyword_map = {
+        'restaurant': ['restaurant', 'dining', 'food', 'eatery', 'grill', 'bistro', 'diner', 'sushi', 'pizza', 'bbq', 'steakhouse', 'thai', 'chinese', 'italian', 'mexican', 'indian', 'japanese', 'korean', 'vietnamese', 'mediterranean', 'seafood', 'wings', 'burger', 'taco', 'noodle', 'ramen', 'pho', 'deli', 'sandwich'],
+        'cafe': ['cafe', 'coffee', 'bakery', 'tea', 'pastry', 'donut', 'dessert', 'ice cream', 'juice', 'smoothie'],
+        'plumber': ['plumber', 'plumbing', 'drain', 'pipe', 'water heater', 'sewer'],
+        'electrician': ['electrician', 'electrical', 'wiring', 'lighting'],
+        'dentist': ['dentist', 'dental', 'orthodont', 'oral', 'teeth', 'tooth'],
+        'salon': ['salon', 'hair', 'barber', 'beauty', 'nails', 'nail', 'lash', 'brow', 'wax', 'makeup'],
+        'gym': ['gym', 'fitness', 'crossfit', 'yoga', 'pilates', 'martial art', 'boxing', 'training', 'personal trainer'],
+        'lawyer': ['lawyer', 'attorney', 'law firm', 'legal', 'notary'],
+        'realtor': ['realtor', 'real estate', 'realty', 'property', 'mortgage', 'home inspector'],
+        'auto': ['auto', 'mechanic', 'car', 'tire', 'oil change', 'body shop', 'collision', 'transmission', 'brake'],
+        'landscaping': ['landscap', 'lawn', 'garden', 'tree', 'mowing', 'irrigation', 'hardscape', 'snow removal'],
+        'cleaning': ['clean', 'maid', 'janitorial', 'pressure wash', 'carpet clean', 'window clean'],
+        'construction': ['construct', 'contractor', 'building', 'roofing', 'roof', 'siding', 'renovation', 'remodel', 'hvac', 'painting', 'paint', 'drywall', 'flooring', 'deck', 'fence', 'paving', 'concrete', 'mason', 'weld'],
+        'spa': ['spa', 'wellness', 'massage', 'facial', 'skin', 'derma', 'acupuncture', 'chiropractic', 'therapy'],
+        'dentist': ['doctor', 'medical', 'clinic', 'physician', 'pediatr', 'optometr', 'optic', 'pharmacy', 'physio', 'veterinar', 'vet'],
+    }
+    for theme_key, keywords in keyword_map.items():
+        for kw in keywords:
+            if kw in cat:
+                return INDUSTRY_THEMES[theme_key]
+    return INDUSTRY_THEMES['default']
+
+
 @app.route('/api/mockup', methods=['POST'])
 def api_mockup():
     """
     POST /api/mockup
-    Body: { name, city, category, phone, address, website (optional) }
-    Returns: { html: '...complete HTML mockup...' }
+    Body: { name, city, category, phone, address, website, rating, review_count, description }
+    Returns: { html: '...complete personalized HTML mockup...' }
     """
     data = request.json
     name = data.get('name', 'Your Business')
@@ -317,238 +490,365 @@ def api_mockup():
     phone = data.get('phone', '')
     address = data.get('address', '')
     website = data.get('website', '')
+    rating = data.get('rating', '')
+    review_count = data.get('review_count', '')
+    description = data.get('description', '')
     has_website = bool(website and is_real_website(website))
 
-    # Map category to Unsplash keyword for hero image
-    category_lower = category.lower()
-    unsplash_keywords = {
-        'restaurant': 'restaurant,food',
-        'cafe': 'cafe,coffee',
-        'coffee': 'cafe,coffee',
-        'bar': 'bar,cocktails',
-        'plumber': 'plumbing,pipe',
-        'plumbing': 'plumbing,pipe',
-        'electrician': 'electrician,electrical',
-        'electrical': 'electrician,electrical',
-        'dentist': 'dental,dentist',
-        'dental': 'dental,dentist',
-        'doctor': 'medical,clinic',
-        'medical': 'medical,clinic',
-        'salon': 'hair,salon',
-        'hair': 'hair,salon',
-        'barbershop': 'barbershop,haircut',
-        'barber': 'barbershop,haircut',
-        'gym': 'gym,fitness',
-        'fitness': 'gym,fitness',
-        'lawyer': 'law,office',
-        'law': 'law,office',
-        'real estate': 'realestate,house',
-        'realtor': 'realestate,house',
-        'auto': 'car,garage',
-        'mechanic': 'car,garage',
-        'landscaping': 'garden,landscaping',
-        'cleaning': 'cleaning,house',
-        'photographer': 'photography,camera',
-        'photography': 'photography,camera',
-        'accounting': 'office,finance',
-        'accountant': 'office,finance',
-        'bakery': 'bakery,bread',
-        'pizza': 'pizza,restaurant',
-        'spa': 'spa,wellness',
-        'yoga': 'yoga,wellness',
-        'pet': 'pets,dog',
-        'vet': 'veterinary,dog',
-        'florist': 'flowers,florist',
-        'jewelry': 'jewelry,gems',
-        'clothing': 'fashion,clothing',
-        'retail': 'shop,retail',
-        'hotel': 'hotel,luxury',
-        'construction': 'construction,building',
-        'roofing': 'roof,construction',
-        'hvac': 'hvac,airconditioning',
-        'insurance': 'office,business',
-        'travel': 'travel,vacation',
-        'tutoring': 'education,learning',
-        'childcare': 'children,daycare',
-    }
-    unsplash_kw = category_lower
-    for key, val in unsplash_keywords.items():
-        if key in category_lower:
-            unsplash_kw = val
-            break
+    # Get industry theme
+    theme = get_industry_theme(category)
+    primary = theme['primary']
+    secondary = theme['secondary']
+    accent = theme['accent']
+    bg_color = theme['bg']
+    card_color = theme['card']
+    text_color = theme['text']
+    muted_color = theme['muted']
+    font_family = theme['font']
+    hero_cta = theme['hero_cta']
+    hero_cta2 = theme['hero_cta2']
+    hero_icon = theme['hero_icon']
+    hero_icon2 = theme['hero_icon2']
+    unsplash_kw = theme['unsplash']
 
     hero_image_url = f"https://source.unsplash.com/1600x900/?{urllib.parse.quote(unsplash_kw)}"
 
-    # Determine services to show based on category
+    # Use real stats if we have them, otherwise show nothing fake
+    if rating:
+        try:
+            rating_val = float(rating)
+            rating_display = f"{rating_val:.1f}"
+            stars_full = int(rating_val)
+            stars_half = 1 if (rating_val - stars_full) >= 0.3 else 0
+            stars_html = ''.join(['<i class="fa fa-star"></i>'] * stars_full)
+            if stars_half:
+                stars_html += '<i class="fa fa-star-half-stroke"></i>'
+        except (ValueError, TypeError):
+            rating_display = ''
+            stars_html = ''
+    else:
+        rating_display = ''
+        stars_html = ''
+
+    review_count_display = str(review_count) if review_count else ''
+
+    # Single Gemini call for ALL personalized content
     client = get_gemini_client()
+    gemini_content = None
     try:
-        services_prompt = f"""For a {category} business called "{name}" in {city}, generate exactly 6 short service offerings (2-5 words each).
-Return ONLY a JSON array of 6 strings. No explanation.
-Example: ["Service One", "Service Two", "Service Three", "Service Four", "Service Five", "Service Six"]"""
-        response = client.generate_content(services_prompt)
-        raw = response.text.strip().replace('```json', '').replace('```', '').strip()
-        services = json.loads(raw)
-        if not isinstance(services, list) or len(services) < 3:
-            raise ValueError("bad services response")
-        services = services[:6]
-    except Exception:
-        services = ["Professional Service", "Expert Consultation", "Quality Work", "Fast Turnaround", "Licensed & Insured", "Free Estimates"]
+        mega_prompt = f"""Generate personalized website content for this specific business. Make it feel CUSTOM and REAL, not generic.
 
-    # Generate a compelling tagline
-    try:
-        tagline_prompt = f"""Write ONE short punchy tagline (8 words or less) for a {category} business called "{name}" in {city}.
-Return ONLY the tagline text, nothing else."""
-        response = client.generate_content(tagline_prompt)
-        tagline = response.text.strip().strip('"').strip("'")
-        if len(tagline) > 80:
-            tagline = tagline[:80]
-    except Exception:
-        tagline = f"Your Trusted {category.title()} in {city}"
+BUSINESS:
+- Name: {name}
+- City: {city}
+- Category: {category}
+- Phone: {phone or 'N/A'}
+- Address: {address or 'N/A'}
+- Rating: {rating or 'N/A'}
+- Reviews: {review_count or 'N/A'}
+- Description: {description or 'N/A'}
 
-    # Generate about section text
-    try:
-        about_prompt = f"""Write 2 short sentences (total max 40 words) describing a {category} business called "{name}" in {city}.
-Warm, professional tone. Return ONLY the text."""
-        response = client.generate_content(about_prompt)
-        about_text = response.text.strip()
-        if len(about_text) > 300:
-            about_text = about_text[:300]
-    except Exception:
-        about_text = f"{name} has been proudly serving the {city} community with top-quality {category} services. We are committed to excellence and customer satisfaction in everything we do."
+Return ONLY valid JSON (no markdown, no code blocks):
+{{
+  "tagline": "A punchy 4-8 word tagline specific to this exact business and location",
+  "hero_subtitle": "One compelling sentence (max 15 words) about what makes THIS business special in THIS city",
+  "about_paragraph": "2-3 sentences (max 60 words) about this specific business. Reference the city, their specialty. Make it feel like THEY wrote it.",
+  "services": [
+    {{"name": "Specific Service 1", "desc": "One sentence explaining this service (12-18 words). Be specific to the industry."}},
+    {{"name": "Specific Service 2", "desc": "One sentence explaining this service (12-18 words). Be specific to the industry."}},
+    {{"name": "Specific Service 3", "desc": "One sentence explaining this service (12-18 words). Be specific to the industry."}},
+    {{"name": "Specific Service 4", "desc": "One sentence explaining this service (12-18 words). Be specific to the industry."}},
+    {{"name": "Specific Service 5", "desc": "One sentence explaining this service (12-18 words). Be specific to the industry."}},
+    {{"name": "Specific Service 6", "desc": "One sentence explaining this service (12-18 words). Be specific to the industry."}}
+  ],
+  "reviews": [
+    {{"text": "A realistic Google-style review (20-35 words) mentioning a specific service or experience at this business.", "name": "FirstName L.", "rating": 5}},
+    {{"text": "A realistic review (20-35 words) with slight personality, mentioning something specific about visiting this place.", "name": "FirstName L.", "rating": 5}},
+    {{"text": "A realistic review (20-35 words), slightly different tone, mentions the city or neighborhood.", "name": "FirstName L.", "rating": 4}}
+  ],
+  "unique_selling_points": [
+    "A specific differentiator for THIS business (e.g., 'Same-day emergency service')",
+    "Another unique advantage (e.g., 'Family-owned since 2005')",
+    "A third selling point (e.g., 'Free estimates within 2 hours')",
+    "A fourth selling point (e.g., 'Serving all of {city} metro area')"
+  ]
+}}
 
-    # Generate the full HTML mockup
+RULES:
+- NO generic phrases like "top-quality service" or "experienced team" or "committed to excellence"
+- Every piece of text must feel like it was written FOR this specific business
+- Reviews must sound like real people, not marketing copy
+- Services must be actual services this type of business offers
+- If you know specifics about this city/area, reference them"""
+
+        response = client.generate_content(mega_prompt)
+        raw = response.text.strip()
+        # Clean markdown code blocks if present
+        if '```' in raw:
+            raw = raw.split('```')[1]
+            if raw.startswith('json'):
+                raw = raw[4:]
+            raw = raw.strip()
+        gemini_content = json.loads(raw)
+    except Exception as e:
+        gemini_content = None
+
+    # Fallback content if Gemini fails
+    if not gemini_content:
+        gemini_content = {
+            'tagline': f"{city}'s Go-To {category.title()}",
+            'hero_subtitle': f"Serving {city} with dedication and expertise in {category}.",
+            'about_paragraph': f"{name} is a locally-owned {category} business right here in {city}. We take pride in knowing our neighbors and delivering results that speak for themselves.",
+            'services': [
+                {'name': f'{category.title()} Service {i+1}', 'desc': f'Professional {category} solutions tailored to your specific needs.'} for i in range(6)
+            ],
+            'reviews': [
+                {'text': f'Great experience with {name}. They really know what they are doing and the pricing was fair.', 'name': 'Sarah M.', 'rating': 5},
+                {'text': f'Used {name} twice now. Reliable, professional, and they actually show up when they say they will.', 'name': 'James T.', 'rating': 5},
+                {'text': f'Found {name} on Google and glad I did. Good work at a reasonable price in {city}.', 'name': 'Amanda R.', 'rating': 4},
+            ],
+            'unique_selling_points': [f'Locally owned in {city}', 'Licensed and insured', 'Free consultations', 'Satisfaction guaranteed']
+        }
+
+    tagline = gemini_content.get('tagline', f"{city}'s Best {category.title()}")
+    hero_subtitle = gemini_content.get('hero_subtitle', '')
+    about_text = gemini_content.get('about_paragraph', '')
+    services = gemini_content.get('services', [])[:6]
+    reviews = gemini_content.get('reviews', [])[:3]
+    usps = gemini_content.get('unique_selling_points', [])[:4]
+
+    # Service icons per industry
+    service_icons = {
+        'restaurant': ['fa-utensils', 'fa-wine-glass', 'fa-truck', 'fa-cake-candles', 'fa-champagne-glasses', 'fa-fire-burner'],
+        'cafe': ['fa-mug-hot', 'fa-cookie', 'fa-blender', 'fa-ice-cream', 'fa-wifi', 'fa-bag-shopping'],
+        'plumber': ['fa-wrench', 'fa-faucet-drip', 'fa-hot-tub-person', 'fa-house-flood-water', 'fa-shower', 'fa-toolbox'],
+        'electrician': ['fa-bolt', 'fa-lightbulb', 'fa-plug', 'fa-solar-panel', 'fa-fan', 'fa-toolbox'],
+        'dentist': ['fa-tooth', 'fa-teeth', 'fa-syringe', 'fa-x-ray', 'fa-face-smile', 'fa-shield-halved'],
+        'salon': ['fa-scissors', 'fa-spray-can-sparkles', 'fa-paintbrush', 'fa-face-smile-beam', 'fa-hand-sparkles', 'fa-wand-magic-sparkles'],
+        'gym': ['fa-dumbbell', 'fa-person-running', 'fa-heart-pulse', 'fa-stopwatch', 'fa-users', 'fa-ranking-star'],
+        'lawyer': ['fa-scale-balanced', 'fa-gavel', 'fa-file-contract', 'fa-handshake', 'fa-building-columns', 'fa-shield-halved'],
+        'realtor': ['fa-house', 'fa-key', 'fa-magnifying-glass-dollar', 'fa-handshake', 'fa-chart-line', 'fa-building'],
+        'auto': ['fa-car', 'fa-oil-can', 'fa-gears', 'fa-tire', 'fa-battery-full', 'fa-gauge-high'],
+        'landscaping': ['fa-leaf', 'fa-tree', 'fa-seedling', 'fa-sun', 'fa-water', 'fa-trowel'],
+        'cleaning': ['fa-broom', 'fa-spray-can-sparkles', 'fa-hand-sparkles', 'fa-house-chimney', 'fa-pump-soap', 'fa-window-maximize'],
+        'construction': ['fa-hammer', 'fa-hard-hat', 'fa-ruler-combined', 'fa-truck', 'fa-paint-roller', 'fa-screwdriver-wrench'],
+        'spa': ['fa-spa', 'fa-hand-holding-heart', 'fa-hot-tub-person', 'fa-gem', 'fa-feather', 'fa-yin-yang'],
+    }
+    cat_key = None
+    for k in service_icons:
+        if k in category.lower():
+            cat_key = k
+            break
+    icons = service_icons.get(cat_key, ['fa-check-circle', 'fa-star', 'fa-thumbs-up', 'fa-bolt', 'fa-shield-halved', 'fa-clock'])
+
+    # Build services HTML
+    services_html = ''
+    for i, svc in enumerate(services):
+        icon = icons[i % len(icons)]
+        svc_name = svc.get('name', f'Service {i+1}') if isinstance(svc, dict) else str(svc)
+        svc_desc = svc.get('desc', '') if isinstance(svc, dict) else ''
+        services_html += f'''
+      <div class="service-card">
+        <div class="service-icon"><i class="fa {icon}"></i></div>
+        <div class="service-name">{svc_name}</div>
+        <div class="service-desc">{svc_desc}</div>
+      </div>'''
+
+    # Build reviews HTML with real star ratings
+    reviews_html = ''
+    for rev in reviews:
+        rev_rating = rev.get('rating', 5) if isinstance(rev, dict) else 5
+        rev_text = rev.get('text', '') if isinstance(rev, dict) else str(rev)
+        rev_name = rev.get('name', 'Customer') if isinstance(rev, dict) else 'Customer'
+        rev_stars = '&#9733;' * int(rev_rating) + ('&#9734;' * (5 - int(rev_rating)))
+        initial = rev_name[0].upper() if rev_name else 'C'
+        reviews_html += f'''
+      <div class="testimonial-card">
+        <div class="testimonial-stars">{rev_stars}</div>
+        <p class="testimonial-text">"{rev_text}"</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">{initial}</div>
+          <div><div class="testimonial-name">{rev_name}</div><div class="testimonial-location">{city}</div></div>
+        </div>
+      </div>'''
+
+    # Build USP badges
+    usp_html = ''
+    usp_icons = ['fa-circle-check', 'fa-shield-halved', 'fa-clock', 'fa-location-dot']
+    for i, usp in enumerate(usps):
+        usp_icon = usp_icons[i % len(usp_icons)]
+        usp_html += f'<div class="about-feature"><i class="fa {usp_icon}"></i> {usp}</div>'
+
+    # Stats section — only show real data
+    stats_html = ''
+    if rating_display or review_count_display:
+        stats_items = ''
+        if rating_display:
+            stats_items += f'<div class="stat"><div class="stat-num">{rating_display} {stars_html}</div><div class="stat-label">Google Rating</div></div>'
+        if review_count_display:
+            stats_items += f'<div class="stat"><div class="stat-num">{review_count_display}+</div><div class="stat-label">Google Reviews</div></div>'
+        stats_html = f'<div class="hero-stats">{stats_items}</div>'
+
+    # Google Maps embed
+    maps_html = ''
+    if address:
+        maps_query = urllib.parse.quote(f"{name} {address} {city}")
+        maps_html = f'''
+    <div class="map-container">
+      <iframe src="https://www.google.com/maps?q={maps_query}&output=embed" width="100%" height="300" style="border:0;border-radius:12px;" allowfullscreen="" loading="lazy"></iframe>
+    </div>'''
+
+    # Google Fonts based on theme
+    font_imports = ''
+    if 'Playfair' in font_family:
+        font_imports = '<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet">'
+    elif 'Oswald' in font_family:
+        font_imports = '<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">'
+    elif 'Libre Baskerville' in font_family:
+        font_imports = '<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">'
+    elif 'DM Sans' in font_family:
+        font_imports = '<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">'
+    else:
+        font_imports = '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">'
+
     html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{name}</title>
+<title>{name} - {category.title()} in {city}</title>
+{font_imports}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
   * {{ margin: 0; padding: 0; box-sizing: border-box; }}
   :root {{
-    --green: #00ff88;
-    --dark: #0a0a0a;
-    --card: #111;
-    --border: #222;
-    --text: #e0e0e0;
-    --muted: #888;
+    --primary: {primary};
+    --secondary: {secondary};
+    --accent: {accent};
+    --bg: {bg_color};
+    --card: {card_color};
+    --text: {text_color};
+    --muted: {muted_color};
   }}
-  body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--dark); color: var(--text); }}
+  body {{ font-family: {font_family}; background: var(--bg); color: var(--text); }}
 
   /* NAV */
-  nav {{ position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,10,10,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; align-items: center; justify-content: space-between; height: 64px; }}
-  .nav-logo {{ font-size: 20px; font-weight: 800; color: var(--green); letter-spacing: -0.5px; }}
+  nav {{ position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba({int(bg_color[1:3],16)},{int(bg_color[3:5],16)},{int(bg_color[5:7],16)},0.95); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.06); padding: 0 40px; display: flex; align-items: center; justify-content: space-between; height: 68px; }}
+  .nav-logo {{ font-size: 22px; font-weight: 900; color: var(--primary); letter-spacing: -0.5px; }}
   .nav-links {{ display: flex; gap: 32px; }}
   .nav-links a {{ color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }}
-  .nav-links a:hover {{ color: var(--green); }}
-  .nav-cta {{ background: var(--green); color: #000; padding: 8px 20px; border-radius: 6px; font-size: 14px; font-weight: 700; text-decoration: none; transition: background 0.2s; }}
-  .nav-cta:hover {{ background: #00dd77; }}
+  .nav-links a:hover {{ color: var(--primary); }}
+  .nav-cta {{ background: var(--primary); color: var(--bg); padding: 10px 24px; border-radius: 8px; font-size: 14px; font-weight: 700; text-decoration: none; transition: all 0.2s; }}
+  .nav-cta:hover {{ opacity: 0.9; transform: translateY(-1px); }}
 
   /* HERO */
   .hero {{ position: relative; height: 100vh; min-height: 600px; display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; }}
-  .hero-bg {{ position: absolute; inset: 0; background-image: url('{hero_image_url}'); background-size: cover; background-position: center; filter: brightness(0.25); }}
-  .hero-overlay {{ position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(10,10,10,0.8) 100%); }}
+  .hero-bg {{ position: absolute; inset: 0; background-image: url('{hero_image_url}'); background-size: cover; background-position: center; filter: brightness(0.2) saturate(0.8); }}
+  .hero-overlay {{ position: absolute; inset: 0; background: linear-gradient(180deg, rgba({int(bg_color[1:3],16)},{int(bg_color[3:5],16)},{int(bg_color[5:7],16)},0.3) 0%, rgba({int(bg_color[1:3],16)},{int(bg_color[3:5],16)},{int(bg_color[5:7],16)},0.85) 100%); }}
   .hero-content {{ position: relative; z-index: 1; max-width: 800px; padding: 0 24px; }}
-  .hero-badge {{ display: inline-block; background: rgba(0,255,136,0.15); border: 1px solid rgba(0,255,136,0.3); color: var(--green); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; padding: 6px 16px; border-radius: 100px; margin-bottom: 24px; }}
-  .hero h1 {{ font-size: clamp(36px, 6vw, 72px); font-weight: 900; line-height: 1.05; letter-spacing: -2px; margin-bottom: 20px; color: #fff; }}
-  .hero h1 span {{ color: var(--green); }}
-  .hero-tagline {{ font-size: clamp(16px, 2vw, 20px); color: rgba(255,255,255,0.7); margin-bottom: 40px; line-height: 1.5; }}
+  .hero-badge {{ display: inline-block; background: rgba({int(primary[1:3],16)},{int(primary[3:5],16)},{int(primary[5:7],16)},0.15); border: 1px solid rgba({int(primary[1:3],16)},{int(primary[3:5],16)},{int(primary[5:7],16)},0.3); color: var(--primary); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; padding: 6px 16px; border-radius: 100px; margin-bottom: 24px; }}
+  .hero h1 {{ font-size: clamp(36px, 6vw, 68px); font-weight: 900; line-height: 1.08; letter-spacing: -2px; margin-bottom: 16px; color: #fff; }}
+  .hero h1 span {{ color: var(--primary); display: block; font-size: 0.55em; letter-spacing: 0; margin-top: 8px; }}
+  .hero-tagline {{ font-size: clamp(16px, 2vw, 20px); color: rgba(255,255,255,0.7); margin-bottom: 40px; line-height: 1.6; max-width: 600px; margin-left: auto; margin-right: auto; }}
   .hero-actions {{ display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }}
-  .btn-hero {{ padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 700; text-decoration: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }}
-  .btn-hero-primary {{ background: var(--green); color: #000; }}
-  .btn-hero-primary:hover {{ background: #00dd77; transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,255,136,0.3); }}
-  .btn-hero-secondary {{ background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(4px); }}
-  .btn-hero-secondary:hover {{ background: rgba(255,255,255,0.15); }}
-  .hero-stats {{ display: flex; gap: 48px; justify-content: center; margin-top: 60px; flex-wrap: wrap; }}
+  .btn-hero {{ padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 700; text-decoration: none; transition: all 0.25s; display: inline-flex; align-items: center; gap: 8px; }}
+  .btn-hero-primary {{ background: var(--primary); color: var(--bg); }}
+  .btn-hero-primary:hover {{ transform: translateY(-2px); box-shadow: 0 8px 32px rgba({int(primary[1:3],16)},{int(primary[3:5],16)},{int(primary[5:7],16)},0.35); }}
+  .btn-hero-secondary {{ background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(4px); }}
+  .btn-hero-secondary:hover {{ background: rgba(255,255,255,0.12); }}
+  .hero-stats {{ display: flex; gap: 48px; justify-content: center; margin-top: 50px; flex-wrap: wrap; }}
   .stat {{ text-align: center; }}
-  .stat-num {{ font-size: 32px; font-weight: 900; color: var(--green); }}
-  .stat-label {{ font-size: 13px; color: var(--muted); margin-top: 4px; }}
+  .stat-num {{ font-size: 28px; font-weight: 900; color: var(--primary); }}
+  .stat-num i {{ font-size: 18px; margin-left: 2px; }}
+  .stat-label {{ font-size: 12px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }}
 
   /* SECTION BASE */
   section {{ padding: 100px 40px; }}
-  .section-label {{ font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; color: var(--green); margin-bottom: 12px; }}
-  .section-title {{ font-size: clamp(28px, 4vw, 48px); font-weight: 900; letter-spacing: -1px; margin-bottom: 16px; }}
+  .section-label {{ font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; color: var(--primary); margin-bottom: 12px; }}
+  .section-title {{ font-size: clamp(28px, 4vw, 44px); font-weight: 900; letter-spacing: -1px; margin-bottom: 16px; color: #fff; }}
   .section-sub {{ font-size: 16px; color: var(--muted); max-width: 560px; line-height: 1.6; }}
   .section-header {{ margin-bottom: 64px; }}
 
   /* SERVICES */
-  .services {{ background: var(--dark); }}
-  .services-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }}
-  .service-card {{ background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 32px; transition: all 0.3s; position: relative; overflow: hidden; }}
-  .service-card::before {{ content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--green), transparent); opacity: 0; transition: opacity 0.3s; }}
-  .service-card:hover {{ border-color: var(--green); transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,255,136,0.08); }}
+  .services {{ background: var(--bg); }}
+  .services-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }}
+  .service-card {{ background: var(--card); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 32px; transition: all 0.3s; position: relative; overflow: hidden; }}
+  .service-card::before {{ content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--primary), transparent); opacity: 0; transition: opacity 0.3s; }}
+  .service-card:hover {{ border-color: rgba({int(primary[1:3],16)},{int(primary[3:5],16)},{int(primary[5:7],16)},0.4); transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.2); }}
   .service-card:hover::before {{ opacity: 1; }}
-  .service-icon {{ width: 48px; height: 48px; background: rgba(0,255,136,0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; color: var(--green); font-size: 20px; }}
+  .service-icon {{ width: 48px; height: 48px; background: rgba({int(primary[1:3],16)},{int(primary[3:5],16)},{int(primary[5:7],16)},0.12); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; color: var(--primary); font-size: 20px; }}
   .service-name {{ font-size: 17px; font-weight: 700; margin-bottom: 8px; color: #fff; }}
-  .service-desc {{ font-size: 14px; color: var(--muted); line-height: 1.5; }}
+  .service-desc {{ font-size: 14px; color: var(--muted); line-height: 1.6; }}
 
   /* ABOUT */
-  .about {{ background: #0d0d0d; }}
-  .about-inner {{ display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; max-width: 1100px; margin: 0 auto; }}
-  .about-image {{ border-radius: 20px; overflow: hidden; height: 420px; position: relative; }}
-  .about-image img {{ width: 100%; height: 100%; object-fit: cover; filter: brightness(0.8); }}
-  .about-image-badge {{ position: absolute; bottom: 24px; left: 24px; background: var(--green); color: #000; padding: 12px 20px; border-radius: 10px; font-weight: 800; font-size: 13px; }}
-  .about-text .section-sub {{ max-width: 100%; margin-bottom: 32px; font-size: 17px; color: #bbb; }}
-  .about-features {{ display: flex; flex-direction: column; gap: 16px; }}
-  .about-feature {{ display: flex; align-items: center; gap: 14px; font-size: 15px; color: var(--text); }}
-  .about-feature i {{ color: var(--green); font-size: 16px; width: 20px; }}
+  .about {{ background: rgba(255,255,255,0.02); }}
+  .about-inner {{ display: grid; grid-template-columns: 1fr 1fr; gap: 60px; max-width: 1100px; margin: 0 auto; align-items: center; }}
+  .about-image {{ position: relative; border-radius: 16px; overflow: hidden; }}
+  .about-image img {{ width: 100%; height: 400px; object-fit: cover; border-radius: 16px; }}
+  .about-image-badge {{ position: absolute; bottom: 16px; left: 16px; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); color: var(--primary); padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; }}
+  .about-text .section-sub {{ margin-bottom: 32px; }}
+  .about-features {{ display: flex; flex-direction: column; gap: 12px; }}
+  .about-feature {{ display: flex; align-items: center; gap: 12px; font-size: 15px; color: var(--text); }}
+  .about-feature i {{ color: var(--primary); font-size: 16px; }}
 
   /* TESTIMONIALS */
-  .testimonials {{ background: var(--dark); }}
-  .testimonials-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }}
-  .testimonial-card {{ background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; }}
-  .testimonial-stars {{ color: #ffd700; font-size: 14px; margin-bottom: 16px; letter-spacing: 2px; }}
-  .testimonial-text {{ font-size: 15px; color: #ccc; line-height: 1.7; margin-bottom: 20px; font-style: italic; }}
+  .testimonials {{ background: var(--bg); }}
+  .testimonials-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; max-width: 1100px; margin: 0 auto; }}
+  .testimonial-card {{ background: var(--card); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 32px; }}
+  .testimonial-stars {{ color: var(--primary); font-size: 16px; margin-bottom: 16px; letter-spacing: 2px; }}
+  .testimonial-text {{ font-size: 15px; line-height: 1.7; color: var(--text); margin-bottom: 24px; font-style: italic; }}
   .testimonial-author {{ display: flex; align-items: center; gap: 12px; }}
-  .testimonial-avatar {{ width: 40px; height: 40px; border-radius: 50%; background: rgba(0,255,136,0.15); border: 2px solid var(--green); display: flex; align-items: center; justify-content: center; color: var(--green); font-weight: 700; font-size: 16px; }}
-  .testimonial-name {{ font-weight: 700; font-size: 14px; }}
+  .testimonial-avatar {{ width: 40px; height: 40px; border-radius: 50%; background: rgba({int(primary[1:3],16)},{int(primary[3:5],16)},{int(primary[5:7],16)},0.2); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; }}
+  .testimonial-name {{ font-weight: 600; font-size: 14px; color: #fff; }}
   .testimonial-location {{ font-size: 12px; color: var(--muted); }}
 
   /* CTA BAND */
-  .cta-band {{ background: var(--green); padding: 80px 40px; text-align: center; }}
-  .cta-band h2 {{ font-size: clamp(28px, 4vw, 48px); font-weight: 900; color: #000; letter-spacing: -1px; margin-bottom: 12px; }}
-  .cta-band p {{ font-size: 18px; color: rgba(0,0,0,0.7); margin-bottom: 36px; }}
-  .btn-cta-dark {{ display: inline-flex; align-items: center; gap: 8px; background: #000; color: var(--green); padding: 16px 40px; border-radius: 8px; font-size: 16px; font-weight: 800; text-decoration: none; transition: all 0.2s; }}
-  .btn-cta-dark:hover {{ background: #111; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }}
+  .cta-band {{ background: linear-gradient(135deg, var(--primary), {accent}); padding: 80px 40px; text-align: center; }}
+  .cta-band h2 {{ font-size: clamp(24px, 4vw, 40px); font-weight: 900; color: #fff; margin-bottom: 12px; }}
+  .cta-band p {{ font-size: 16px; color: rgba(255,255,255,0.85); margin-bottom: 32px; }}
+  .btn-cta-dark {{ display: inline-flex; align-items: center; gap: 8px; background: var(--bg); color: var(--primary); padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 700; text-decoration: none; transition: all 0.25s; }}
+  .btn-cta-dark:hover {{ transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }}
 
   /* CONTACT */
-  .contact {{ background: #0d0d0d; }}
-  .contact-inner {{ display: grid; grid-template-columns: 1fr 1fr; gap: 60px; max-width: 1000px; margin: 0 auto; }}
+  .contact {{ background: rgba(255,255,255,0.02); }}
+  .contact-inner {{ display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }}
   .contact-info {{ display: flex; flex-direction: column; gap: 24px; }}
-  .contact-item {{ display: flex; align-items: flex-start; gap: 16px; }}
-  .contact-icon {{ width: 44px; height: 44px; background: rgba(0,255,136,0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--green); font-size: 18px; flex-shrink: 0; }}
-  .contact-label {{ font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 4px; }}
-  .contact-value {{ font-size: 16px; font-weight: 600; color: #fff; }}
-  .contact-form {{ background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 32px; }}
-  .form-group {{ margin-bottom: 16px; }}
-  .form-group label {{ display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }}
-  .form-group input, .form-group textarea {{ width: 100%; background: #0a0a0a; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-size: 14px; color: var(--text); font-family: inherit; transition: border-color 0.2s; }}
-  .form-group input:focus, .form-group textarea:focus {{ outline: none; border-color: var(--green); }}
-  .form-group textarea {{ resize: vertical; min-height: 100px; }}
-  .form-submit {{ width: 100%; background: var(--green); color: #000; border: none; padding: 13px; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background 0.2s; }}
-  .form-submit:hover {{ background: #00dd77; }}
+  .contact-item {{ display: flex; gap: 16px; align-items: flex-start; }}
+  .contact-icon {{ width: 44px; height: 44px; border-radius: 10px; background: rgba({int(primary[1:3],16)},{int(primary[3:5],16)},{int(primary[5:7],16)},0.12); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }}
+  .contact-label {{ font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }}
+  .contact-value {{ font-size: 15px; color: var(--text); line-height: 1.5; }}
+  .contact-form {{ background: var(--card); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 32px; }}
+  .form-group {{ margin-bottom: 20px; }}
+  .form-group label {{ display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }}
+  .form-group input, .form-group textarea {{ width: 100%; padding: 12px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 15px; font-family: inherit; transition: border-color 0.2s; }}
+  .form-group input:focus, .form-group textarea:focus {{ outline: none; border-color: var(--primary); }}
+  .form-group textarea {{ height: 120px; resize: vertical; }}
+  .form-submit {{ width: 100%; padding: 14px; background: var(--primary); color: var(--bg); border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; }}
+  .form-submit:hover {{ opacity: 0.9; transform: translateY(-1px); }}
+  .map-container {{ margin-top: 24px; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); }}
 
   /* FOOTER */
-  footer {{ background: var(--dark); border-top: 1px solid var(--border); padding: 40px; text-align: center; }}
-  .footer-logo {{ font-size: 22px; font-weight: 900; color: var(--green); margin-bottom: 8px; }}
+  footer {{ background: rgba(0,0,0,0.3); padding: 60px 40px 40px; text-align: center; border-top: 1px solid rgba(255,255,255,0.06); }}
+  .footer-logo {{ font-size: 24px; font-weight: 900; color: var(--primary); margin-bottom: 8px; }}
   .footer-tagline {{ font-size: 14px; color: var(--muted); margin-bottom: 24px; }}
-  .footer-links {{ display: flex; gap: 32px; justify-content: center; margin-bottom: 24px; flex-wrap: wrap; }}
+  .footer-links {{ display: flex; gap: 24px; justify-content: center; margin-bottom: 32px; }}
   .footer-links a {{ color: var(--muted); text-decoration: none; font-size: 14px; transition: color 0.2s; }}
-  .footer-links a:hover {{ color: var(--green); }}
-  .footer-copy {{ font-size: 13px; color: #444; }}
+  .footer-links a:hover {{ color: var(--primary); }}
+  .footer-copy {{ font-size: 13px; color: rgba(255,255,255,0.3); }}
 
   /* WATERMARK */
-  .watermark-bar {{ background: #0d0d0d; border-top: 1px solid var(--border); padding: 12px 40px; text-align: center; }}
-  .watermark-bar p {{ font-size: 12px; color: #444; }}
-  .watermark-bar span {{ color: var(--green); font-weight: 700; }}
+  .watermark-bar {{ position: fixed; bottom: 0; left: 0; right: 0; z-index: 999; background: linear-gradient(135deg, var(--primary), {accent}); padding: 10px; text-align: center; }}
+  .watermark-bar p {{ font-size: 13px; font-weight: 600; color: #fff; }}
+  .watermark-bar span {{ font-weight: 800; }}
 
+  /* RESPONSIVE */
   @media (max-width: 768px) {{
-    nav .nav-links {{ display: none; }}
-    section {{ padding: 60px 20px; }}
-    .about-inner, .contact-inner {{ grid-template-columns: 1fr; gap: 40px; }}
-    .hero-stats {{ gap: 24px; }}
     nav {{ padding: 0 20px; }}
+    .nav-links {{ display: none; }}
+    section {{ padding: 60px 20px; }}
+    .about-inner {{ grid-template-columns: 1fr; gap: 32px; }}
+    .contact-inner {{ grid-template-columns: 1fr; }}
+    .hero-stats {{ gap: 24px; }}
   }}
 </style>
 </head>
@@ -563,7 +863,7 @@ Warm, professional tone. Return ONLY the text."""
     <a href="#testimonials">Reviews</a>
     <a href="#contact">Contact</a>
   </div>
-  <a href="#contact" class="nav-cta">Get a Quote</a>
+  <a href="#contact" class="nav-cta">{hero_cta}</a>
 </nav>
 
 <!-- HERO -->
@@ -572,17 +872,13 @@ Warm, professional tone. Return ONLY the text."""
   <div class="hero-overlay"></div>
   <div class="hero-content">
     <div class="hero-badge">{city} &bull; {category.title()}</div>
-    <h1>{name}<br><span>{tagline}</span></h1>
-    <p class="hero-tagline">Professional {category} services trusted by hundreds of customers in {city}.</p>
+    <h1>{name}<span>{tagline}</span></h1>
+    <p class="hero-tagline">{hero_subtitle}</p>
     <div class="hero-actions">
-      <a href="#contact" class="btn-hero btn-hero-primary"><i class="fa fa-phone"></i> Get a Free Quote</a>
-      <a href="#services" class="btn-hero btn-hero-secondary"><i class="fa fa-arrow-down"></i> Our Services</a>
+      <a href="#contact" class="btn-hero btn-hero-primary"><i class="fa {hero_icon}"></i> {hero_cta}</a>
+      <a href="#services" class="btn-hero btn-hero-secondary"><i class="fa {hero_icon2}"></i> {hero_cta2}</a>
     </div>
-    <div class="hero-stats">
-      <div class="stat"><div class="stat-num">500+</div><div class="stat-label">Happy Clients</div></div>
-      <div class="stat"><div class="stat-num">10+</div><div class="stat-label">Years Experience</div></div>
-      <div class="stat"><div class="stat-num">4.9<i class="fa fa-star" style="font-size:20px;margin-left:4px;"></i></div><div class="stat-label">Avg Rating</div></div>
-    </div>
+    {stats_html}
   </div>
 </section>
 
@@ -592,15 +888,10 @@ Warm, professional tone. Return ONLY the text."""
     <div class="section-header">
       <div class="section-label">What We Do</div>
       <div class="section-title">Our Services</div>
-      <div class="section-sub">Everything you need from a trusted {category} provider -- done right the first time.</div>
+      <div class="section-sub">Specialized {category} solutions for {city} and surrounding areas.</div>
     </div>
     <div class="services-grid">
-      {''.join(f"""
-      <div class="service-card">
-        <div class="service-icon"><i class="fa fa-check-circle"></i></div>
-        <div class="service-name">{s}</div>
-        <div class="service-desc">Top-quality service delivered by our experienced team with attention to detail.</div>
-      </div>""" for s in services)}
+      {services_html}
     </div>
   </div>
 </section>
@@ -617,10 +908,7 @@ Warm, professional tone. Return ONLY the text."""
       <div class="section-title">Why Choose {name}?</div>
       <p class="section-sub">{about_text}</p>
       <div class="about-features">
-        <div class="about-feature"><i class="fa fa-circle-check"></i> Fully licensed and insured</div>
-        <div class="about-feature"><i class="fa fa-circle-check"></i> Local {city} experts since day one</div>
-        <div class="about-feature"><i class="fa fa-circle-check"></i> Transparent pricing -- no surprises</div>
-        <div class="about-feature"><i class="fa fa-circle-check"></i> 100% satisfaction guaranteed</div>
+        {usp_html}
       </div>
     </div>
   </div>
@@ -631,34 +919,11 @@ Warm, professional tone. Return ONLY the text."""
   <div style="max-width:1100px;margin:0 auto;">
     <div class="section-header">
       <div class="section-label">Reviews</div>
-      <div class="section-title">What Clients Say</div>
-      <div class="section-sub">Real feedback from real customers in {city}.</div>
+      <div class="section-title">What Our Clients Say</div>
+      <div class="section-sub">{'Based on ' + review_count_display + ' Google reviews' if review_count_display else 'Real feedback from our customers'}.</div>
     </div>
     <div class="testimonials-grid">
-      <div class="testimonial-card">
-        <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-        <p class="testimonial-text">"Absolutely incredible service. {name} showed up on time, did the job perfectly, and the price was very fair. Will definitely call them again!"</p>
-        <div class="testimonial-author">
-          <div class="testimonial-avatar">S</div>
-          <div><div class="testimonial-name">Sarah M.</div><div class="testimonial-location">{city}</div></div>
-        </div>
-      </div>
-      <div class="testimonial-card">
-        <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-        <p class="testimonial-text">"Best {category} service I've ever used. Highly professional team, great communication from start to finish. Strongly recommend to anyone in {city}."</p>
-        <div class="testimonial-author">
-          <div class="testimonial-avatar">J</div>
-          <div><div class="testimonial-name">James R.</div><div class="testimonial-location">{city}</div></div>
-        </div>
-      </div>
-      <div class="testimonial-card">
-        <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-        <p class="testimonial-text">"I was skeptical at first but {name} completely exceeded my expectations. Fast, clean, and honestly the best value in town."</p>
-        <div class="testimonial-author">
-          <div class="testimonial-avatar">A</div>
-          <div><div class="testimonial-name">Amanda K.</div><div class="testimonial-location">{city}</div></div>
-        </div>
-      </div>
+      {reviews_html}
     </div>
   </div>
 </section>
@@ -666,8 +931,8 @@ Warm, professional tone. Return ONLY the text."""
 <!-- CTA BAND -->
 <div class="cta-band">
   <h2>Ready to Get Started?</h2>
-  <p>Call us today or fill out the form below -- we respond within 1 hour.</p>
-  <a href="#contact" class="btn-cta-dark"><i class="fa fa-calendar-check"></i> Book a Free Consultation</a>
+  <p>{'Call us at ' + phone + ' or fill out the form below.' if phone else 'Fill out the form below and we will get back to you fast.'}</p>
+  <a href="#contact" class="btn-cta-dark"><i class="fa fa-calendar-check"></i> {hero_cta}</a>
 </div>
 
 <!-- CONTACT -->
@@ -675,21 +940,22 @@ Warm, professional tone. Return ONLY the text."""
   <div style="max-width:1000px;margin:0 auto;">
     <div class="section-header" style="text-align:center;">
       <div class="section-label">Get In Touch</div>
-      <div class="section-title">Contact Us</div>
+      <div class="section-title">Contact {name}</div>
     </div>
     <div class="contact-inner">
       <div class="contact-info">
-        {f'<div class="contact-item"><div class="contact-icon"><i class="fa fa-phone"></i></div><div><div class="contact-label">Phone</div><div class="contact-value">{phone}</div></div></div>' if phone else ''}
-        {f'<div class="contact-item"><div class="contact-icon"><i class="fa fa-location-dot"></i></div><div><div class="contact-label">Address</div><div class="contact-value">{address}</div></div></div>' if address else ''}
+        {'<div class="contact-item"><div class="contact-icon"><i class="fa fa-phone"></i></div><div><div class="contact-label">Phone</div><div class="contact-value">' + phone + '</div></div></div>' if phone else ''}
+        {'<div class="contact-item"><div class="contact-icon"><i class="fa fa-location-dot"></i></div><div><div class="contact-label">Address</div><div class="contact-value">' + address + '</div></div></div>' if address else ''}
         <div class="contact-item"><div class="contact-icon"><i class="fa fa-clock"></i></div><div><div class="contact-label">Hours</div><div class="contact-value">Mon-Fri: 8am - 6pm<br>Sat: 9am - 4pm</div></div></div>
         <div class="contact-item"><div class="contact-icon"><i class="fa fa-map-marker-alt"></i></div><div><div class="contact-label">Service Area</div><div class="contact-value">{city} &amp; surrounding areas</div></div></div>
+        {maps_html}
       </div>
       <div class="contact-form">
         <div class="form-group"><label>Your Name</label><input type="text" placeholder="John Smith"></div>
         <div class="form-group"><label>Email</label><input type="email" placeholder="john@email.com"></div>
         <div class="form-group"><label>Phone</label><input type="tel" placeholder="(555) 000-0000"></div>
         <div class="form-group"><label>Message</label><textarea placeholder="Tell us about your project..."></textarea></div>
-        <button class="form-submit">Send Message <i class="fa fa-arrow-right"></i></button>
+        <button class="form-submit">{hero_cta} <i class="fa fa-arrow-right"></i></button>
       </div>
     </div>
   </div>
@@ -709,13 +975,14 @@ Warm, professional tone. Return ONLY the text."""
 </footer>
 
 <div class="watermark-bar">
-  <p>Website mockup powered by <span>Cold Outreach Engine</span> &mdash; We can build your real site today.</p>
+  <p>This is a preview mockup by <span>Cold Outreach Engine</span> &mdash; Imagine what your real website could look like.</p>
 </div>
 
 </body>
 </html>"""
 
     return jsonify({'html': html})
+
 
 @app.route('/health')
 def health():
