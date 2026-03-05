@@ -5,6 +5,7 @@ import io
 import json
 import logging
 import time
+import urllib.parse
 from flask import Flask, request, jsonify, render_template, make_response
 from flask_cors import CORS
 import requests
@@ -60,150 +61,94 @@ def is_real_website(url: str) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# PLAYWRIGHT GOOGLE MAPS SCRAPER  (zero cost, no API key)
+# REQUESTS-BASED GOOGLE MAPS SCRAPER  (no Playwright, no API key)
 # ---------------------------------------------------------------------------
 
 class PlaywrightLeadFinder:
     """
-    Scrapes Google Maps using Playwright headless Chrome.
-    No API key required — completely free.
+    Scrapes Google Maps search results using plain HTTP requests + BeautifulSoup.
+    Works on any server — no Playwright/Chromium required.
+    Falls back to Google Places Text Search API if GOOGLE_PLACES_API_KEY is set.
     """
 
+    HEADERS = {
+        'User-Agent': (
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+            'AppleWebKit/537.36 (KHTML, like Gecko) '
+            'Chrome/120.0.0.0 Safari/537.36'
+        ),
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    }
+
     def search(self, keyword: str, city: str, max_results: int = 20) -> list:
-        from playwright.sync_api import sync_playwright
+        # If Google Places API key is available, use it (most reliable)
+        api_key = os.getenv('GOOGLE_PLACES_API_KEY')
+        if api_key:
+            return self._search_places_api(keyword, city, max_results, api_key)
+        # Otherwise fall back to scraping
+        return self._search_scrape(keyword, city, max_results)
 
-        query = f"{keyword} {city}"
-        logger.info(f"Scraping Google Maps for: {query}")
+    def _search_places_api(self, keyword: str, city: str, max_results: int, api_key: str) -> list:
+        """Use Google Places Text Search API — most reliable path."""
+        query = f"{keyword} in {city}"
+        url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
         results = []
+        page_token = None
 
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            context = browser.new_context(
-                user_agent=(
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                    "AppleWebKit/537.36 (KHTML, like Gecko) "
-                    "Chrome/120.0.0.0 Safari/537.36"
-                ),
-                viewport={"width": 1280, "height": 800},
-            )
-            page = context.new_page()
+        while len(results) < max_results:
+            params = {'query': query, 'key': api_key}
+            if page_token:
+                params['pagetoken'] = page_token
+                time.sleep(2)  # Required delay for next_page_token
 
-            try:
-                search_url = f"https://www.google.com/maps/search/{requests.utils.quote(query)}"
-                page.goto(search_url, wait_until="networkidle", timeout=30000)
-                page.wait_for_timeout(2000)
+            resp = requests.get(url, params=params, timeout=10)
+            data = resp.json()
 
-                # Scroll the results pane to load more listings
-                results_pane = page.query_selector('div[role="feed"]')
-                loaded = 0
-                while loaded < max_results:
-                    if results_pane:
-                        results_pane.evaluate("el => el.scrollTop += 800")
-                    else:
-                        page.mouse.wheel(0, 800)
-                    page.wait_for_timeout(1200)
+            if data.get('status') not in ('OK', 'ZERO_RESULTS'):
+                logger.warning(f"Places API error: {data.get('status')} — {data.get('error_message','')}")
+                break
 
-                    items = page.query_selector_all('a[href*="/maps/place/"]')
-                    loaded = len(items)
-                    if loaded >= max_results:
-                        break
+            for place in data.get('results', []):
+                if len(results) >= max_results:
+                    break
+                lead = self._place_to_lead(place, api_key)
+                results.append(lead)
 
-                    # Check for end-of-results indicator
-                    end_msg = page.query_selector('span.HlvSq')
-                    if end_msg:
-                        break
+            page_token = data.get('next_page_token')
+            if not page_token:
+                break
 
-                # Collect listing links (deduplicated)
-                items = page.query_selector_all('a[href*="/maps/place/"]')
-                seen_hrefs = set()
-                listing_urls = []
-                for item in items:
-                    href = item.get_attribute('href')
-                    if href and href not in seen_hrefs:
-                        seen_hrefs.add(href)
-                        listing_urls.append(href)
-                    if len(listing_urls) >= max_results:
-                        break
-
-                logger.info(f"Found {len(listing_urls)} listing URLs")
-
-                # Visit each listing to extract details
-                for url in listing_urls[:max_results]:
-                    try:
-                        lead = self._extract_listing(page, url)
-                        if lead:
-                            results.append(lead)
-                        page.wait_for_timeout(800)
-                    except Exception as e:
-                        logger.warning(f"Failed to extract listing {url}: {e}")
-                        continue
-
-            finally:
-                browser.close()
-
-        logger.info(f"Scraped {len(results)} leads from Google Maps")
+        logger.info(f"Google Places API returned {len(results)} leads")
         return results
 
-    def _extract_listing(self, page, url: str) -> dict:
-        page.goto(url, wait_until="domcontentloaded", timeout=20000)
-        page.wait_for_timeout(1500)
+    def _place_to_lead(self, place: dict, api_key: str) -> dict:
+        """Convert a Places API result to our lead format, enriching with details if possible."""
+        place_id = place.get('place_id')
+        name = place.get('name', '')
+        address = place.get('formatted_address', '')
+        rating = place.get('rating')
+        review_count = place.get('user_ratings_total', 0)
+        category = place.get('types', [''])[0].replace('_', ' ').title() if place.get('types') else ''
 
-        def get_text(selector):
-            el = page.query_selector(selector)
-            return el.inner_text().strip() if el else ""
-
-        # Business name
-        name = get_text('h1.DUwDvf') or get_text('h1[data-attrid="title"]') or get_text('h1')
-
-        # Address
-        address = ""
-        addr_el = page.query_selector('button[data-item-id="address"]')
-        if addr_el:
-            address = addr_el.inner_text().strip()
-        if not address:
-            address = get_text('[data-item-id="address"] .Io6YTe')
-
-        # Phone
-        phone = ""
-        phone_el = page.query_selector('button[data-item-id^="phone:tel:"]')
-        if phone_el:
-            phone = phone_el.inner_text().strip()
-
-        # Website
-        website = ""
-        web_el = page.query_selector('a[data-item-id="authority"]')
-        if web_el:
-            website = web_el.get_attribute('href') or ""
-        if website.startswith('https://www.google.com/url'):
-            # Unwrap Google redirect
-            match = re.search(r'[?&]q=([^&]+)', website)
-            if match:
-                website = requests.utils.unquote(match.group(1))
-
-        # Category
-        category = get_text('button.DkEaL') or get_text('[jsaction*="category"]')
-
-        # Rating & reviews
-        rating_text = get_text('div.F7nice span[aria-hidden="true"]')
-        rating = None
-        try:
-            rating = float(rating_text) if rating_text else None
-        except ValueError:
-            pass
-
-        review_text = get_text('div.F7nice span[aria-label*="review"]')
-        review_count = 0
-        try:
-            nums = re.findall(r'[\d,]+', review_text)
-            review_count = int(nums[0].replace(',', '')) if nums else 0
-        except Exception:
-            pass
-
-        if not name:
-            return None
+        # Fetch place details to get phone + website
+        phone = ''
+        website = ''
+        if place_id:
+            try:
+                det_url = "https://maps.googleapis.com/maps/api/place/details/json"
+                det = requests.get(det_url, params={
+                    'place_id': place_id,
+                    'fields': 'formatted_phone_number,website',
+                    'key': api_key
+                }, timeout=8).json()
+                result = det.get('result', {})
+                phone = result.get('formatted_phone_number', '')
+                website = result.get('website', '')
+            except Exception as e:
+                logger.warning(f"Could not fetch details for {name}: {e}")
 
         has_real_site = is_real_website(website)
-
         return {
             'name': name,
             'address': address,
@@ -215,6 +160,87 @@ class PlaywrightLeadFinder:
             'rating': rating,
             'review_count': review_count,
         }
+
+    def _search_scrape(self, keyword: str, city: str, max_results: int) -> list:
+        """
+        Fallback: scrape Google Maps HTML search results page.
+        Extracts structured data from the page's embedded JSON blobs.
+        """
+        query = urllib.parse.quote_plus(f"{keyword} {city}")
+        search_url = f"https://www.google.com/maps/search/{query}"
+        logger.info(f"Scraping Google Maps: {search_url}")
+
+        try:
+            resp = requests.get(search_url, headers=self.HEADERS, timeout=15)
+            resp.raise_for_status()
+        except Exception as e:
+            raise Exception(f"Failed to reach Google Maps: {e}")
+
+        html = resp.text
+
+        # Extract business data from embedded JSON in the page
+        results = []
+        # Google Maps embeds data in window.APP_INITIALIZATION_STATE or similar JSON blobs
+        # We parse out business listings using regex on the serialised data arrays
+        patterns = [
+            r'"([^"]{2,80})",[^,]*,\["https?://[^"]+"\],[^,]*,\["(\+?[\d\s\-().]{7,20})"\]',
+        ]
+
+        # More reliable: look for the /*""*/ JSON data blocks
+        json_blocks = re.findall(r'\\x22([^\\]{5,80})\\x22', html)
+
+        # Parse business name + address blocks from the HTML directly
+        soup = BeautifulSoup(html, 'html.parser')
+
+        # Try to find structured listing data
+        seen_names = set()
+        for div in soup.find_all('div', attrs={'aria-label': True}):
+            label = div.get('aria-label', '').strip()
+            if not label or label in seen_names or len(label) < 3:
+                continue
+            if any(skip in label.lower() for skip in ['search', 'map', 'zoom', 'directions', 'menu']):
+                continue
+            seen_names.add(label)
+
+            # Try to find associated details nearby in the DOM
+            text = div.get_text(separator=' ', strip=True)
+            phone_match = re.search(r'(\+?1?\s?[\(]?\d{3}[\)]?[\s.\-]?\d{3}[\s.\-]?\d{4})', text)
+            phone = phone_match.group(1) if phone_match else ''
+
+            # Look for website in nearby links
+            website = ''
+            for a in div.find_all('a', href=True):
+                href = a['href']
+                if href.startswith('http') and 'google.com' not in href and 'goo.gl' not in href:
+                    website = href
+                    break
+
+            has_real_site = is_real_website(website)
+            results.append({
+                'name': label,
+                'address': '',
+                'phone': phone,
+                'website': website,
+                'has_website': has_real_site,
+                'is_hot_lead': not has_real_site,
+                'category': keyword.title(),
+                'rating': None,
+                'review_count': 0,
+            })
+
+            if len(results) >= max_results:
+                break
+
+        # If scraping got nothing useful, return a helpful error set
+        if not results:
+            raise Exception(
+                "Google Maps HTML scraping returned no results. "
+                "Please set the GOOGLE_PLACES_API_KEY environment variable on Render "
+                "for reliable lead search. Get a free key at https://console.cloud.google.com/"
+            )
+
+        logger.info(f"Scraped {len(results)} leads from Google Maps HTML")
+        return results
 
 
 # ---------------------------------------------------------------------------
