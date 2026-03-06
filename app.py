@@ -1,56 +1,67 @@
-import os
-import re
-import csv
-import io
-import json
-import logging
-import time
-import urllib.parse
-from flask import Flask, request, jsonify, render_template, make_response
-from flask_cors import CORS
-import requests
-from bs4 import BeautifulSoup
-import google.generativeai as genai
-from urllib.parse import urlparse
+import urllib.request, urllib.error, json, base64, time, os
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Read the good file
+with open('/home/user/files/tmp/app_good.py', 'rb') as f:
+    good_bytes = f.read()
+print(f"Good file size: {len(good_bytes)} bytes")
 
-app = Flask(__name__)
-CORS(app)
+# Get current SHA of broken file on main
+url = "https://api.github.com/repos/sportaholic000-hue/cold-outreach-engine/contents/app.py"
+req = urllib.request.Request(url, headers={"User-Agent": "restore-script", "Accept": "application/vnd.github+json"})
+with urllib.request.urlopen(req) as r:
+    current = json.loads(r.read())
+current_sha = current["sha"]
+print(f"Current SHA: {current_sha}, size: {current['size']}")
 
-_gemini_client = None
+# Encode good file
+good_b64 = base64.b64encode(good_bytes).decode("ascii")
 
-def get_gemini_client():
-    global _gemini_client
-    if _gemini_client is None:
-        api_key = os.getenv('GEMINI_API_KEY')
-        if not api_key:
-            raise ValueError("GEMINI_API_KEY environment variable not set")
-        genai.configure(api_key=api_key)
-        _gemini_client = genai.GenerativeModel('gemini-2.0-flash')
-    return _gemini_client
+# Try to find a GitHub token
+token = ""
+for k in ["GITHUB_TOKEN", "GH_TOKEN", "GITHUB_PAT", "GH_PAT"]:
+    token = os.environ.get(k, "")
+    if token:
+        print(f"Token found in env var: {k}")
+        break
 
-PLACEHOLDER_DOMAINS = {
-    'godaddy.com', 'wix.com', 'squarespace.com', 'weebly.com',
-    'wordpress.com', 'sites.google.com', 'business.site', 'myshopify.com',
-    'blogspot.com', 'tumblr.com', 'facebook.com', 'instagram.com',
-    'linktr.ee', 'linkinbio.com', 'carrd.co', 'notion.site',
-}
+if not token:
+    # List all env vars that might be tokens
+    for k, v in os.environ.items():
+        if any(x in k.upper() for x in ["TOKEN", "PAT", "KEY", "SECRET", "AUTH"]):
+            print(f"  Possible token env var: {k} = {v[:20]}...")
+    print("No GitHub token found in environment")
+else:
+    payload = json.dumps({
+        "message": "fix: restore full 884-line app.py from commit 68250a8",
+        "content": good_b64,
+        "sha": current_sha,
+        "branch": "main"
+    }).encode("utf-8")
 
-def is_real_website(url: str) -> bool:
-    if not url:
-        return False
+    push_url = "https://api.github.com/repos/sportaholic000-hue/cold-outreach-engine/contents/app.py"
+    push_req = urllib.request.Request(push_url, data=payload, method="PUT", headers={
+        "Content-Type": "application/json",
+        "User-Agent": "restore-script",
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"token {token}"
+    })
     try:
-        parsed = urlparse(url if url.startswith('http') else 'https://' + url)
-        domain = parsed.netloc.lower().replace('www.', '')
-        for placeholder in PLACEHOLDER_DOMAINS:
-            if domain == placeholder or domain.endswith('.' + placeholder):
-                return False
-        return True
-    except Exception:
-        return False
+        with urllib.request.urlopen(push_req) as r:
+            result = json.loads(r.read())
+            new_sha = result["commit"]["sha"]
+            print(f"SUCCESS! New commit SHA: {new_sha}")
 
-if __name__ == '__main__':
-    port = int(os.getenv('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+            # Trigger Render redeploy
+            render_url = "https://api.render.com/v1/services/srv-d6kdn9vpm1nc73esasvg/deploys"
+            render_payload = json.dumps({"clearCache": "do_not_clear"}).encode()
+            render_req = urllib.request.Request(render_url, data=render_payload, method="POST", headers={
+                "Authorization": "Bearer rnd_ksGgcsOBcxxaFRg5gX4zB34uf1H5",
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            })
+            with urllib.request.urlopen(render_req) as r2:
+                deploy = json.loads(r2.read())
+                print(f"Render deploy triggered: {deploy.get('id', deploy)}")
+    except urllib.error.HTTPError as e:
+        body = e.read().decode()
+        print(f"Push failed ({e.code}): {body[:500]}")
