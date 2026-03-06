@@ -649,7 +649,7 @@
     </div><!-- /container -->
 
     <script>
-        // -- Tab switching
+        // ── Tab switching ────────────────────────────────────────────────────
         function switchTab(tabName) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
@@ -657,7 +657,7 @@
             document.getElementById('tab-' + tabName).classList.add('active');
         }
 
-        // -- Helpers
+        // ── Helpers ──────────────────────────────────────────────────────────
         function setOutput(el, html) { el.innerHTML = html; }
         function setLoading(el, msg) { el.innerHTML = `<em style="color:#aaa">${msg}</em>`; }
         function setError(el, msg)   { el.innerHTML = `<span style="color:#f87171">Error: ${msg}</span>`; }
@@ -675,6 +675,7 @@
             return res.json();
         }
 
+        // ── Tab 1: Search (/api/search) ──────────────────────────────────────
         document.addEventListener('DOMContentLoaded', () => {
             // ---- Search tab ----
             const searchBtn = document.querySelector('#tab-search .btn-run');
@@ -688,6 +689,7 @@
                         if (el.placeholder) body[el.placeholder.toLowerCase().replace(/\s+/g,'_')] = el.value;
                         if (el.name)        body[el.name] = el.value;
                     });
+                    // Grab labelled fields by position
                     const labels = panel.querySelectorAll('label');
                     labels.forEach((lbl, i) => {
                         const inp = inputs[i];
@@ -701,8 +703,8 @@
                                 `<div style="border:1px solid #2a2a2a;border-radius:8px;padding:12px;margin-bottom:10px;">
                                     <strong>${r.name || r.business_name || 'Business'}</strong>
                                     ${r.address ? `<br><span style="color:#aaa">${r.address}</span>` : ''}
-                                    ${r.phone    ? `<br>&#128222; ${r.phone}` : ''}
-                                    ${r.rating   ? `<br>&#11088; ${r.rating} (${r.reviews || r.review_count || 0} reviews)` : ''}
+                                    ${r.phone    ? `<br>📞 ${r.phone}` : ''}
+                                    ${r.rating   ? `<br>⭐ ${r.rating} (${r.reviews || r.review_count || 0} reviews)` : ''}
                                     ${r.website  ? `<br><a href="${r.website}" target="_blank" style="color:#4ade80">${r.website}</a>` : ''}
                                 </div>`
                             ).join('');
@@ -780,6 +782,7 @@
                             ? inp.options[inp.selectedIndex]?.value
                             : inp.value;
                     });
+                    // Normalize keys to match Flask API
                     const payload = {
                         business_name: body.business_name || body.name || '',
                         city:          body.city || '',
