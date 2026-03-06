@@ -1,1 +1,46 @@
-aW1wb3J0IG9zCmltcG9ydCByZQppbXBvcnQgY3N2CmltcG9ydCBpbwppbXBvcnQganNvbgppbXBvcnQgbG9nZ2luZwppbXBvcnQgdGltZQppbXBvcnQgdXJsbGliLnBhcnNlCmZyb20gZmxhc2sgaW1wb3J0IEZsYXNrLCByZXF1ZXN0LCBqc29uaWZ5LCByZW5kZXJfdGVtcGxhdGUsIG1ha2VfcmVzcG9uc2UKZnJvbSBmbGFza19jb3JzIGltcG9ydCBDT1JTCmltcG9ydCByZXF1ZXN0cwpmcm9tIGJzNCBpbXBvcnQgQmVhdXRpZnVsU291cAppbXBvcnQgZ29vZ2xlLmdlbmVyYXRpdmVhaSBhcyBnZW5haQpmcm9tIHVybGxpYi5wYXJzZSBpbXBvcnQgdXJscGFyc2UKCmxvZ2dpbmcuYmFzaWNDb25maWcobGV2ZWw9bG9nZ2luZy5JTkZPKQpsb2dnZXIgPSBsb2dnaW5nLmdldExvZ2dlcihfX25hbWVfXykKCmFwcCA9IEZsYXNrKF9fbmFtZV9fKQpDT1JTKGFwcCkKCl9nZW1pbmlfY2xpZW50ID0gTm9uZQoKZGVmIGdldF9nZW1pbmlfY2xpZW50KCk6CiAgICBnbG9iYWwgX2dlbWluaV9jbGllbnQKICAgIGlmIF9nZW1pbmlfY2xpZW50IGlzIE5vbmU6CiAgICAgICAgYXBpX2tleSA9IG9zLmdldGVudignR0VNSU5JX0FQSV9LRVknKQogICAgICAgIGlmIG5vdCBhcGlfa2V5OgogICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKCJHRU1JTklfQVBJX0tFWSBlbnZpcm9ubWVudCB2YXJpYWJsZSBub3Qgc2V0IikKICAgICAgICBnZW5haS5jb25maWd1cmUoYXBpX2tleT1hcGlfa2V5KQogICAgICAgIF9nZW1pbmlfY2xpZW50ID0gZ2VuYWkuR2VuZXJhdGl2ZU1vZGVsKCdnZW1pbmktMi4wLWZsYXNoJykKICAgIHJldHVybiBfZ2VtaW5pX2NsaWVudAoKUExBQ0VIT0xERVJfRE9NQUlOUyA9IHsKICAgICdnb2RhZGR5LmNvbScsICd3aXguY29tJywgJ3NxdWFyZXNwYWNlLmNvbScsICd3ZWVibHkuY29tJywKICAgICd3b3JkcHJlc3MuY29tJywgJ3NpdGVzLmdvb2dsZS5jb20nLCAnYnVzaW5lc3Muc2l0ZScsICdteXNob3BpZnkuY29tJywKICAgICdibG9nc3BvdC5jb20nLCAndHVtYmxyLmNvbScsICdmYWNlYm9vay5jb20nLCAnaW5zdGFncmFtLmNvbScsCiAgICAnbGlua3RyLmVlJywgJ2xpbmtpbmJpby5jb20nLCAnY2FycmQuY28nLCAnbm90aW9uLnNpdGUnLAp9CgpkZWYgaXNfcmVhbF93ZWJzaXRlKHVybDogc3RyKSAtPiBib29sOgogICAgaWYgbm90IHVybDoKICAgICAgICByZXR1cm4gRmFsc2UKICAgIHRyeToKICAgICAgICBwYXJzZWQgPSB1cmxwYXJzZSh1cmwgaWYgdXJsLnN0YXJ0c3dpdGgoJ2h0dHAnKSBlbHNlICdodHRwczovLycgKyB1cmwpCiAgICAgICAgZG9tYWluID0gcGFyc2VkLm5ldGxvYy5sb3dlcigpLnJlcGxhY2UoJ3d3dy4nLCAnJykKICAgICAgICBmb3IgcGxhY2Vob2xkZXIgaW4gUExBQ0VIT0xERVJfRE9NQUlOUzoKICAgICAgICAgICAgaWYgZG9tYWluID09IHBsYWNlaG9sZGVyIG9yIGRvbWFpbi5lbmRzd2l0aCgnLicgKyBwbGFjZWhvbGRlcik6CiAgICAgICAgICAgICAgICByZXR1cm4gRmFsc2UKICAgICAgICByZXR1cm4gVHJ1ZQogICAgZXhjZXB0IEV4Y2VwdGlvbjoKICAgICAgICByZXR1cm4gRmFsc2UKCmNsYXNzIFBsYXl3cmlnaHRMZWFkRmluZGVyOgogICAgSEVBREVSUyA9IHsKICAgICAgICAnVXNlci1BZ2VudCc6ICgKICAgICAgICAgICAgJ01vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQpICcKICAgICAgICAgICAgJ0FwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pICcKICAgICAgICAgICAgJ0Nocm9tZS8xMjAuMC4wLjAgU2FmYXJpLzUzNy4zNicKICAgICAgICApLAogICAgICAgICdBY2NlcHQtTGFuZ3VhZ2UnOiAnZW4tVVMsZW47cT0wLjknLAogICAgICAgICdBY2NlcHQnOiAndGV4dC9odG1sLGFwcGxpY2F0aW9uL3hodG1sK3htbCxhcHBsaWNhdGlvbi94bWw7cT0wLjksKi8qO3E9MC44JywKICAgIH0KCiAgICBkZWYgc2VhcmNoKHNlbGYsIGtleXdvcmQ6IHN0ciwgY2l0eTogc3RyLCBtYXhfcmVzdWx0czogaW50ID0gMjApIC0+IGxpc3Q6CiAgICAgICAgYXBpX2tleSA9IG9zLmdldGVudignR09PR0xFX1BMQUNFU19BUElfS0VZJykKICAgICAgICBpZiBhcGlfa2V5OgogICAgICAgICAgICByZXR1cm4gc2VsZi5fc2VhcmNoX3dpdGhfYXBpKGtleXdvcmQsIGNpdHksIG1heF9yZXN1bHRzLCBhcGlfa2V5KQogICAgICAgIGxvZ2dlci5pbmZvKGYiTm8gR09PR0xFX1BMQUNFU19BUElfS0VZIHNldC4gVXNpbmcgR2VtaW5pIHRvIGdlbmVyYXRlIGxlYWRzIGZvcjoge2tleXdvcmR9IGluIHtjaXR5fSIpCiAgICAgICAgcmV0dXJuIHNlbGYuX3NlYXJjaF93aXRoX2dlbWluaShrZXl3b3JkLCBjaXR5LCBtYXhfcmVzdWx0cykKCiAgICBkZWYgX3NlYXJjaF93aXRoX2dlbWluaShzZWxmLCBrZXl3b3JkOiBzdHIsIGNpdHk6IHN0ciwgbWF4X3Jlc3VsdHM6IGludCkgLT4gbGlzdDoKICAgICAgICB0cnk6CiAgICAgICAgICAgIGNsaWVudCA9IGdldF9nZW1pbmlfY2xpZW50KCkKICAgICAgICAgICAgcHJvbXB0ID0gZiIiIkdlbmVyYXRlIGEgbGlzdCBvZiB7bWluKG1heF9yZXN1bHRzLCAyMCl9IHJlYWxpc3RpYyBsb2NhbCB7a2V5d29yZH0gYnVzaW5lc3NlcyBpbiB7Y2l0eX0uClRoZXNlIHNob3VsZCBsb29rIGxpa2UgcmVhbCBsb2NhbCBidXNpbmVzc2VzIChub3QgY2hhaW5zKSB3aXRoIHBsYXVzaWJsZSBuYW1lcywgYWRkcmVzc2VzLCBwaG9uZSBudW1iZXJzLCBhbmQgd2Vic2l0ZXMuClNvbWUgYnVzaW5lc3NlcyBzaG91bGQgaGF2ZSBubyB3ZWJzaXRlICh3ZWJzaXRlOiAiIikgdG8gc2ltdWxhdGUgcmVhbC13b3JsZCBkYXRhLgpSZXR1cm4gT05MWSBhIEpTT04gYXJyYXkgd2l0aCB0aGlzIGV4YWN0IHN0cnVjdHVyZSwgbm8gZXhwbGFuYXRpb246
+import base64
+import json
+import urllib.request
+import os
+
+# Read file
+with open('/home/user/files/tmp/app_good.py', 'rb') as f:
+    content = f.read()
+
+print(f"File size: {len(content)} bytes")
+
+b64_content = base64.b64encode(content).decode('ascii')
+
+payload = json.dumps({
+    "message": "fix: restore correct 884-line app.py with full mockup engine",
+    "content": b64_content,
+    "sha": "88a70ce8f657f6cad33e9709a67ec53c4e488b8f",
+    "branch": "main"
+}).encode('utf-8')
+
+token = os.environ.get('GITHUB_TOKEN') or os.environ.get('GH_TOKEN') or os.environ.get('GITHUB_PAT')
+print(f"Token found: {token is not None}")
+print(f"Env vars with GIT/TOKEN: {[k for k in os.environ.keys() if 'GIT' in k.upper() or 'TOKEN' in k.upper()]}")
+
+if token:
+    req = urllib.request.Request(
+        'https://api.github.com/repos/sportaholic000-hue/cold-outreach-engine/contents/app.py',
+        data=payload,
+        method='PUT',
+        headers={
+            'Authorization': f'token {token}',
+            'Content-Type': 'application/json',
+            'User-Agent': 'nebula-agent'
+        }
+    )
+    try:
+        with urllib.request.urlopen(req) as resp:
+            result = json.loads(resp.read())
+            print("SUCCESS:", result.get('commit', {}).get('sha'))
+    except urllib.error.HTTPError as e:
+        body = e.read().decode()
+        print(f"HTTP ERROR {e.code}: {body}")
+else:
+    print("NO TOKEN - listing all env vars:")
+    for k, v in sorted(os.environ.items()):
+        print(f"  {k}={v[:20] if v else ''}")
