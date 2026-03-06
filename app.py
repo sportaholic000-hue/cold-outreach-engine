@@ -262,50 +262,70 @@ Rules:
 def api_mockup():
     data = request.get_json() or {}
     business_name = data.get('business_name', 'My Business').strip()
-    tagline       = data.get('tagline', '').strip()
+    city          = data.get('city', '').strip()
     industry      = data.get('industry', 'business').strip()
-    primary_color = data.get('primary_color', '#6366f1').strip()
-    accent_color  = data.get('accent_color', '#a855f7').strip()
+    tagline       = data.get('tagline', '').strip()
+    primary_color = data.get('primary_color', '#1a1a2e').strip()
+    accent_color  = data.get('accent_color', '#e94560').strip()
     phone         = data.get('phone', '').strip()
     address       = data.get('address', '').strip()
     cta_text      = data.get('cta_text', 'Get a Free Quote').strip()
     services      = data.get('services', '').strip()
     unique_value  = data.get('unique_value', '').strip()
+    rating        = data.get('rating', '').strip()
+    review_count  = data.get('review_count', '').strip()
+
+    location_str = f"{city}" if city else "your area"
+    rating_str = f"{rating} stars ({review_count} reviews)" if rating and review_count else (f"{rating} stars" if rating else "5 stars")
 
     try:
-        prompt = f"""You are an expert web designer. Generate a complete, beautiful, single-page HTML website mockup.
+        prompt = f"""You are a world-class web designer and copywriter. Generate a stunning, complete, production-ready single-page HTML website for a local business.
 
 Business Details:
 - Name: {business_name}
 - Industry: {industry}
-- Tagline: {tagline or f'The best {industry} in town'}
-- Primary Color: {primary_color}
-- Accent Color: {accent_color}
-- Phone: {phone or '(555) 000-0000'}
-- Address: {address or '123 Main Street'}
+- Location: {location_str}
+- Tagline: {tagline or f"#1 {industry.title()} in {location_str}"}
+- Phone: {phone or "(555) 000-0000"}
+- Address: {address or f"123 Main Street, {location_str}"}
 - CTA Button Text: {cta_text}
-- Services/Products: {services or f'Premium {industry} services'}
-- Unique Value Prop: {unique_value or f'Top-rated {industry} with 5-star reviews'}
+- Key Services: {services or f"Full-service {industry} solutions"}
+- Why Choose Us: {unique_value or f"Trusted by hundreds of {location_str} customers"}
+- Rating: {rating_str}
 
-Build a full HTML page with:
-1. Sticky nav bar with business name and CTA button
-2. Hero section: bold headline from tagline, subheadline, CTA button, subtle CSS background shape
-3. Services grid: 3-4 service cards with icons (use emoji), title, short description
-4. Social proof: 3 testimonials with name, role, quote, 5-star rating in stars (★★★★★)
-5. Contact section: phone, address, CTA button
-6. Footer with copyright
+DESIGN REQUIREMENTS — follow these exactly:
 
-Technical requirements:
-- All CSS embedded in <style> tag (no external CSS frameworks)
-- Google Fonts: import Inter or Poppins at top
-- Primary color {primary_color} for buttons, headings, nav
-- Accent color {accent_color} for gradients, highlights, hover states
-- Fully mobile responsive with CSS grid/flexbox
-- Smooth fade-in animation on hero using @keyframes
-- NO placeholder images — use CSS gradients or emoji icons instead
-- Content must be realistic and specific to a {industry} business
+1. NAVBAR: Fixed top. Dark background ({primary_color}). Business name in white (bold). Phone number in accent color ({accent_color}). Right-side CTA button in {accent_color}.
 
-Return ONLY the complete HTML document starting with <!DOCTYPE html>. No markdown, no explanation."""
+2. HERO SECTION: Full viewport height. Background: dark gradient using {primary_color} with a large, blurred CSS circle/blob accent in {accent_color} at 20% opacity (use box-shadow or radial-gradient pseudo-element). Large bold white headline (48px+). Subheadline in light gray. Two CTA buttons side by side (primary filled, secondary outlined). Small trust badge row: ★ rating, checkmark "Licensed & Insured", checkmark "Same-Day Service".
+
+3. STATS BAR: Full-width dark strip below hero. 4 stats in a flex row: "500+ Happy Clients", "15+ Years Experience", "100% Satisfaction", "{rating or '4.9'}★ Rating". Each stat: big bold number in {accent_color}, small label below.
+
+4. SERVICES SECTION: White/light background. Section title "Our Services" centered. Grid of 6 service cards (3 columns). Each card: colored icon box in {accent_color} (use a relevant emoji in a rounded square), bold service name, 2-sentence description. Cards have subtle box-shadow and hover lift effect.
+
+5. WHY CHOOSE US: Dark background ({primary_color}). Left side: large heading + paragraph about the business. Right side: 4 checkmark bullet points of key differentiators. Use CSS grid 60/40 split.
+
+6. TESTIMONIALS: Light gray background. "What Our Customers Say" heading. 3 testimonial cards in a row. Each card: white background, rounded corners, 5 gold stars (★★★★★), italic quote (2-3 sentences, specific and believable), customer name in bold, city in gray. Cards have shadow.
+
+7. CONTACT/CTA SECTION: Full-width dark gradient. Centered headline "Ready to Get Started?". Subtext. Large CTA button. Below: 3 contact info items in a row with icons: phone, address, email (use {business_name.lower().replace(" ", "")}@gmail.com as placeholder email).
+
+8. FOOTER: Dark. Business name + tagline. Copyright {business_name} 2024. Simple nav links: Home, Services, About, Contact.
+
+TECHNICAL REQUIREMENTS:
+- @import Google Fonts 'Inter' at the very top of <style>
+- font-family: 'Inter', sans-serif throughout
+- All CSS in a single <style> block — NO external frameworks
+- Fully mobile responsive: stack columns on mobile with @media (max-width: 768px)
+- Smooth scroll behavior
+- Navbar shrinks/darkens on scroll (small JS)
+- Hero fade-in animation using @keyframes fadeInUp
+- Service cards: translateY(-8px) on hover with transition
+- All colors derived from {primary_color} and {accent_color}
+- NO placeholder images — use CSS gradients, emoji in styled boxes, or SVG icons inline
+- All content must be hyper-realistic and specific to a {industry} business in {location_str}
+- Generate real-sounding staff names for testimonials, real-sounding service names for {industry}
+
+Return ONLY the complete HTML document starting with <!DOCTYPE html>. No markdown, no explanation, no commentary before or after."""
 
         response = gemini_generate(prompt)
         html = response.text.strip()
