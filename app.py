@@ -383,10 +383,11 @@ def generate_mockup():
 
         # Build reviews HTML
         reviews_html = ''
+        star_char = chr(0x2605)
         for name, stars, text in theme['reviews_data']:
             reviews_html += f'''
             <div style="background:white;border-radius:16px;padding:32px;box-shadow:0 4px 20px rgba(0,0,0,0.07);">
-                <div style="color:#FFB800;font-size:18px;margin-bottom:12px;">{"\u2605" * stars}</div>
+                <div style="color:#FFB800;font-size:18px;margin-bottom:12px;">{star_char * stars}</div>
                 <p style="color:#444;line-height:1.7;font-size:15px;margin-bottom:20px;">"{text}"</p>
                 <div style="display:flex;align-items:center;gap:12px;">
                     <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,{theme['primary']},{theme['secondary']});display:flex;align-items:center;justify-content:center;color:white;font-weight:700;">{name[0]}</div>
@@ -394,6 +395,8 @@ def generate_mockup():
                 </div>
             </div>'''
 
+        phone_emoji = chr(0x1f4de)
+        address_emoji = chr(0x1f4cd)
         html = f'''<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -470,8 +473,8 @@ def generate_mockup():
 <section id="contact" style="padding:90px 40px;max-width:1100px;margin:0 auto;text-align:center;">
   <h2 style="font-family:'Playfair Display',serif;font-size:clamp(32px,4vw,48px);font-weight:700;color:{theme['secondary']};margin-bottom:48px;">Get In Touch</h2>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px;margin-bottom:48px;">
-    {'<div style="background:white;border-radius:16px;padding:32px;box-shadow:0 4px 20px rgba(0,0,0,0.07);"><div style="font-size:36px;margin-bottom:12px;">\U0001f4de</div><h3 style="font-weight:600;margin-bottom:8px;">Phone</h3><p style="color:#666;">' + phone + '</p></div>' if phone else ''}
-    {'<div style="background:white;border-radius:16px;padding:32px;box-shadow:0 4px 20px rgba(0,0,0,0.07);"><div style="font-size:36px;margin-bottom:12px;">\U0001f4cd</div><h3 style="font-weight:600;margin-bottom:8px;">Address</h3><p style="color:#666;">' + address + '</p></div>' if address else ''}
+    {'<div style="background:white;border-radius:16px;padding:32px;box-shadow:0 4px 20px rgba(0,0,0,0.07);"><div style="font-size:36px;margin-bottom:12px;">' + phone_emoji + '</div><h3 style="font-weight:600;margin-bottom:8px;">Phone</h3><p style="color:#666;">' + phone + '</p></div>' if phone else ''}
+    {'<div style="background:white;border-radius:16px;padding:32px;box-shadow:0 4px 20px rgba(0,0,0,0.07);"><div style="font-size:36px;margin-bottom:12px;">' + address_emoji + '</div><h3 style="font-weight:600;margin-bottom:8px;">Address</h3><p style="color:#666;">' + address + '</p></div>' if address else ''}
     <div style="background:white;border-radius:16px;padding:32px;box-shadow:0 4px 20px rgba(0,0,0,0.07);"><div style="font-size:36px;margin-bottom:12px;">\u2b50</div><h3 style="font-weight:600;margin-bottom:8px;">Rating</h3><p style="color:#666;">{rating}/5 ({reviews:,} reviews)</p></div>
   </div>
   <a href="{'https://maps.google.com/?q=' + address.replace(' ','+') if address else '#'}" target="_blank" style="background:{theme['primary']};color:white;padding:18px 48px;border-radius:100px;font-weight:700;font-size:17px;text-decoration:none;display:inline-block;box-shadow:0 8px 32px rgba(0,0,0,0.15);">Get Directions</a>
