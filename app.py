@@ -17,17 +17,40 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 CORS(app)
 
-_gemini_client = None
+_gemini_clients = {}
 
-def get_gemini_client():
-    global _gemini_client
-    if _gemini_client is None:
+def get_gemini_client(model='gemini-1.5-flash'):
+    global _gemini_clients
+    if model not in _gemini_clients:
         api_key = os.getenv('GEMINI_API_KEY')
         if not api_key:
             raise ValueError("GEMINI_API_KEY environment variable not set")
         genai.configure(api_key=api_key)
-        _gemini_client = genai.GenerativeModel('gemini-2.0-flash')
-    return _gemini_client
+        _gemini_clients[model] = genai.GenerativeModel(model)
+    return _gemini_clients[model]
+
+def gemini_generate(prompt, retries=3):
+    """Try gemini-1.5-flash first, fall back to gemini-1.5-pro, with retry on 429."""
+    models = ['gemini-1.5-flash', 'gemini-1.5-pro']
+    last_err = None
+    for model in models:
+        for attempt in range(retries):
+            try:
+                client = get_gemini_client(model)
+                response = client.generate_content(prompt)
+                return response
+            except Exception as e:
+                err_str = str(e)
+                last_err = e
+                if '429' in err_str or 'quota' in err_str.lower() or 'exhausted' in err_str.lower():
+                    wait = (attempt + 1) * 10
+                    logger.warning(f"Quota hit on {model} attempt {attempt+1}, waiting {wait}s: {e}")
+                    time.sleep(wait)
+                    continue
+                else:
+                    logger.error(f"Gemini error on {model}: {e}")
+                    break
+    raise Exception(f"All Gemini models failed. Last error: {last_err}")
 
 PLACEHOLDER_DOMAINS = {
     'godaddy.com', 'wix.com', 'squarespace.com', 'weebly.com',
@@ -76,7 +99,6 @@ class LeadFinder:
 
     def _search_with_gemini(self, industry, location, country, job_titles, company_size, max_results):
         try:
-            client = get_gemini_client()
             size_hint = f" ({company_size} employees)" if company_size and company_size != 'Any' else ""
             title_hint = f" Key contacts: {job_titles}." if job_titles else ""
             prompt = f"""Generate {min(max_results, 25)} realistic B2B leads for {industry} companies in {location}, {country}{size_hint}.{title_hint}
@@ -103,7 +125,7 @@ Rules:
 - Email format: firstname@companydomain.com
 - Mix of websites present and absent (30% no website, empty string)
 - Return ONLY the JSON array, nothing else"""
-            response = client.generate_content(prompt)
+            response = gemini_generate(prompt)
             results = clean_json(response.text)
             if not isinstance(results, list):
                 raise ValueError("Expected list")
@@ -204,7 +226,6 @@ def api_email():
     length_guide = length_map.get(length, '3-4 sentences total')
 
     try:
-        client = get_gemini_client()
         prompt = f"""Write a cold outreach email:
 
 Prospect: {prospect_name or 'the recipient'}{' (' + prospect_title + ')' if prospect_title else ''} at {prospect_company}
@@ -229,7 +250,7 @@ Rules:
 - Single clear CTA at the end
 - Sign off with {sender_name or 'the sender'}"""
 
-        response = client.generate_content(prompt)
+        response = gemini_generate(prompt)
         result = clean_json(response.text)
         return jsonify({'success': True, 'email': result})
     except Exception as e:
@@ -252,7 +273,6 @@ def api_mockup():
     unique_value  = data.get('unique_value', '').strip()
 
     try:
-        client = get_gemini_client()
         prompt = f"""You are an expert web designer. Generate a complete, beautiful, single-page HTML website mockup.
 
 Business Details:
@@ -287,7 +307,7 @@ Technical requirements:
 
 Return ONLY the complete HTML document starting with <!DOCTYPE html>. No markdown, no explanation."""
 
-        response = client.generate_content(prompt)
+        response = gemini_generate(prompt)
         html = response.text.strip()
         if '```' in html:
             parts = html.split('```')
@@ -323,7 +343,6 @@ def api_sequence():
         return jsonify({'error': 'Industry and your offer are required'}), 400
 
     try:
-        client = get_gemini_client()
         prompt = f"""Create a {steps}-step cold email sequence:
 
 Campaign: {campaign_name or f'{industry} Outreach'}
@@ -354,7 +373,7 @@ Rules:
 - Last step is a polite 'closing the loop / last email' breakup
 - Return ONLY the JSON array"""
 
-        response = client.generate_content(prompt)
+        response = gemini_generate(prompt)
         sequence = clean_json(response.text)
         if not isinstance(sequence, list):
             raise ValueError("Expected list")
