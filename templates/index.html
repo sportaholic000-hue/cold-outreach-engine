@@ -334,40 +334,57 @@ iframe{width:100%;height:600px;border:none;background:#fff}
           <input id="mock-name" type="text" placeholder="e.g. Sunrise Dental"/>
         </div>
         <div class="form-group">
-          <label>Industry *</label>
+          <label>City / Location *</label>
+          <input id="mock-city" type="text" placeholder="e.g. Austin, TX"/>
+        </div>
+        <div class="form-group">
+          <label>Industry / Business Type *</label>
           <input id="mock-industry" type="text" placeholder="e.g. dental clinic, gym, restaurant, law firm"/>
-        </div>
-        <div class="form-group span2">
-          <label>Tagline</label>
-          <input id="mock-tagline" type="text" placeholder="e.g. Healthy Smiles for the Whole Family"/>
-        </div>
-        <div class="form-group">
-          <label>Primary Color</label>
-          <input id="mock-primary" type="color" value="#6366f1" style="height:42px;padding:4px 8px;cursor:pointer"/>
-        </div>
-        <div class="form-group">
-          <label>Accent Color</label>
-          <input id="mock-accent" type="color" value="#a855f7" style="height:42px;padding:4px 8px;cursor:pointer"/>
         </div>
         <div class="form-group">
           <label>Phone Number</label>
           <input id="mock-phone" type="text" placeholder="e.g. (512) 555-0192"/>
         </div>
-        <div class="form-group">
-          <label>CTA Button Text</label>
-          <input id="mock-cta" type="text" placeholder="e.g. Book a Free Consultation" value="Book a Free Consultation"/>
+        <div class="form-group span2">
+          <label>Tagline <span style="color:var(--muted);font-weight:400">(AI will generate one if blank)</span></label>
+          <input id="mock-tagline" type="text" placeholder="e.g. Healthy Smiles for the Whole Family"/>
         </div>
         <div class="form-group span2">
           <label>Address</label>
           <input id="mock-address" type="text" placeholder="e.g. 420 Oak Street, Austin, TX 78701"/>
         </div>
-        <div class="form-group span2">
-          <label>Services / Products (comma separated)</label>
-          <input id="mock-services" type="text" placeholder="e.g. General Dentistry, Teeth Whitening, Invisalign, Emergency Care"/>
+        <div class="form-group">
+          <label>Google Rating</label>
+          <input id="mock-rating" type="text" placeholder="e.g. 4.8"/>
+        </div>
+        <div class="form-group">
+          <label>Number of Reviews</label>
+          <input id="mock-reviews" type="text" placeholder="e.g. 247"/>
+        </div>
+        <div class="form-group">
+          <label>CTA Button Text</label>
+          <input id="mock-cta" type="text" placeholder="e.g. Book a Free Consultation" value="Book a Free Consultation"/>
+        </div>
+        <div class="form-group" style="display:flex;flex-direction:column;gap:6px">
+          <label>Color Scheme</label>
+          <div style="display:flex;gap:12px;align-items:center">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+              <span style="font-size:11px;color:var(--muted)">Primary</span>
+              <input id="mock-primary" type="color" value="#1a1a2e" style="height:36px;width:60px;padding:2px 4px;cursor:pointer;border-radius:6px;border:1px solid var(--border);background:var(--card)"/>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+              <span style="font-size:11px;color:var(--muted)">Accent</span>
+              <input id="mock-accent" type="color" value="#e94560" style="height:36px;width:60px;padding:2px 4px;cursor:pointer;border-radius:6px;border:1px solid var(--border);background:var(--card)"/>
+            </div>
+          </div>
         </div>
         <div class="form-group span2">
-          <label>Unique Value / What Makes Them Special</label>
-          <textarea id="mock-value" placeholder="e.g. Family-owned practice with 15 years experience. Same-day appointments, accepts all major insurance."></textarea>
+          <label>Services / Products <span style="color:var(--muted);font-weight:400">(comma separated)</span></label>
+          <input id="mock-services" type="text" placeholder="e.g. General Dentistry, Teeth Whitening, Invisalign, Emergency Care, Dental Implants, Kids Dentistry"/>
+        </div>
+        <div class="form-group span2">
+          <label>What Makes Them Special <span style="color:var(--muted);font-weight:400">(key selling points, years in business, awards, etc.)</span></label>
+          <textarea id="mock-value" placeholder="e.g. Family-owned practice with 15 years experience. Same-day appointments available. Accepts all major insurance. Winner of Austin Best Dentist 2023."></textarea>
         </div>
       </div>
       <div class="btn-row">
@@ -659,20 +676,25 @@ document.getElementById('btn-mockup').addEventListener('click', async () => {
   hideError('mockup-error'); hideResult('mockup-result');
 
   const name     = val('mock-name');
+  const city     = val('mock-city');
   const industry = val('mock-industry');
   if (!name)     return showError('mockup-error', 'Business name is required.');
+  if (!city)     return showError('mockup-error', 'City / Location is required.');
   if (!industry) return showError('mockup-error', 'Industry is required.');
 
   setLoading(btn, 'mockup-spinner', true);
   try {
     const data = await apiFetch('/api/mockup', {
       business_name: name,
+      city:          city,
       industry:      industry,
       tagline:       val('mock-tagline'),
       primary_color: document.getElementById('mock-primary').value,
       accent_color:  document.getElementById('mock-accent').value,
       phone:         val('mock-phone'),
       address:       val('mock-address'),
+      rating:        val('mock-rating'),
+      review_count:  val('mock-reviews'),
       cta_text:      val('mock-cta'),
       services:      val('mock-services'),
       unique_value:  val('mock-value')
