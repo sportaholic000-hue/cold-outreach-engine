@@ -1,816 +1,754 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cold Outreach Engine</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Cold Outreach Engine</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0f;
+  --surface:#13131a;
+  --card:#1a1a24;
+  --border:#2a2a3a;
+  --primary:#6366f1;
+  --accent:#a855f7;
+  --text:#e8e8f0;
+  --muted:#6b6b80;
+  --success:#22c55e;
+  --error:#ef4444;
+}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0a0a0a;
-            min-height: 100vh;
-            padding: 20px;
-            color: #e0e0e0;
-        }
+/* ── HERO ── */
+.hero{position:relative;padding:80px 24px 60px;text-align:center;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.35;pointer-events:none}
+.orb1{width:500px;height:500px;background:radial-gradient(circle,#6366f1,transparent);top:-150px;left:50%;transform:translateX(-50%)}
+.orb2{width:300px;height:300px;background:radial-gradient(circle,#a855f7,transparent);top:50px;right:5%;animation:float 8s ease-in-out infinite}
+.orb3{width:250px;height:250px;background:radial-gradient(circle,#06b6d4,transparent);top:80px;left:5%;animation:float 10s ease-in-out infinite reverse}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}
+.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);border-radius:999px;padding:6px 16px;font-size:12px;font-weight:600;letter-spacing:.08em;color:#a5b4fc;margin-bottom:24px}
+.badge span{width:6px;height:6px;border-radius:50%;background:#6366f1;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hero h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:800;line-height:1.1;background:linear-gradient(135deg,#fff 30%,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px}
+.hero p{color:var(--muted);font-size:1.1rem;max-width:560px;margin:0 auto 32px}
+.stats-bar{display:flex;justify-content:center;gap:40px;flex-wrap:wrap;padding:28px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:16px;max-width:800px;margin:0 auto 48px}
+.stat{text-align:center}
+.stat-num{font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,#6366f1,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-label{font-size:.75rem;color:var(--muted);margin-top:2px}
+.reviews{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:32px}
+.review-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px;max-width:240px;text-align:left}
+.review-stars{color:#f59e0b;font-size:12px;margin-bottom:6px}
+.review-text{font-size:13px;color:var(--muted);margin-bottom:8px}
+.review-author{font-size:12px;font-weight:600}
 
-        .container { max-width: 1200px; margin: 0 auto; }
+/* ── TABS ── */
+.app-shell{max-width:900px;margin:0 auto;padding:0 24px 80px}
+.tab-nav{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:24px}
+.tab-btn{flex:1;padding:10px;border:none;border-radius:8px;background:transparent;color:var(--muted);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s}
+.tab-btn.active{background:var(--primary);color:#fff}
+.tab-btn:hover:not(.active){background:rgba(255,255,255,.05);color:var(--text)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
 
-        /* =====================
-           HERO SECTION
-        ===================== */
-        .hero {
-            position: relative;
-            text-align: center;
-            padding: 90px 20px 70px;
-            overflow: hidden;
-        }
+/* ── CARDS / FORMS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:20px}
+.card h2{font-size:1.1rem;font-weight:700;margin-bottom:6px}
+.card p.desc{font-size:13px;color:var(--muted);margin-bottom:24px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-grid.cols3{grid-template-columns:1fr 1fr 1fr}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.span2{grid-column:span 2}
+.form-group label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.form-group input,.form-group select,.form-group textarea{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;outline:none;transition:border-color .2s;width:100%}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--primary)}
+.form-group select option{background:var(--surface)}
+.form-group textarea{resize:vertical;min-height:80px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-primary{background:linear-gradient(135deg,#6366f1,#a855f7);color:#fff}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-secondary{background:var(--surface);border:1px solid var(--border);color:var(--text)}
+.btn-secondary:hover{border-color:var(--primary);color:var(--primary)}
+.btn-row{display:flex;gap:12px;align-items:center;margin-top:20px;flex-wrap:wrap}
 
-        /* Animated glowing orb blob */
-        .hero-orb {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 520px;
-            height: 520px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(0,255,136,0.18) 0%, rgba(0,255,136,0.06) 40%, transparent 70%);
-            filter: blur(60px);
-            animation: orbPulse 4s ease-in-out infinite;
-            pointer-events: none;
-            z-index: 0;
-        }
+/* ── RESULTS ── */
+.result-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:20px;display:none}
+.result-box.visible{display:block}
+.result-box h3{font-size:14px;font-weight:700;margin-bottom:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.error-box{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:12px 16px;color:#fca5a5;font-size:14px;margin-top:16px;display:none}
+.error-box.visible{display:block}
 
-        @keyframes orbPulse {
-            0%   { transform: translate(-50%, -50%) scale(1);   opacity: 0.7; }
-            50%  { transform: translate(-50%, -50%) scale(1.18); opacity: 1;   }
-            100% { transform: translate(-50%, -50%) scale(1);   opacity: 0.7; }
-        }
+/* ── LEADS TABLE ── */
+.leads-table-wrap{overflow-x:auto;margin-top:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:rgba(99,102,241,.1);color:var(--primary);font-weight:600;padding:10px 12px;text-align:left;white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top}
+td a{color:var(--primary);text-decoration:none}
+td a:hover{text-decoration:underline}
+tr:hover td{background:rgba(255,255,255,.02)}
 
-        .hero-content {
-            position: relative;
-            z-index: 1;
-        }
+/* ── EMAIL OUTPUT ── */
+.email-output{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:20px;font-size:14px;line-height:1.7}
+.email-subject{font-weight:700;font-size:15px;margin-bottom:4px}
+.email-preview{font-size:12px;color:var(--muted);margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.email-body{white-space:pre-wrap;color:var(--text)}
 
-        .hero-badge {
-            display: inline-block;
-            background: rgba(0,255,136,0.1);
-            border: 1px solid rgba(0,255,136,0.3);
-            color: #00ff88;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            padding: 6px 16px;
-            border-radius: 100px;
-            margin-bottom: 24px;
-        }
+/* ── MOCKUP FRAME ── */
+.mockup-frame-wrap{margin-top:20px;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.mockup-toolbar{display:flex;align-items:center;gap:8px;background:var(--surface);padding:10px 16px;border-bottom:1px solid var(--border)}
+.dot{width:10px;height:10px;border-radius:50%}
+.dot-r{background:#ef4444}.dot-y{background:#f59e0b}.dot-g{background:#22c55e}
+iframe{width:100%;height:600px;border:none;background:#fff}
 
-        .hero h1 {
-            font-size: clamp(36px, 6vw, 64px);
-            font-weight: 900;
-            color: #ffffff;
-            letter-spacing: -2px;
-            line-height: 1.08;
-            margin-bottom: 22px;
-        }
+/* ── SEQUENCE ── */
+.seq-step{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:12px;position:relative}
+.seq-step-header{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.seq-badge{background:linear-gradient(135deg,#6366f1,#a855f7);color:#fff;border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;white-space:nowrap}
+.seq-day{font-size:12px;color:var(--muted)}
+.seq-purpose{font-size:11px;color:#a855f7;font-weight:600;margin-left:auto}
+.seq-subject{font-weight:700;font-size:14px;margin-bottom:6px}
+.seq-body{font-size:13px;color:var(--muted);white-space:pre-wrap;line-height:1.6}
 
-        .hero h1 span {
-            color: #00ff88;
-        }
+/* ── SPINNER ── */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-        .hero-sub {
-            font-size: clamp(15px, 2vw, 18px);
-            color: #888;
-            max-width: 580px;
-            margin: 0 auto 40px;
-            line-height: 1.65;
-        }
+/* ── COPY BTN ── */
+.copy-btn{padding:6px 12px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .2s}
+.copy-btn:hover{border-color:var(--primary);color:var(--primary)}
 
-        .hero-ctas {
-            display: flex;
-            gap: 14px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn-primary {
-            padding: 14px 32px;
-            background: #00ff88;
-            color: #000;
-            font-size: 15px;
-            font-weight: 700;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 0 24px rgba(0,255,136,0.35);
-        }
-
-        .btn-primary:hover {
-            background: #00e67a;
-            box-shadow: 0 0 36px rgba(0,255,136,0.55);
-            transform: translateY(-1px);
-        }
-
-        .btn-outline {
-            padding: 14px 32px;
-            background: transparent;
-            color: #e0e0e0;
-            font-size: 15px;
-            font-weight: 700;
-            border: 1px solid #333;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-outline:hover {
-            border-color: #00ff88;
-            color: #00ff88;
-            transform: translateY(-1px);
-        }
-
-        /* =====================
-           STATS BAR
-        ===================== */
-        .stats-bar {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-bottom: 48px;
-        }
-
-        .stat-card {
-            background: rgba(255,255,255,0.03);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(0,255,136,0.12);
-            border-radius: 14px;
-            padding: 22px 20px;
-            text-align: center;
-            transition: border-color 0.2s, transform 0.2s;
-        }
-
-        .stat-card:hover {
-            border-color: rgba(0,255,136,0.35);
-            transform: translateY(-2px);
-        }
-
-        .stat-number {
-            font-size: 28px;
-            font-weight: 900;
-            color: #00ff88;
-            letter-spacing: -1px;
-            line-height: 1;
-            margin-bottom: 6px;
-        }
-
-        .stat-label {
-            font-size: 13px;
-            color: #555;
-            font-weight: 500;
-        }
-
-        /* =====================
-           REVIEWS SECTION
-        ===================== */
-        .reviews-section {
-            margin-bottom: 48px;
-        }
-
-        .section-label {
-            text-align: center;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: #444;
-            margin-bottom: 20px;
-        }
-
-        .reviews-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-        }
-
-        .review-card {
-            background: rgba(255,255,255,0.03);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(0,255,136,0.12);
-            border-radius: 16px;
-            padding: 26px 24px;
-            transition: border-color 0.2s, transform 0.2s;
-        }
-
-        .review-card:hover {
-            border-color: rgba(0,255,136,0.3);
-            transform: translateY(-2px);
-        }
-
-        .review-stars {
-            color: #00ff88;
-            font-size: 16px;
-            margin-bottom: 14px;
-            letter-spacing: 2px;
-        }
-
-        .review-quote {
-            font-size: 14px;
-            color: #bbb;
-            line-height: 1.65;
-            margin-bottom: 18px;
-            font-style: italic;
-        }
-
-        .review-author {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .review-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, rgba(0,255,136,0.3), rgba(0,255,136,0.08));
-            border: 1px solid rgba(0,255,136,0.25);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            font-weight: 700;
-            color: #00ff88;
-            flex-shrink: 0;
-        }
-
-        .review-name {
-            font-size: 14px;
-            font-weight: 700;
-            color: #ffffff;
-        }
-
-        .review-role {
-            font-size: 12px;
-            color: #555;
-            margin-top: 1px;
-        }
-
-        /* =====================
-           TABS
-        ===================== */
-        .tabs {
-            display: flex;
-            gap: 4px;
-            background: #111;
-            border-radius: 12px;
-            padding: 4px;
-            margin-bottom: 24px;
-            border: 1px solid #222;
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 10px 16px;
-            border: none;
-            background: transparent;
-            color: #555;
-            font-size: 14px;
-            font-weight: 600;
-            border-radius: 9px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .tab-btn.active {
-            background: #00ff88;
-            color: #000;
-        }
-
-        .tab-btn:hover:not(.active) { background: #1a1a1a; color: #00ff88; }
-
-        .tab-panel { display: none; }
-        .tab-panel.active { display: block; }
-
-        /* =====================
-           CARD (glassmorphism)
-        ===================== */
-        .card {
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            background: rgba(0,255,136,0.04);
-            border: 1px solid rgba(0,255,136,0.15);
-            border-radius: 16px;
-            padding: 28px;
-            margin-bottom: 20px;
-        }
-
-        .card h2 { font-size: 18px; font-weight: 700; margin-bottom: 18px; color: #00ff88; }
-
-        /* =====================
-           FORM ELEMENTS
-        ===================== */
-        .form-row { display: flex; gap: 12px; margin-bottom: 14px; }
-        .form-row .field { flex: 1; }
-        .field { margin-bottom: 14px; }
-        label { display: block; font-size: 13px; font-weight: 600; color: #888; margin-bottom: 6px; }
-
-        input[type="text"], input[type="number"], textarea, select {
-            width: 100%;
-            padding: 10px 14px;
-            border: 1px solid #2a2a2a;
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: inherit;
-            transition: border-color 0.2s;
-            color: #e0e0e0;
-            background: #0a0a0a;
-        }
-
-        input:focus, textarea:focus, select:focus {
-            outline: none;
-            border-color: #00ff88;
-        }
-
-        textarea { resize: vertical; min-height: 80px; }
-        .help-text { font-size: 12px; color: #555; margin-top: 4px; }
-
-        /* Buttons inside cards */
-        .btn-run {
-            padding: 12px 28px;
-            background: #00ff88;
-            color: #000;
-            font-size: 14px;
-            font-weight: 700;
-            border: none;
-            border-radius: 9px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-run:hover {
-            background: #00e67a;
-            box-shadow: 0 0 20px rgba(0,255,136,0.4);
-        }
-
-        /* Output areas */
-        .output-area {
-            background: #0a0a0a;
-            border: 1px solid #1e1e1e;
-            border-radius: 10px;
-            padding: 16px;
-            font-size: 13px;
-            color: #777;
-            min-height: 80px;
-            white-space: pre-wrap;
-            font-family: 'Courier New', monospace;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .stats-bar { grid-template-columns: repeat(2, 1fr); }
-            .reviews-grid { grid-template-columns: 1fr; }
-            .hero h1 { font-size: 32px; letter-spacing: -1px; }
-        }
-
-        @media (max-width: 480px) {
-            .stats-bar { grid-template-columns: 1fr 1fr; }
-        }
-    </style>
+@media(max-width:600px){
+  .form-grid{grid-template-columns:1fr}
+  .form-grid.cols3{grid-template-columns:1fr}
+  .form-group.span2{grid-column:span 1}
+  .stats-bar{gap:20px}
+  .tab-btn{font-size:12px;padding:8px 4px}
+}
+</style>
 </head>
 <body>
-    <div class="container">
 
-        <!-- =====================
-             HERO SECTION
-        ===================== -->
-        <section class="hero">
-            <div class="hero-orb"></div>
-            <div class="hero-content">
-                <div class="hero-badge">AI-Powered Outreach</div>
-                <h1>Close More Deals<br><span>on Autopilot</span></h1>
-                <p class="hero-sub">AI-powered cold outreach that finds leads, writes personalized emails, and generates stunning mockups &mdash; in minutes.</p>
-                <div class="hero-ctas">
-                    <a href="#" class="btn-primary">
-                        &#9889; Start Free
-                    </a>
-                    <a href="#" class="btn-outline">
-                        &#9654; Watch Demo
-                    </a>
-                </div>
-            </div>
-        </section>
+<!-- HERO -->
+<div class="hero">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+  <div class="badge"><span></span>AI-POWERED OUTREACH</div>
+  <h1>Close More Deals<br>on Autopilot</h1>
+  <p>Find qualified leads, write personalized emails, generate client mockups, and build full sequences — all in one place.</p>
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-num">12,400+</div><div class="stat-label">Leads Generated</div></div>
+    <div class="stat"><div class="stat-num">89%</div><div class="stat-label">Open Rate</div></div>
+    <div class="stat"><div class="stat-num">3.2x</div><div class="stat-label">Reply Rate</div></div>
+    <div class="stat"><div class="stat-num">500+</div><div class="stat-label">Active Users</div></div>
+  </div>
+  <div class="reviews">
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-text">"Booked 4 calls in my first week. The email writer is insane."</div>
+      <div class="review-author">Sarah K. — Freelance Designer</div>
+    </div>
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-text">"Finally a lead tool that actually finds real contacts."</div>
+      <div class="review-author">Marcus T. — Agency Owner</div>
+    </div>
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-text">"The mockup generator closes clients before the sales call."</div>
+      <div class="review-author">Priya S. — Web Consultant</div>
+    </div>
+  </div>
+</div>
 
-        <!-- =====================
-             STATS BAR
-        ===================== -->
-        <div class="stats-bar">
-            <div class="stat-card">
-                <div class="stat-number">12,400+</div>
-                <div class="stat-label">Leads Generated</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">89%</div>
-                <div class="stat-label">Email Open Rate</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">3.2x</div>
-                <div class="stat-label">Reply Rate</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">500+</div>
-                <div class="stat-label">Active Users</div>
-            </div>
+<!-- APP -->
+<div class="app-shell">
+  <div class="tab-nav">
+    <button class="tab-btn active" data-tab="leads">🔍 Lead Finder</button>
+    <button class="tab-btn" data-tab="email">✉️ Email Writer</button>
+    <button class="tab-btn" data-tab="mockup">🎨 Mockup Gen</button>
+    <button class="tab-btn" data-tab="sequence">⚡ Sequence</button>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       TAB 1: LEAD FINDER
+  ══════════════════════════════════════════ -->
+  <div class="tab-panel active" id="panel-leads">
+    <div class="card">
+      <h2>Find Qualified Leads</h2>
+      <p class="desc">AI searches for businesses matching your exact criteria and returns contact details ready to outreach.</p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Industry / Niche *</label>
+          <input id="lead-industry" type="text" placeholder="e.g. dental clinics, SaaS startups, law firms"/>
         </div>
-
-        <!-- =====================
-             REVIEWS SECTION
-        ===================== -->
-        <div class="reviews-section">
-            <p class="section-label">What our users say</p>
-            <div class="reviews-grid">
-                <div class="review-card">
-                    <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                    <p class="review-quote">"This tool booked us 14 calls in the first week."</p>
-                    <div class="review-author">
-                        <div class="review-avatar">SK</div>
-                        <div>
-                            <div class="review-name">Sarah K.</div>
-                            <div class="review-role">Agency Owner</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="review-card">
-                    <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                    <p class="review-quote">"The mockup generator alone is worth it. Clients love seeing their brand instantly."</p>
-                    <div class="review-author">
-                        <div class="review-avatar">MT</div>
-                        <div>
-                            <div class="review-name">Marcus T.</div>
-                            <div class="review-role">Freelancer</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="review-card">
-                    <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                    <p class="review-quote">"Replaced 3 tools with this one. Outreach has never been easier."</p>
-                    <div class="review-author">
-                        <div class="review-avatar">PS</div>
-                        <div>
-                            <div class="review-name">Priya S.</div>
-                            <div class="review-role">SaaS Founder</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="form-group">
+          <label>City / Region *</label>
+          <input id="lead-location" type="text" placeholder="e.g. Austin, New York, London"/>
         </div>
-
-        <!-- =====================
-             TABS
-        ===================== -->
-        <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('leads')">Lead Finder</button>
-            <button class="tab-btn" onclick="switchTab('email')">Email Writer</button>
-            <button class="tab-btn" onclick="switchTab('mockup')">Mockup Gen</button>
-            <button class="tab-btn" onclick="switchTab('sequence')">Sequence</button>
+        <div class="form-group">
+          <label>Country</label>
+          <input id="lead-country" type="text" placeholder="e.g. United States" value="United States"/>
         </div>
-
-        <!-- TAB: Lead Finder -->
-        <div class="tab-panel active" id="tab-leads">
-            <div class="card">
-                <h2>&#128269; Lead Finder</h2>
-                <div class="form-row">
-                    <div class="field">
-                        <label>Industry / Niche</label>
-                        <input type="text" placeholder="e.g. SaaS, eCommerce, Agencies">
-                    </div>
-                    <div class="field">
-                        <label>Company Size</label>
-                        <select>
-                            <option>1-10 employees</option>
-                            <option>11-50 employees</option>
-                            <option>51-200 employees</option>
-                            <option>200+ employees</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="field">
-                        <label>Location</label>
-                        <input type="text" placeholder="e.g. United States, Canada">
-                    </div>
-                    <div class="field">
-                        <label>Number of Leads</label>
-                        <input type="number" placeholder="50" min="1" max="500">
-                    </div>
-                </div>
-                <div class="field">
-                    <label>Keywords / Job Titles</label>
-                    <input type="text" placeholder="e.g. CEO, Founder, Head of Marketing">
-                    <p class="help-text">Separate multiple titles with commas</p>
-                </div>
-                <button class="btn-run">Find Leads</button>
-            </div>
-            <div class="card">
-                <h2>&#128203; Results</h2>
-                <div class="output-area">Results will appear here after running the lead finder...</div>
-            </div>
+        <div class="form-group">
+          <label>Company Size</label>
+          <select id="lead-size">
+            <option value="Any">Any size</option>
+            <option value="1-10">1–10 employees (micro)</option>
+            <option value="11-50">11–50 employees (small)</option>
+            <option value="51-200">51–200 employees (mid)</option>
+            <option value="201-500">201–500 employees (growth)</option>
+            <option value="500+">500+ employees (enterprise)</option>
+          </select>
         </div>
-
-        <!-- TAB: Email Writer -->
-        <div class="tab-panel" id="tab-email">
-            <div class="card">
-                <h2>&#9993; Email Writer</h2>
-                <div class="form-row">
-                    <div class="field">
-                        <label>Prospect Name</label>
-                        <input type="text" placeholder="e.g. John Smith">
-                    </div>
-                    <div class="field">
-                        <label>Company Name</label>
-                        <input type="text" placeholder="e.g. Acme Corp">
-                    </div>
-                </div>
-                <div class="field">
-                    <label>Your Offer / Value Proposition</label>
-                    <textarea placeholder="e.g. We help SaaS companies increase trial-to-paid conversions by 40% using AI-powered onboarding flows..."></textarea>
-                </div>
-                <div class="form-row">
-                    <div class="field">
-                        <label>Tone</label>
-                        <select>
-                            <option>Professional</option>
-                            <option>Casual</option>
-                            <option>Bold</option>
-                            <option>Friendly</option>
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label>Email Length</label>
-                        <select>
-                            <option>Short (3-4 lines)</option>
-                            <option>Medium (5-7 lines)</option>
-                            <option>Long (full pitch)</option>
-                        </select>
-                    </div>
-                </div>
-                <button class="btn-run">Generate Email</button>
-            </div>
-            <div class="card">
-                <h2>&#128394; Generated Email</h2>
-                <div class="output-area">Your personalized email will appear here...</div>
-            </div>
+        <div class="form-group">
+          <label>Target Job Titles</label>
+          <input id="lead-titles" type="text" placeholder="e.g. CEO, Founder, Marketing Director"/>
         </div>
-
-        <!-- TAB: Mockup Gen -->
-        <div class="tab-panel" id="tab-mockup">
-            <div class="card">
-                <h2>&#127912; Mockup Generator</h2>
-                <div class="form-row">
-                    <div class="field">
-                        <label>Brand / Company Name</label>
-                        <input type="text" placeholder="e.g. Acme Corp">
-                    </div>
-                    <div class="field">
-                        <label>Brand Colors (hex)</label>
-                        <input type="text" placeholder="e.g. #FF5733, #2C3E50">
-                    </div>
-                </div>
-                <div class="field">
-                    <label>Mockup Type</label>
-                    <select>
-                        <option>Landing Page</option>
-                        <option>Email Campaign</option>
-                        <option>Social Media Ad</option>
-                        <option>Product Banner</option>
-                        <option>Logo Concept</option>
-                    </select>
-                </div>
-                <div class="field">
-                    <label>Description / Context</label>
-                    <textarea placeholder="Describe the brand, their audience, and what you want the mockup to showcase..."></textarea>
-                </div>
-                <button class="btn-run">Generate Mockup</button>
-            </div>
-            <div class="card">
-                <h2>&#128247; Preview</h2>
-                <div class="output-area">Mockup preview will render here after generation...</div>
-            </div>
+        <div class="form-group">
+          <label>Number of Leads</label>
+          <input id="lead-count" type="number" min="1" max="50" value="10"/>
         </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-search">
+          <span id="search-spinner" class="spinner" style="display:none"></span>
+          🔍 Find Leads
+        </button>
+        <button class="btn btn-secondary" id="btn-export-csv" style="display:none">⬇️ Export CSV</button>
+        <button class="btn btn-secondary" id="btn-export-json" style="display:none">⬇️ Export JSON</button>
+      </div>
+    </div>
+    <div class="error-box" id="search-error"></div>
+    <div class="result-box" id="search-results">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <h3 id="search-result-count">Results</h3>
+      </div>
+      <div class="leads-table-wrap">
+        <table id="leads-table">
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Contact</th>
+              <th>Title</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Website</th>
+              <th>Employees</th>
+              <th>Rating</th>
+            </tr>
+          </thead>
+          <tbody id="leads-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-        <!-- TAB: Sequence -->
-        <div class="tab-panel" id="tab-sequence">
-            <div class="card">
-                <h2>&#128336; Outreach Sequence</h2>
-                <div class="form-row">
-                    <div class="field">
-                        <label>Sequence Name</label>
-                        <input type="text" placeholder="e.g. SaaS Founders Q1 2026">
-                    </div>
-                    <div class="field">
-                        <label>Number of Steps</label>
-                        <input type="number" placeholder="5" min="1" max="10">
-                    </div>
-                </div>
-                <div class="field">
-                    <label>Goal</label>
-                    <select>
-                        <option>Book a Call</option>
-                        <option>Drive Sign-ups</option>
-                        <option>Generate Referrals</option>
-                        <option>Nurture Leads</option>
-                    </select>
-                </div>
-                <div class="field">
-                    <label>Follow-up Interval (days)</label>
-                    <input type="number" placeholder="3" min="1" max="30">
-                    <p class="help-text">Days between each follow-up message</p>
-                </div>
-                <button class="btn-run">Build Sequence</button>
-            </div>
-            <div class="card">
-                <h2>&#128233; Sequence Steps</h2>
-                <div class="output-area">Your outreach sequence steps will appear here...</div>
-            </div>
+  <!-- ══════════════════════════════════════════
+       TAB 2: EMAIL WRITER
+  ══════════════════════════════════════════ -->
+  <div class="tab-panel" id="panel-email">
+    <div class="card">
+      <h2>AI Email Writer</h2>
+      <p class="desc">Generate personalized cold emails with subject lines optimized for open rates.</p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Prospect Name</label>
+          <input id="email-prospect-name" type="text" placeholder="e.g. John Smith"/>
         </div>
+        <div class="form-group">
+          <label>Prospect Company *</label>
+          <input id="email-prospect-company" type="text" placeholder="e.g. Acme Corp"/>
+        </div>
+        <div class="form-group">
+          <label>Prospect Title</label>
+          <input id="email-prospect-title" type="text" placeholder="e.g. CEO, Head of Marketing"/>
+        </div>
+        <div class="form-group">
+          <label>Your Name</label>
+          <input id="email-sender-name" type="text" placeholder="e.g. Alex Johnson"/>
+        </div>
+        <div class="form-group span2">
+          <label>Your Offer / Service *</label>
+          <textarea id="email-offer" placeholder="e.g. We help dental clinics get 20+ new patients/month with targeted Google Ads and a done-for-you landing page."></textarea>
+        </div>
+        <div class="form-group span2">
+          <label>Their Pain Point (optional)</label>
+          <input id="email-pain" type="text" placeholder="e.g. Struggling to fill appointment slots, relying on word of mouth"/>
+        </div>
+        <div class="form-group">
+          <label>Tone</label>
+          <select id="email-tone">
+            <option>Professional</option>
+            <option>Casual</option>
+            <option>Bold</option>
+            <option>Friendly</option>
+            <option>Direct</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Length</label>
+          <select id="email-length">
+            <option>Short (3-4 lines)</option>
+            <option>Medium (5-7 lines)</option>
+            <option>Long (full pitch)</option>
+          </select>
+        </div>
+        <div class="form-group span2">
+          <label>Call to Action</label>
+          <input id="email-cta" type="text" placeholder="e.g. Would you be open to a 15-min call this week?" value="Would you be open to a 15-min call this week?"/>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-email">
+          <span id="email-spinner" class="spinner" style="display:none"></span>
+          ✉️ Generate Email
+        </button>
+      </div>
+    </div>
+    <div class="error-box" id="email-error"></div>
+    <div class="result-box" id="email-result">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <h3>Generated Email</h3>
+        <button class="copy-btn" id="copy-email-btn">Copy</button>
+      </div>
+      <div class="email-output">
+        <div class="email-subject" id="email-out-subject"></div>
+        <div class="email-preview" id="email-out-preview"></div>
+        <div class="email-body" id="email-out-body"></div>
+      </div>
+    </div>
+  </div>
 
-    </div><!-- /container -->
+  <!-- ══════════════════════════════════════════
+       TAB 3: MOCKUP GENERATOR
+  ══════════════════════════════════════════ -->
+  <div class="tab-panel" id="panel-mockup">
+    <div class="card">
+      <h2>Client Website Mockup</h2>
+      <p class="desc">Generate a full live website mockup for any business. AI builds a real HTML site — drop the link in your pitch.</p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Business Name *</label>
+          <input id="mock-name" type="text" placeholder="e.g. Sunrise Dental"/>
+        </div>
+        <div class="form-group">
+          <label>Industry *</label>
+          <input id="mock-industry" type="text" placeholder="e.g. dental clinic, gym, restaurant, law firm"/>
+        </div>
+        <div class="form-group span2">
+          <label>Tagline</label>
+          <input id="mock-tagline" type="text" placeholder="e.g. Healthy Smiles for the Whole Family"/>
+        </div>
+        <div class="form-group">
+          <label>Primary Color</label>
+          <input id="mock-primary" type="color" value="#6366f1" style="height:42px;padding:4px 8px;cursor:pointer"/>
+        </div>
+        <div class="form-group">
+          <label>Accent Color</label>
+          <input id="mock-accent" type="color" value="#a855f7" style="height:42px;padding:4px 8px;cursor:pointer"/>
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input id="mock-phone" type="text" placeholder="e.g. (512) 555-0192"/>
+        </div>
+        <div class="form-group">
+          <label>CTA Button Text</label>
+          <input id="mock-cta" type="text" placeholder="e.g. Book a Free Consultation" value="Book a Free Consultation"/>
+        </div>
+        <div class="form-group span2">
+          <label>Address</label>
+          <input id="mock-address" type="text" placeholder="e.g. 420 Oak Street, Austin, TX 78701"/>
+        </div>
+        <div class="form-group span2">
+          <label>Services / Products (comma separated)</label>
+          <input id="mock-services" type="text" placeholder="e.g. General Dentistry, Teeth Whitening, Invisalign, Emergency Care"/>
+        </div>
+        <div class="form-group span2">
+          <label>Unique Value / What Makes Them Special</label>
+          <textarea id="mock-value" placeholder="e.g. Family-owned practice with 15 years experience. Same-day appointments, accepts all major insurance."></textarea>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-mockup">
+          <span id="mockup-spinner" class="spinner" style="display:none"></span>
+          🎨 Generate Mockup
+        </button>
+      </div>
+    </div>
+    <div class="error-box" id="mockup-error"></div>
+    <div class="result-box" id="mockup-result">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <h3>Live Preview</h3>
+        <button class="copy-btn" id="copy-mockup-btn">Copy HTML</button>
+      </div>
+      <div class="mockup-frame-wrap">
+        <div class="mockup-toolbar">
+          <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+          <span style="font-size:12px;color:var(--muted);margin-left:8px" id="mockup-url-bar">mockup-preview</span>
+        </div>
+        <iframe id="mockup-iframe" sandbox="allow-scripts allow-same-origin"></iframe>
+      </div>
+    </div>
+  </div>
 
-    <script>
-        // ── Tab switching ────────────────────────────────────────────────────
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
-            document.getElementById('tab-' + tabName).classList.add('active');
-        }
+  <!-- ══════════════════════════════════════════
+       TAB 4: SEQUENCE BUILDER
+  ══════════════════════════════════════════ -->
+  <div class="tab-panel" id="panel-sequence">
+    <div class="card">
+      <h2>Email Sequence Builder</h2>
+      <p class="desc">Build a complete multi-step drip campaign. AI writes every email with a different angle.</p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Campaign Name</label>
+          <input id="seq-name" type="text" placeholder="e.g. Q1 Dental Outreach"/>
+        </div>
+        <div class="form-group">
+          <label>Target Industry *</label>
+          <input id="seq-industry" type="text" placeholder="e.g. dental clinics, SaaS startups"/>
+        </div>
+        <div class="form-group span2">
+          <label>Your Offer *</label>
+          <textarea id="seq-offer" placeholder="e.g. Done-for-you Google Ads + landing page to get 20+ new patients/month for dental clinics."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Campaign Goal</label>
+          <select id="seq-goal">
+            <option>Book a Call</option>
+            <option>Drive Sign-ups</option>
+            <option>Generate Referrals</option>
+            <option>Nurture Leads</option>
+            <option>Close a Sale</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tone</label>
+          <select id="seq-tone">
+            <option>Professional</option>
+            <option>Casual</option>
+            <option>Bold</option>
+            <option>Friendly</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Number of Emails</label>
+          <input id="seq-steps" type="number" min="2" max="10" value="5"/>
+        </div>
+        <div class="form-group">
+          <label>Days Between Emails</label>
+          <input id="seq-days" type="number" min="1" max="30" value="3"/>
+        </div>
+        <div class="form-group span2">
+          <label>Your Name</label>
+          <input id="seq-sender" type="text" placeholder="e.g. Alex Johnson"/>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-sequence">
+          <span id="seq-spinner" class="spinner" style="display:none"></span>
+          ⚡ Build Sequence
+        </button>
+      </div>
+    </div>
+    <div class="error-box" id="seq-error"></div>
+    <div class="result-box" id="seq-result">
+      <h3 id="seq-result-title">Sequence</h3>
+      <div id="seq-steps-container" style="margin-top:16px"></div>
+    </div>
+  </div>
 
-        // ── Helpers ──────────────────────────────────────────────────────────
-        function setOutput(el, html) { el.innerHTML = html; }
-        function setLoading(el, msg) { el.innerHTML = `<em style="color:#aaa">${msg}</em>`; }
-        function setError(el, msg)   { el.innerHTML = `<span style="color:#f87171">Error: ${msg}</span>`; }
+</div><!-- end app-shell -->
 
-        async function apiFetch(endpoint, body) {
-            const res = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            });
-            if (!res.ok) {
-                const err = await res.json().catch(() => ({ error: res.statusText }));
-                throw new Error(err.error || res.statusText);
-            }
-            return res.json();
-        }
+<script>
+// ── TAB SWITCHING ──
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+  });
+});
 
-        // ── Tab 1: Search (/api/search) ──────────────────────────────────────
-        document.addEventListener('DOMContentLoaded', () => {
-            // ---- Search tab ----
-            const searchBtn = document.querySelector('#tab-search .btn-run');
-            if (searchBtn) {
-                searchBtn.addEventListener('click', async () => {
-                    const panel  = document.getElementById('tab-search');
-                    const inputs = panel.querySelectorAll('input, select, textarea');
-                    const out    = panel.querySelector('.output-area');
-                    const body   = {};
-                    inputs.forEach(el => {
-                        if (el.placeholder) body[el.placeholder.toLowerCase().replace(/\s+/g,'_')] = el.value;
-                        if (el.name)        body[el.name] = el.value;
-                    });
-                    // Grab labelled fields by position
-                    const labels = panel.querySelectorAll('label');
-                    labels.forEach((lbl, i) => {
-                        const inp = inputs[i];
-                        if (inp) body[lbl.textContent.trim().toLowerCase().replace(/\s+/g,'_')] = inp.value;
-                    });
-                    setLoading(out, 'Searching for leads...');
-                    try {
-                        const data = await apiFetch('/api/search', body);
-                        if (data.results && data.results.length) {
-                            const rows = data.results.map(r =>
-                                `<div style="border:1px solid #2a2a2a;border-radius:8px;padding:12px;margin-bottom:10px;">
-                                    <strong>${r.name || r.business_name || 'Business'}</strong>
-                                    ${r.address ? `<br><span style="color:#aaa">${r.address}</span>` : ''}
-                                    ${r.phone    ? `<br>📞 ${r.phone}` : ''}
-                                    ${r.rating   ? `<br>⭐ ${r.rating} (${r.reviews || r.review_count || 0} reviews)` : ''}
-                                    ${r.website  ? `<br><a href="${r.website}" target="_blank" style="color:#4ade80">${r.website}</a>` : ''}
-                                </div>`
-                            ).join('');
-                            setOutput(out, `<p style="color:#4ade80;margin-bottom:12px">Found ${data.results.length} results</p>${rows}`);
-                        } else {
-                            setOutput(out, '<em style="color:#aaa">No results found.</em>');
-                        }
-                    } catch(e) { setError(out, e.message); }
-                });
-            }
+// ── HELPERS ──
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = '⚠️ ' + msg;
+  el.classList.add('visible');
+}
+function hideError(id) {
+  const el = document.getElementById(id);
+  el.textContent = '';
+  el.classList.remove('visible');
+}
+function showResult(id) { document.getElementById(id).classList.add('visible'); }
+function hideResult(id) { document.getElementById(id).classList.remove('visible'); }
+function setLoading(btn, spinnerId, loading) {
+  btn.disabled = loading;
+  document.getElementById(spinnerId).style.display = loading ? 'inline-block' : 'none';
+}
+async function apiFetch(endpoint, body) {
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || res.statusText);
+  return data;
+}
+function val(id) { return document.getElementById(id).value.trim(); }
+function copyText(text) {
+  navigator.clipboard.writeText(text).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+}
 
-            // ---- Enrich tab (/api/enrich) ----
-            const enrichBtn = document.querySelector('#tab-enrich .btn-run');
-            if (enrichBtn) {
-                enrichBtn.addEventListener('click', async () => {
-                    const panel  = document.getElementById('tab-enrich');
-                    const inputs = panel.querySelectorAll('input, textarea');
-                    const out    = panel.querySelector('.output-area');
-                    const body   = {};
-                    const labels = panel.querySelectorAll('label');
-                    labels.forEach((lbl, i) => {
-                        const inp = inputs[i];
-                        if (inp) body[lbl.textContent.trim().toLowerCase().replace(/[\s\/]+/g,'_')] = inp.value;
-                    });
-                    setLoading(out, 'Enriching lead data...');
-                    try {
-                        const data = await apiFetch('/api/enrich', body);
-                        const result = data.enriched || data;
-                        setOutput(out, `<pre style="white-space:pre-wrap;font-size:13px;color:#d4d4d4">${JSON.stringify(result, null, 2)}</pre>`);
-                    } catch(e) { setError(out, e.message); }
-                });
-            }
+// ═══════════════════════════════════════
+// LEAD FINDER
+// ═══════════════════════════════════════
+let _lastLeads = [];
 
-            // ---- Export tab (/api/export) ----
-            const exportBtn = document.querySelector('#tab-export .btn-run');
-            if (exportBtn) {
-                exportBtn.addEventListener('click', async () => {
-                    const panel  = document.getElementById('tab-export');
-                    const inputs = panel.querySelectorAll('input, select, textarea');
-                    const out    = panel.querySelector('.output-area');
-                    const body   = {};
-                    const labels = panel.querySelectorAll('label');
-                    labels.forEach((lbl, i) => {
-                        const inp = inputs[i];
-                        if (inp) body[lbl.textContent.trim().toLowerCase().replace(/\s+/g,'_')] = inp.value || inp.options?.[inp.selectedIndex]?.value;
-                    });
-                    setLoading(out, 'Generating export...');
-                    try {
-                        const data = await apiFetch('/api/export', body);
-                        if (data.csv || data.content) {
-                            const blob = new Blob([data.csv || data.content], { type: 'text/csv' });
-                            const url  = URL.createObjectURL(blob);
-                            setOutput(out, `<p style="color:#4ade80">Export ready!</p><a href="${url}" download="leads_export.csv" style="color:#4ade80;text-decoration:underline">Download CSV</a>`);
-                        } else {
-                            setOutput(out, `<pre style="white-space:pre-wrap;font-size:13px;color:#d4d4d4">${JSON.stringify(data, null, 2)}</pre>`);
-                        }
-                    } catch(e) { setError(out, e.message); }
-                });
-            }
+document.getElementById('btn-search').addEventListener('click', async () => {
+  const btn = document.getElementById('btn-search');
+  hideError('search-error'); hideResult('search-results');
+  document.getElementById('btn-export-csv').style.display = 'none';
+  document.getElementById('btn-export-json').style.display = 'none';
 
-            // ---- Mockup tab (/api/mockup) ----
-            const mockupBtn = document.querySelector('#tab-mockup .btn-run');
-            if (mockupBtn) {
-                mockupBtn.addEventListener('click', async () => {
-                    const panel  = document.getElementById('tab-mockup');
-                    const inputs = panel.querySelectorAll('input, select, textarea');
-                    const out    = panel.querySelector('.output-area');
-                    const body   = {};
-                    const labels = panel.querySelectorAll('label');
-                    labels.forEach((lbl, i) => {
-                        const inp = inputs[i];
-                        if (!inp) return;
-                        const key = lbl.textContent.trim().toLowerCase().replace(/[\s\/]+/g,'_').replace(/[^a-z0-9_]/g,'');
-                        body[key] = inp.tagName === 'SELECT'
-                            ? inp.options[inp.selectedIndex]?.value
-                            : inp.value;
-                    });
-                    // Normalize keys to match Flask API
-                    const payload = {
-                        business_name: body.business_name || body.name || '',
-                        city:          body.city || '',
-                        category:      body.category || body.business_type || 'restaurant',
-                        phone:         body.phone || '',
-                        address:       body.address || '',
-                        rating:        parseFloat(body.rating) || 4.5,
-                        reviews:       parseInt(body.reviews || body.review_count) || 50,
-                        description:   body.description || body.description__context || ''
-                    };
-                    setLoading(out, 'Building stunning mockup...');
-                    try {
-                        const data = await apiFetch('/api/mockup', payload);
-                        if (data.html) {
-                            const iframe = document.createElement('iframe');
-                            iframe.style.cssText = 'width:100%;height:600px;border:none;border-radius:8px;margin-top:12px;';
-                            out.innerHTML = '<p style="color:#4ade80;margin-bottom:8px">Mockup ready! Scroll to preview:</p>';
-                            out.appendChild(iframe);
-                            iframe.contentDocument.open();
-                            iframe.contentDocument.write(data.html);
-                            iframe.contentDocument.close();
-                        } else {
-                            setError(out, data.error || 'No HTML returned');
-                        }
-                    } catch(e) { setError(out, e.message); }
-                });
-            }
-        });
-    </script>
+  const industry = val('lead-industry');
+  const location = val('lead-location');
+  if (!industry) return showError('search-error', 'Industry / niche is required.');
+  if (!location) return showError('search-error', 'City / region is required.');
+
+  setLoading(btn, 'search-spinner', true);
+  try {
+    const data = await apiFetch('/api/search', {
+      industry,
+      location,
+      country:      val('lead-country') || 'United States',
+      job_titles:   val('lead-titles'),
+      company_size: val('lead-size'),
+      max_results:  parseInt(document.getElementById('lead-count').value) || 10
+    });
+
+    _lastLeads = data.results || [];
+    document.getElementById('search-result-count').textContent =
+      _lastLeads.length + ' leads found';
+
+    const tbody = document.getElementById('leads-tbody');
+    tbody.innerHTML = '';
+    _lastLeads.forEach(l => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${l.name || ''}</strong></td>
+        <td>${l.contact_name || ''}</td>
+        <td>${l.contact_title || ''}</td>
+        <td>${l.email ? `<a href="mailto:${l.email}">${l.email}</a>` : ''}</td>
+        <td>${l.phone || ''}</td>
+        <td>${l.website ? `<a href="${l.website}" target="_blank">🔗 Site</a>` : ''}</td>
+        <td>${l.employees || ''}</td>
+        <td>${l.rating ? '⭐ ' + l.rating : ''}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    showResult('search-results');
+    if (_lastLeads.length > 0) {
+      document.getElementById('btn-export-csv').style.display = '';
+      document.getElementById('btn-export-json').style.display = '';
+    }
+  } catch(e) {
+    showError('search-error', e.message);
+  }
+  setLoading(btn, 'search-spinner', false);
+});
+
+// CSV Export
+document.getElementById('btn-export-csv').addEventListener('click', async () => {
+  if (!_lastLeads.length) return;
+  try {
+    const res = await fetch('/api/export', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ leads: _lastLeads, format: 'csv' })
+    });
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'leads.csv';
+    a.click(); URL.revokeObjectURL(url);
+  } catch(e) { alert('Export failed: ' + e.message); }
+});
+
+// JSON Export
+document.getElementById('btn-export-json').addEventListener('click', async () => {
+  if (!_lastLeads.length) return;
+  try {
+    const res = await fetch('/api/export', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ leads: _lastLeads, format: 'json' })
+    });
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'leads.json';
+    a.click(); URL.revokeObjectURL(url);
+  } catch(e) { alert('Export failed: ' + e.message); }
+});
+
+// ═══════════════════════════════════════
+// EMAIL WRITER
+// ═══════════════════════════════════════
+let _lastEmailText = '';
+
+document.getElementById('btn-email').addEventListener('click', async () => {
+  const btn = document.getElementById('btn-email');
+  hideError('email-error'); hideResult('email-result');
+
+  const company = val('email-prospect-company');
+  const offer   = val('email-offer');
+  if (!company) return showError('email-error', 'Prospect company is required.');
+  if (!offer)   return showError('email-error', 'Your offer is required.');
+
+  setLoading(btn, 'email-spinner', true);
+  try {
+    const data = await apiFetch('/api/email', {
+      prospect_name:    val('email-prospect-name'),
+      prospect_company: company,
+      prospect_title:   val('email-prospect-title'),
+      sender_name:      val('email-sender-name'),
+      your_offer:       offer,
+      pain_point:       val('email-pain'),
+      tone:             val('email-tone'),
+      length:           val('email-length'),
+      cta:              val('email-cta')
+    });
+
+    const email = data.email || {};
+    document.getElementById('email-out-subject').textContent = 'Subject: ' + (email.subject || '');
+    document.getElementById('email-out-preview').textContent = 'Preview: ' + (email.preview_text || '');
+    document.getElementById('email-out-body').textContent = email.body || '';
+    _lastEmailText = 'Subject: ' + email.subject + '\n\n' + email.body;
+    showResult('email-result');
+  } catch(e) {
+    showError('email-error', e.message);
+  }
+  setLoading(btn, 'email-spinner', false);
+});
+
+document.getElementById('copy-email-btn').addEventListener('click', () => {
+  copyText(_lastEmailText);
+  const btn = document.getElementById('copy-email-btn');
+  btn.textContent = 'Copied!';
+  setTimeout(() => btn.textContent = 'Copy', 1500);
+});
+
+// ═══════════════════════════════════════
+// MOCKUP GENERATOR
+// ═══════════════════════════════════════
+let _lastMockupHtml = '';
+
+document.getElementById('btn-mockup').addEventListener('click', async () => {
+  const btn = document.getElementById('btn-mockup');
+  hideError('mockup-error'); hideResult('mockup-result');
+
+  const name     = val('mock-name');
+  const industry = val('mock-industry');
+  if (!name)     return showError('mockup-error', 'Business name is required.');
+  if (!industry) return showError('mockup-error', 'Industry is required.');
+
+  setLoading(btn, 'mockup-spinner', true);
+  try {
+    const data = await apiFetch('/api/mockup', {
+      business_name: name,
+      industry:      industry,
+      tagline:       val('mock-tagline'),
+      primary_color: document.getElementById('mock-primary').value,
+      accent_color:  document.getElementById('mock-accent').value,
+      phone:         val('mock-phone'),
+      address:       val('mock-address'),
+      cta_text:      val('mock-cta'),
+      services:      val('mock-services'),
+      unique_value:  val('mock-value')
+    });
+
+    _lastMockupHtml = data.html || '';
+    const iframe = document.getElementById('mockup-iframe');
+    iframe.srcdoc = _lastMockupHtml;
+    document.getElementById('mockup-url-bar').textContent =
+      name.toLowerCase().replace(/\s+/g, '-') + '.com';
+    showResult('mockup-result');
+  } catch(e) {
+    showError('mockup-error', e.message);
+  }
+  setLoading(btn, 'mockup-spinner', false);
+});
+
+document.getElementById('copy-mockup-btn').addEventListener('click', () => {
+  copyText(_lastMockupHtml);
+  const btn = document.getElementById('copy-mockup-btn');
+  btn.textContent = 'Copied!';
+  setTimeout(() => btn.textContent = 'Copy HTML', 1500);
+});
+
+// ═══════════════════════════════════════
+// SEQUENCE BUILDER
+// ═══════════════════════════════════════
+document.getElementById('btn-sequence').addEventListener('click', async () => {
+  const btn = document.getElementById('btn-sequence');
+  hideError('seq-error'); hideResult('seq-result');
+
+  const industry = val('seq-industry');
+  const offer    = val('seq-offer');
+  if (!industry) return showError('seq-error', 'Target industry is required.');
+  if (!offer)    return showError('seq-error', 'Your offer is required.');
+
+  setLoading(btn, 'seq-spinner', true);
+  try {
+    const data = await apiFetch('/api/sequence', {
+      campaign_name: val('seq-name'),
+      industry,
+      your_offer:    offer,
+      goal:          val('seq-goal'),
+      tone:          val('seq-tone'),
+      steps:         parseInt(document.getElementById('seq-steps').value) || 5,
+      days_between:  parseInt(document.getElementById('seq-days').value) || 3,
+      sender_name:   val('seq-sender')
+    });
+
+    const sequence = data.sequence || [];
+    document.getElementById('seq-result-title').textContent =
+      sequence.length + '-Step Sequence';
+
+    const container = document.getElementById('seq-steps-container');
+    container.innerHTML = '';
+    sequence.forEach(step => {
+      const div = document.createElement('div');
+      div.className = 'seq-step';
+      div.innerHTML = `
+        <div class="seq-step-header">
+          <span class="seq-badge">Email ${step.step}</span>
+          <span class="seq-day">Day ${step.day}</span>
+          <span class="seq-purpose">${step.purpose || ''}</span>
+        </div>
+        <div class="seq-subject">📧 ${step.subject}</div>
+        <div class="seq-body">${step.body}</div>
+      `;
+      container.appendChild(div);
+    });
+
+    showResult('seq-result');
+  } catch(e) {
+    showError('seq-error', e.message);
+  }
+  setLoading(btn, 'seq-spinner', false);
+});
+</script>
 </body>
 </html>
