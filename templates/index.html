@@ -17,21 +17,260 @@
 
         .container { max-width: 1200px; margin: 0 auto; }
 
-        .header {
+        /* =====================
+           HERO SECTION
+        ===================== */
+        .hero {
+            position: relative;
             text-align: center;
-            padding: 40px 0 30px;
-            color: #00ff88;
+            padding: 90px 20px 70px;
+            overflow: hidden;
         }
-        .header h1 {
-            font-size: 32px;
-            font-weight: 800;
-            margin-bottom: 8px;
-            color: #00ff88;
-            letter-spacing: -0.5px;
-        }
-        .header p { color: #555; font-size: 15px; }
 
-        /* TABS */
+        /* Animated glowing orb blob */
+        .hero-orb {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 520px;
+            height: 520px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,255,136,0.18) 0%, rgba(0,255,136,0.06) 40%, transparent 70%);
+            filter: blur(60px);
+            animation: orbPulse 4s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes orbPulse {
+            0%   { transform: translate(-50%, -50%) scale(1);   opacity: 0.7; }
+            50%  { transform: translate(-50%, -50%) scale(1.18); opacity: 1;   }
+            100% { transform: translate(-50%, -50%) scale(1);   opacity: 0.7; }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(0,255,136,0.1);
+            border: 1px solid rgba(0,255,136,0.3);
+            color: #00ff88;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 6px 16px;
+            border-radius: 100px;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 {
+            font-size: clamp(36px, 6vw, 64px);
+            font-weight: 900;
+            color: #ffffff;
+            letter-spacing: -2px;
+            line-height: 1.08;
+            margin-bottom: 22px;
+        }
+
+        .hero h1 span {
+            color: #00ff88;
+        }
+
+        .hero-sub {
+            font-size: clamp(15px, 2vw, 18px);
+            color: #888;
+            max-width: 580px;
+            margin: 0 auto 40px;
+            line-height: 1.65;
+        }
+
+        .hero-ctas {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            padding: 14px 32px;
+            background: #00ff88;
+            color: #000;
+            font-size: 15px;
+            font-weight: 700;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 0 24px rgba(0,255,136,0.35);
+        }
+
+        .btn-primary:hover {
+            background: #00e67a;
+            box-shadow: 0 0 36px rgba(0,255,136,0.55);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            padding: 14px 32px;
+            background: transparent;
+            color: #e0e0e0;
+            font-size: 15px;
+            font-weight: 700;
+            border: 1px solid #333;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-outline:hover {
+            border-color: #00ff88;
+            color: #00ff88;
+            transform: translateY(-1px);
+        }
+
+        /* =====================
+           STATS BAR
+        ===================== */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 48px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(0,255,136,0.12);
+            border-radius: 14px;
+            padding: 22px 20px;
+            text-align: center;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .stat-card:hover {
+            border-color: rgba(0,255,136,0.35);
+            transform: translateY(-2px);
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 900;
+            color: #00ff88;
+            letter-spacing: -1px;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        /* =====================
+           REVIEWS SECTION
+        ===================== */
+        .reviews-section {
+            margin-bottom: 48px;
+        }
+
+        .section-label {
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #444;
+            margin-bottom: 20px;
+        }
+
+        .reviews-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .review-card {
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(0,255,136,0.12);
+            border-radius: 16px;
+            padding: 26px 24px;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .review-card:hover {
+            border-color: rgba(0,255,136,0.3);
+            transform: translateY(-2px);
+        }
+
+        .review-stars {
+            color: #00ff88;
+            font-size: 16px;
+            margin-bottom: 14px;
+            letter-spacing: 2px;
+        }
+
+        .review-quote {
+            font-size: 14px;
+            color: #bbb;
+            line-height: 1.65;
+            margin-bottom: 18px;
+            font-style: italic;
+        }
+
+        .review-author {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .review-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(0,255,136,0.3), rgba(0,255,136,0.08));
+            border: 1px solid rgba(0,255,136,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: #00ff88;
+            flex-shrink: 0;
+        }
+
+        .review-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .review-role {
+            font-size: 12px;
+            color: #555;
+            margin-top: 1px;
+        }
+
+        /* =====================
+           TABS
+        ===================== */
         .tabs {
             display: flex;
             gap: 4px;
@@ -41,6 +280,7 @@
             margin-bottom: 24px;
             border: 1px solid #222;
         }
+
         .tab-btn {
             flex: 1;
             padding: 10px 16px;
@@ -53,30 +293,40 @@
             cursor: pointer;
             transition: all 0.2s;
         }
+
         .tab-btn.active {
             background: #00ff88;
             color: #000;
         }
+
         .tab-btn:hover:not(.active) { background: #1a1a1a; color: #00ff88; }
 
         .tab-panel { display: none; }
         .tab-panel.active { display: block; }
 
-        /* CARD */
+        /* =====================
+           CARD (glassmorphism)
+        ===================== */
         .card {
-            background: #111;
-            border: 1px solid #222;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            background: rgba(0,255,136,0.04);
+            border: 1px solid rgba(0,255,136,0.15);
             border-radius: 16px;
             padding: 28px;
             margin-bottom: 20px;
         }
+
         .card h2 { font-size: 18px; font-weight: 700; margin-bottom: 18px; color: #00ff88; }
 
-        /* FORM ELEMENTS */
+        /* =====================
+           FORM ELEMENTS
+        ===================== */
         .form-row { display: flex; gap: 12px; margin-bottom: 14px; }
         .form-row .field { flex: 1; }
         .field { margin-bottom: 14px; }
         label { display: block; font-size: 13px; font-weight: 600; color: #888; margin-bottom: 6px; }
+
         input[type="text"], input[type="number"], textarea, select {
             width: 100%;
             padding: 10px 14px;
@@ -88,667 +338,325 @@
             color: #e0e0e0;
             background: #0a0a0a;
         }
+
         input:focus, textarea:focus, select:focus {
             outline: none;
             border-color: #00ff88;
         }
+
         textarea { resize: vertical; min-height: 80px; }
         .help-text { font-size: 12px; color: #555; margin-top: 4px; }
 
-        /* BUTTONS */
-        .btn {
-            padding: 11px 22px;
-            border: none;
-            border-radius: 8px;
+        /* Buttons inside cards */
+        .btn-run {
+            padding: 12px 28px;
+            background: #00ff88;
+            color: #000;
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 700;
+            border: none;
+            border-radius: 9px;
             cursor: pointer;
             transition: all 0.2s;
         }
-        .btn-primary {
-            background: #00ff88;
-            color: #000;
-        }
-        .btn-primary:hover { background: #00dd77; }
-        .btn-secondary {
-            background: #1a1a1a;
-            color: #00ff88;
-            border: 1px solid #2a2a2a;
-        }
-        .btn-secondary:hover { background: #222; }
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+
+        .btn-run:hover {
+            background: #00e67a;
+            box-shadow: 0 0 20px rgba(0,255,136,0.4);
         }
 
-        /* SPINNER */
-        .spinner {
-            display: inline-block;
-            width: 14px;
-            height: 14px;
-            border: 2px solid rgba(0,0,0,0.3);
-            border-top-color: #000;
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-            margin-left: 8px;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* RESULTS TABLE */
-        .results-container {
+        /* Output areas */
+        .output-area {
             background: #0a0a0a;
-            border: 1px solid #222;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-        .results-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-        .results-header h3 { font-size: 16px; color: #00ff88; }
-        .results-actions { display: flex; gap: 8px; }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
+            border: 1px solid #1e1e1e;
+            border-radius: 10px;
+            padding: 16px;
             font-size: 13px;
-        }
-        thead th {
-            background: #111;
-            padding: 10px 12px;
-            text-align: left;
-            font-weight: 600;
-            color: #888;
-            border-bottom: 1px solid #222;
-        }
-        tbody td {
-            padding: 12px;
-            border-bottom: 1px solid #1a1a1a;
-            color: #ccc;
-        }
-        tbody tr:hover { background: #111; }
-        tbody tr.selected { background: #0d1a14; }
-
-        input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-        .badge-success { background: rgba(0,255,136,0.15); color: #00ff88; }
-        .badge-warning { background: rgba(255,200,0,0.15); color: #ffc800; }
-
-        .pain-points-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            font-size: 12px;
-            color: #999;
-        }
-        .pain-points-list li {
-            padding: 3px 0;
-            padding-left: 14px;
-            position: relative;
-        }
-        .pain-points-list li:before {
-            content: "•";
-            position: absolute;
-            left: 0;
-            color: #00ff88;
-        }
-
-        .email-preview {
-            background: #0a0a0a;
-            border: 1px solid #222;
-            border-radius: 6px;
-            padding: 10px;
-            font-size: 12px;
-            line-height: 1.5;
-            color: #aaa;
+            color: #777;
+            min-height: 80px;
             white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
         }
 
-        /* MOCKUP PREVIEW */
-        .mockup-preview {
-            margin-top: 24px;
-        }
-        .mockup-iframe {
-            width: 100%;
-            height: 600px;
-            border: 1px solid #222;
-            border-radius: 12px;
-            background: #fff;
-        }
-        .mockup-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 16px;
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stats-bar { grid-template-columns: repeat(2, 1fr); }
+            .reviews-grid { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 32px; letter-spacing: -1px; }
         }
 
-        /* ALERT */
-        .alert {
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            font-size: 14px;
-        }
-        .alert-success {
-            background: rgba(0,255,136,0.1);
-            color: #00ff88;
-            border: 1px solid rgba(0,255,136,0.2);
-        }
-        .alert-error {
-            background: rgba(255,50,50,0.1);
-            color: #ff5555;
-            border: 1px solid rgba(255,50,50,0.2);
+        @media (max-width: 480px) {
+            .stats-bar { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Cold Outreach Engine</h1>
-            <p>AI-powered lead generation with personalized outreach</p>
+
+        <!-- =====================
+             HERO SECTION
+        ===================== -->
+        <section class="hero">
+            <div class="hero-orb"></div>
+            <div class="hero-content">
+                <div class="hero-badge">AI-Powered Outreach</div>
+                <h1>Close More Deals<br><span>on Autopilot</span></h1>
+                <p class="hero-sub">AI-powered cold outreach that finds leads, writes personalized emails, and generates stunning mockups &mdash; in minutes.</p>
+                <div class="hero-ctas">
+                    <a href="#" class="btn-primary">
+                        &#9889; Start Free
+                    </a>
+                    <a href="#" class="btn-outline">
+                        &#9654; Watch Demo
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- =====================
+             STATS BAR
+        ===================== -->
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-number">12,400+</div>
+                <div class="stat-label">Leads Generated</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">89%</div>
+                <div class="stat-label">Email Open Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">3.2x</div>
+                <div class="stat-label">Reply Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">500+</div>
+                <div class="stat-label">Active Users</div>
+            </div>
         </div>
 
+        <!-- =====================
+             REVIEWS SECTION
+        ===================== -->
+        <div class="reviews-section">
+            <p class="section-label">What our users say</p>
+            <div class="reviews-grid">
+                <div class="review-card">
+                    <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                    <p class="review-quote">"This tool booked us 14 calls in the first week."</p>
+                    <div class="review-author">
+                        <div class="review-avatar">SK</div>
+                        <div>
+                            <div class="review-name">Sarah K.</div>
+                            <div class="review-role">Agency Owner</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="review-card">
+                    <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                    <p class="review-quote">"The mockup generator alone is worth it. Clients love seeing their brand instantly."</p>
+                    <div class="review-author">
+                        <div class="review-avatar">MT</div>
+                        <div>
+                            <div class="review-name">Marcus T.</div>
+                            <div class="review-role">Freelancer</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="review-card">
+                    <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                    <p class="review-quote">"Replaced 3 tools with this one. Outreach has never been easier."</p>
+                    <div class="review-author">
+                        <div class="review-avatar">PS</div>
+                        <div>
+                            <div class="review-name">Priya S.</div>
+                            <div class="review-role">SaaS Founder</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =====================
+             TABS
+        ===================== -->
         <div class="tabs">
-            <button class="tab-btn active" data-tab="search">1. Search Leads</button>
-            <button class="tab-btn" data-tab="enrich">2. AI Enrich</button>
-            <button class="tab-btn" data-tab="export">3. Export</button>
-            <button class="tab-btn" data-tab="mockup">4. Mockup</button>
+            <button class="tab-btn active" onclick="switchTab('leads')">Lead Finder</button>
+            <button class="tab-btn" onclick="switchTab('email')">Email Writer</button>
+            <button class="tab-btn" onclick="switchTab('mockup')">Mockup Gen</button>
+            <button class="tab-btn" onclick="switchTab('sequence')">Sequence</button>
         </div>
 
-        <!-- TAB 1: SEARCH -->
-        <div class="tab-panel active" id="search-panel">
+        <!-- TAB: Lead Finder -->
+        <div class="tab-panel active" id="tab-leads">
             <div class="card">
-                <h2>Search for Leads</h2>
+                <h2>&#128269; Lead Finder</h2>
                 <div class="form-row">
                     <div class="field">
-                        <label>Keyword/Business Type</label>
-                        <input type="text" id="search-keyword" placeholder="e.g., dentist, plumber, restaurant">
+                        <label>Industry / Niche</label>
+                        <input type="text" placeholder="e.g. SaaS, eCommerce, Agencies">
                     </div>
                     <div class="field">
-                        <label>City/Location</label>
-                        <input type="text" id="search-city" placeholder="e.g., Halifax, Toronto">
-                    </div>
-                    <div class="field" style="flex: 0 0 140px;">
-                        <label>Max Results</label>
-                        <input type="number" id="search-max" value="20" min="1" max="50">
-                    </div>
-                </div>
-                <button class="btn btn-primary" id="search-btn">
-                    Search Leads
-                </button>
-            </div>
-
-            <div id="search-results" style="display: none;">
-                <div class="results-container">
-                    <div class="results-header">
-                        <h3>Search Results (<span id="search-count">0</span>)</h3>
-                        <div class="results-actions">
-                            <button class="btn btn-secondary" id="select-all-search">Select All</button>
-                            <button class="btn btn-primary" id="enrich-selected">Enrich Selected</button>
-                        </div>
-                    </div>
-                    <div style="overflow-x: auto;">
-                        <table id="search-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 40px;"><input type="checkbox" id="select-all-checkbox"></th>
-                                    <th>Name</th>
-                                    <th>Address</th>
-                                    <th>Phone</th>
-                                    <th>Website</th>
-                                    <th>Rating</th>
-                                    <th>Reviews</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
+                        <label>Company Size</label>
+                        <select>
+                            <option>1-10 employees</option>
+                            <option>11-50 employees</option>
+                            <option>51-200 employees</option>
+                            <option>200+ employees</option>
+                        </select>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- TAB 2: ENRICH -->
-        <div class="tab-panel" id="enrich-panel">
-            <div class="card">
-                <h2>AI-Enriched Leads</h2>
-                <p style="color: #666; font-size: 14px; margin-bottom: 16px;">
-                    Select leads from Search tab and click "Enrich Selected" to analyze websites and generate personalized emails.
-                </p>
-                <div id="enrich-status" style="display: none;"></div>
-            </div>
-
-            <div id="enrich-results" style="display: none;">
-                <div class="results-container">
-                    <div class="results-header">
-                        <h3>Enriched Leads (<span id="enrich-count">0</span>)</h3>
-                        <div class="results-actions">
-                            <button class="btn btn-secondary" id="select-all-enrich">Select All</button>
-                            <button class="btn btn-primary" id="export-selected">Export Selected</button>
-                        </div>
+                <div class="form-row">
+                    <div class="field">
+                        <label>Location</label>
+                        <input type="text" placeholder="e.g. United States, Canada">
                     </div>
-                    <div id="enrich-table-container"></div>
+                    <div class="field">
+                        <label>Number of Leads</label>
+                        <input type="number" placeholder="50" min="1" max="500">
+                    </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- TAB 3: EXPORT -->
-        <div class="tab-panel" id="export-panel">
-            <div class="card">
-                <h2>Export Leads</h2>
-                <p style="color: #666; font-size: 14px; margin-bottom: 20px;">
-                    Export your enriched leads to CSV or JSON format.
-                </p>
                 <div class="field">
-                    <label>Export Format</label>
-                    <select id="export-format">
-                        <option value="csv">CSV (Spreadsheet)</option>
-                        <option value="json">JSON (Developer)</option>
+                    <label>Keywords / Job Titles</label>
+                    <input type="text" placeholder="e.g. CEO, Founder, Head of Marketing">
+                    <p class="help-text">Separate multiple titles with commas</p>
+                </div>
+                <button class="btn-run">Find Leads</button>
+            </div>
+            <div class="card">
+                <h2>&#128203; Results</h2>
+                <div class="output-area">Results will appear here after running the lead finder...</div>
+            </div>
+        </div>
+
+        <!-- TAB: Email Writer -->
+        <div class="tab-panel" id="tab-email">
+            <div class="card">
+                <h2>&#9993; Email Writer</h2>
+                <div class="form-row">
+                    <div class="field">
+                        <label>Prospect Name</label>
+                        <input type="text" placeholder="e.g. John Smith">
+                    </div>
+                    <div class="field">
+                        <label>Company Name</label>
+                        <input type="text" placeholder="e.g. Acme Corp">
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Your Offer / Value Proposition</label>
+                    <textarea placeholder="e.g. We help SaaS companies increase trial-to-paid conversions by 40% using AI-powered onboarding flows..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="field">
+                        <label>Tone</label>
+                        <select>
+                            <option>Professional</option>
+                            <option>Casual</option>
+                            <option>Bold</option>
+                            <option>Friendly</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Email Length</label>
+                        <select>
+                            <option>Short (3-4 lines)</option>
+                            <option>Medium (5-7 lines)</option>
+                            <option>Long (full pitch)</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn-run">Generate Email</button>
+            </div>
+            <div class="card">
+                <h2>&#128394; Generated Email</h2>
+                <div class="output-area">Your personalized email will appear here...</div>
+            </div>
+        </div>
+
+        <!-- TAB: Mockup Gen -->
+        <div class="tab-panel" id="tab-mockup">
+            <div class="card">
+                <h2>&#127912; Mockup Generator</h2>
+                <div class="form-row">
+                    <div class="field">
+                        <label>Brand / Company Name</label>
+                        <input type="text" placeholder="e.g. Acme Corp">
+                    </div>
+                    <div class="field">
+                        <label>Brand Colors (hex)</label>
+                        <input type="text" placeholder="e.g. #FF5733, #2C3E50">
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Mockup Type</label>
+                    <select>
+                        <option>Landing Page</option>
+                        <option>Email Campaign</option>
+                        <option>Social Media Ad</option>
+                        <option>Product Banner</option>
+                        <option>Logo Concept</option>
                     </select>
                 </div>
-                <button class="btn btn-primary" id="export-btn" disabled>
-                    Download Export
-                </button>
-                <p class="help-text" style="margin-top: 12px;">
-                    You need to enrich at least one lead before exporting.
-                </p>
+                <div class="field">
+                    <label>Description / Context</label>
+                    <textarea placeholder="Describe the brand, their audience, and what you want the mockup to showcase..."></textarea>
+                </div>
+                <button class="btn-run">Generate Mockup</button>
             </div>
-        </div>
-
-        <!-- TAB 4: MOCKUP GENERATOR -->
-        <div class="tab-panel" id="mockup-panel">
             <div class="card">
-                <h2>Website Mockup Generator</h2>
-                <p style="color: #666; font-size: 14px; margin-bottom: 20px;">
-                    Generate a professional website mockup for any business in seconds.
-                </p>
-                
-                <div class="form-row">
-                    <div class="field">
-                        <label>Business Name *</label>
-                        <input type="text" id="mockup-name" placeholder="e.g., Joe's Plumbing">
-                    </div>
-                    <div class="field">
-                        <label>City *</label>
-                        <input type="text" id="mockup-city" placeholder="e.g., Halifax">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="field">
-                        <label>Category/Type *</label>
-                        <input type="text" id="mockup-category" placeholder="e.g., restaurant, plumber, dentist">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="field">
-                        <label>Phone (optional)</label>
-                        <input type="text" id="mockup-phone" placeholder="e.g., (902) 555-0123">
-                    </div>
-                    <div class="field">
-                        <label>Address (optional)</label>
-                        <input type="text" id="mockup-address" placeholder="e.g., 123 Main St, Halifax NS">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="field">
-                        <label>Google Rating (optional)</label>
-                        <input type="text" id="mockup-rating" placeholder="e.g., 4.7">
-                    </div>
-                    <div class="field">
-                        <label>Review Count (optional)</label>
-                        <input type="text" id="mockup-reviews" placeholder="e.g., 142">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="field" style="flex: 1;">
-                        <label>Business Description (optional)</label>
-                        <input type="text" id="mockup-description" placeholder="e.g., Family-owned Italian restaurant since 1985">
-                    </div>
-                </div>
-
-                <button class="btn btn-primary" id="mockup-generate-btn">
-                    Generate Mockup
-                </button>
-
-                <div id="mockup-preview-container" style="display: none;">
-                    <div class="mockup-preview">
-                        <iframe id="mockup-iframe" class="mockup-iframe"></iframe>
-                        <div class="mockup-actions">
-                            <button class="btn btn-primary" id="mockup-fullscreen">Open Full Screen</button>
-                            <button class="btn btn-secondary" id="mockup-copy-html">Copy HTML</button>
-                        </div>
-                    </div>
-                </div>
+                <h2>&#128247; Preview</h2>
+                <div class="output-area">Mockup preview will render here after generation...</div>
             </div>
         </div>
-    </div>
+
+        <!-- TAB: Sequence -->
+        <div class="tab-panel" id="tab-sequence">
+            <div class="card">
+                <h2>&#128336; Outreach Sequence</h2>
+                <div class="form-row">
+                    <div class="field">
+                        <label>Sequence Name</label>
+                        <input type="text" placeholder="e.g. SaaS Founders Q1 2026">
+                    </div>
+                    <div class="field">
+                        <label>Number of Steps</label>
+                        <input type="number" placeholder="5" min="1" max="10">
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Goal</label>
+                    <select>
+                        <option>Book a Call</option>
+                        <option>Drive Sign-ups</option>
+                        <option>Generate Referrals</option>
+                        <option>Nurture Leads</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Follow-up Interval (days)</label>
+                    <input type="number" placeholder="3" min="1" max="30">
+                    <p class="help-text">Days between each follow-up message</p>
+                </div>
+                <button class="btn-run">Build Sequence</button>
+            </div>
+            <div class="card">
+                <h2>&#128233; Sequence Steps</h2>
+                <div class="output-area">Your outreach sequence steps will appear here...</div>
+            </div>
+        </div>
+
+    </div><!-- /container -->
 
     <script>
-        // STATE
-        let searchResults = [];
-        let enrichedResults = [];
-        let selectedSearchIndices = new Set();
-        let selectedEnrichIndices = new Set();
-        let currentMockupHTML = '';
-
-        // TAB SWITCHING
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const tab = btn.dataset.tab;
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-                btn.classList.add('active');
-                document.getElementById(tab + '-panel').classList.add('active');
-            });
-        });
-
-        // SEARCH
-        document.getElementById('search-btn').addEventListener('click', async () => {
-            const keyword = document.getElementById('search-keyword').value.trim();
-            const city = document.getElementById('search-city').value.trim();
-            const maxResults = parseInt(document.getElementById('search-max').value);
-
-            if (!keyword || !city) {
-                alert('Please enter both keyword and city');
-                return;
-            }
-
-            const btn = document.getElementById('search-btn');
-            btn.disabled = true;
-            btn.innerHTML = 'Searching<span class="spinner"></span>';
-
-            try {
-                const response = await fetch('/api/search', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ keyword, city, max_results: maxResults })
-                });
-
-                const data = await response.json();
-                searchResults = data.results || [];
-                selectedSearchIndices.clear();
-                renderSearchResults();
-
-                document.getElementById('search-results').style.display = 'block';
-            } catch (error) {
-                alert('Search failed: ' + error.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = 'Search Leads';
-            }
-        });
-
-        function renderSearchResults() {
-            const tbody = document.querySelector('#search-table tbody');
-            tbody.innerHTML = '';
-            
-            searchResults.forEach((biz, idx) => {
-                const tr = document.createElement('tr');
-                if (selectedSearchIndices.has(idx)) tr.classList.add('selected');
-                
-                const websiteBadge = biz.website ? '<span class="badge valid">Has Site</span>' : '<span class="badge none">No Site</span>';
-                tr.innerHTML = `
-                    <td><input type="checkbox" class="row-select" data-index="${idx}" ${selectedSearchIndices.has(idx) ? 'checked' : ''}></td>
-                    <td>${biz.name || ''}</td>
-                    <td>${biz.address || ''}</td>
-                    <td>${biz.phone || ''}</td>
-                    <td>${biz.website ? `<a href="${biz.website}" target="_blank" style="color: #00ff88;">${biz.website}</a>` : 'N/A'} ${websiteBadge}</td>
-                    <td>${biz.rating ? biz.rating + ' ★' : 'N/A'}</td>
-                    <td>${biz.reviews || 'N/A'}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            document.getElementById('search-count').textContent = searchResults.length;
-
-            document.querySelectorAll('#search-table .row-select').forEach(cb => {
-                cb.addEventListener('change', (e) => {
-                    const idx = parseInt(e.target.dataset.index);
-                    if (e.target.checked) {
-                        selectedSearchIndices.add(idx);
-                    } else {
-                        selectedSearchIndices.delete(idx);
-                    }
-                    renderSearchResults();
-                });
-            });
+        function switchTab(tabName) {
+            // Update buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            // Update panels
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+            document.getElementById('tab-' + tabName).classList.add('active');
         }
-
-        document.getElementById('select-all-checkbox').addEventListener('change', (e) => {
-            if (e.target.checked) {
-                searchResults.forEach((_, idx) => selectedSearchIndices.add(idx));
-            } else {
-                selectedSearchIndices.clear();
-            }
-            renderSearchResults();
-        });
-
-        document.getElementById('select-all-search').addEventListener('click', () => {
-            searchResults.forEach((_, idx) => selectedSearchIndices.add(idx));
-            renderSearchResults();
-            document.getElementById('select-all-checkbox').checked = true;
-        });
-
-        // ENRICH
-        document.getElementById('enrich-selected').addEventListener('click', async () => {
-            if (selectedSearchIndices.size === 0) {
-                alert('Please select at least one lead to enrich');
-                return;
-            }
-
-            const selected = Array.from(selectedSearchIndices).map(idx => searchResults[idx]);
-
-            const btn = document.getElementById('enrich-selected');
-            btn.disabled = true;
-            btn.innerHTML = 'Enriching<span class="spinner"></span>';
-
-            const statusDiv = document.getElementById('enrich-status');
-            statusDiv.style.display = 'block';
-            statusDiv.innerHTML = '<div class="alert alert-success">Enriching ' + selected.length + ' leads with AI... This may take 30-60 seconds.</div>';
-
-            // Switch to enrich tab
-            document.querySelector('[data-tab="enrich"]').click();
-
-            try {
-                const response = await fetch('/api/enrich', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ businesses: selected })
-                });
-
-                const data = await response.json();
-                enrichedResults = data.results || [];
-                selectedEnrichIndices.clear();
-                renderEnrichResults();
-
-                document.getElementById('enrich-results').style.display = 'block';
-                document.getElementById('export-btn').disabled = false;
-                statusDiv.innerHTML = '<div class="alert alert-success">✓ Successfully enriched ' + enrichedResults.length + ' leads!</div>';
-            } catch (error) {
-                statusDiv.innerHTML = '<div class="alert alert-error">Enrichment failed: ' + error.message + '</div>';
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = 'Enrich Selected';
-            }
-        });
-
-        function renderEnrichResults() {
-            const container = document.getElementById('enrich-table-container');
-            container.innerHTML = '';
-
-            enrichedResults.forEach((biz, idx) => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.style.marginBottom = '16px';
-                card.style.background = selectedEnrichIndices.has(idx) ? '#0d1a14' : '#111';
-
-                const painPoints = Array.isArray(biz.pain_points) ? biz.pain_points : [];
-                const painPointsHTML = painPoints.length > 0 
-                    ? `<ul class="pain-points-list">${painPoints.map(p => `<li>${p}</li>`).join('')}</ul>`
-                    : '<span style="color: #555;">No pain points identified</span>';
-
-                card.innerHTML = `
-                    <div style="display: flex; align-items: start; gap: 12px; margin-bottom: 12px;">
-                        <input type="checkbox" class="enrich-select" data-index="${idx}" ${selectedEnrichIndices.has(idx) ? 'checked' : ''}>
-                        <div style="flex: 1;">
-                            <h3 style="font-size: 16px; margin-bottom: 4px; color: #00ff88;">${biz.name}</h3>
-                            <p style="font-size: 13px; color: #888; margin-bottom: 8px;">
-                                ${biz.address || 'No address'} ${biz.phone ? '• ' + biz.phone : ''} ${biz.website ? '• <a href="' + biz.website + '" target="_blank" style="color: #00ff88;">' + biz.website + '</a>' : ''}
-                            </p>
-                        </div>
-                        ${biz.pain_points && biz.pain_points.length > 0 ? '<span class="badge badge-success">Analyzed</span>' : '<span class="badge badge-warning">No Website</span>'}
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
-                        <div>
-                            <label style="display: block; font-size: 12px; font-weight: 600; color: #888; margin-bottom: 6px;">Pain Points Identified</label>
-                            ${painPointsHTML}
-                        </div>
-                        <div>
-                            <label style="display: block; font-size: 12px; font-weight: 600; color: #888; margin-bottom: 6px;">Generated Outreach Email</label>
-                            <div class="email-preview">${biz.outreach_email || 'No email generated'}</div>
-                        </div>
-                    </div>
-                `;
-
-                container.appendChild(card);
-            });
-
-            document.getElementById('enrich-count').textContent = enrichedResults.length;
-
-            document.querySelectorAll('.enrich-select').forEach(cb => {
-                cb.addEventListener('change', (e) => {
-                    const idx = parseInt(e.target.dataset.index);
-                    if (e.target.checked) {
-                        selectedEnrichIndices.add(idx);
-                    } else {
-                        selectedEnrichIndices.delete(idx);
-                    }
-                    renderEnrichResults();
-                });
-            });
-        }
-
-        document.getElementById('select-all-enrich').addEventListener('click', () => {
-            enrichedResults.forEach((_, idx) => selectedEnrichIndices.add(idx));
-            renderEnrichResults();
-        });
-
-        // EXPORT
-        document.getElementById('export-selected').addEventListener('click', () => {
-            if (selectedEnrichIndices.size === 0) {
-                alert('Please select at least one enriched lead to export');
-                return;
-            }
-            document.querySelector('[data-tab="export"]').click();
-        });
-
-        document.getElementById('export-btn').addEventListener('click', async () => {
-            const toExport = selectedEnrichIndices.size > 0 
-                ? Array.from(selectedEnrichIndices).map(idx => enrichedResults[idx])
-                : enrichedResults;
-
-            const format = document.getElementById('export-format').value;
-
-            try {
-                const response = await fetch('/api/export', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ businesses: toExport, format })
-                });
-
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `leads.${format}`;
-                a.click();
-                window.URL.revokeObjectURL(url);
-            } catch (error) {
-                alert('Export failed: ' + error.message);
-            }
-        });
-
-        // MOCKUP GENERATOR
-        document.getElementById('mockup-generate-btn').addEventListener('click', async () => {
-            const name = document.getElementById('mockup-name').value.trim();
-            const city = document.getElementById('mockup-city').value.trim();
-            const category = document.getElementById('mockup-category').value.trim();
-            const phone = document.getElementById('mockup-phone').value.trim();
-            const address = document.getElementById('mockup-address').value.trim();
-            const rating = document.getElementById('mockup-rating').value.trim();
-            const review_count = document.getElementById('mockup-reviews').value.trim();
-            const description = document.getElementById('mockup-description').value.trim();
-
-            if (!name || !city || !category) {
-                alert('Please fill in Business Name, City, and Category');
-                return;
-            }
-
-            const btn = document.getElementById('mockup-generate-btn');
-            btn.disabled = true;
-            btn.innerHTML = 'Generating<span class="spinner"></span>';
-
-            try {
-                const response = await fetch('/api/mockup', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, city, category, phone, address, rating, review_count, description })
-                });
-
-                if (!response.ok) {
-                    throw new Error('Mockup generation failed');
-                }
-
-                const data = await response.json();
-                currentMockupHTML = data.html;
-
-                // Display in iframe
-                const iframe = document.getElementById('mockup-iframe');
-                iframe.srcdoc = currentMockupHTML;
-
-                document.getElementById('mockup-preview-container').style.display = 'block';
-            } catch (error) {
-                alert('Mockup generation failed: ' + error.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = 'Generate Mockup';
-            }
-        });
-
-        document.getElementById('mockup-fullscreen').addEventListener('click', () => {
-            const blob = new Blob([currentMockupHTML], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            window.open(url, '_blank');
-        });
-
-        document.getElementById('mockup-copy-html').addEventListener('click', () => {
-            navigator.clipboard.writeText(currentMockupHTML).then(() => {
-                const btn = document.getElementById('mockup-copy-html');
-                const originalText = btn.textContent;
-                btn.textContent = '✓ Copied!';
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                }, 2000);
-            }).catch(err => {
-                alert('Failed to copy: ' + err.message);
-            });
-        });
     </script>
 </body>
 </html>
