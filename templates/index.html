@@ -649,14 +649,165 @@
     </div><!-- /container -->
 
     <script>
+        // -- Tab switching
         function switchTab(tabName) {
-            // Update buttons
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
-            // Update panels
             document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
             document.getElementById('tab-' + tabName).classList.add('active');
         }
+
+        // -- Helpers
+        function setOutput(el, html) { el.innerHTML = html; }
+        function setLoading(el, msg) { el.innerHTML = `<em style="color:#aaa">${msg}</em>`; }
+        function setError(el, msg)   { el.innerHTML = `<span style="color:#f87171">Error: ${msg}</span>`; }
+
+        async function apiFetch(endpoint, body) {
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({ error: res.statusText }));
+                throw new Error(err.error || res.statusText);
+            }
+            return res.json();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // ---- Search tab ----
+            const searchBtn = document.querySelector('#tab-search .btn-run');
+            if (searchBtn) {
+                searchBtn.addEventListener('click', async () => {
+                    const panel  = document.getElementById('tab-search');
+                    const inputs = panel.querySelectorAll('input, select, textarea');
+                    const out    = panel.querySelector('.output-area');
+                    const body   = {};
+                    inputs.forEach(el => {
+                        if (el.placeholder) body[el.placeholder.toLowerCase().replace(/\s+/g,'_')] = el.value;
+                        if (el.name)        body[el.name] = el.value;
+                    });
+                    const labels = panel.querySelectorAll('label');
+                    labels.forEach((lbl, i) => {
+                        const inp = inputs[i];
+                        if (inp) body[lbl.textContent.trim().toLowerCase().replace(/\s+/g,'_')] = inp.value;
+                    });
+                    setLoading(out, 'Searching for leads...');
+                    try {
+                        const data = await apiFetch('/api/search', body);
+                        if (data.results && data.results.length) {
+                            const rows = data.results.map(r =>
+                                `<div style="border:1px solid #2a2a2a;border-radius:8px;padding:12px;margin-bottom:10px;">
+                                    <strong>${r.name || r.business_name || 'Business'}</strong>
+                                    ${r.address ? `<br><span style="color:#aaa">${r.address}</span>` : ''}
+                                    ${r.phone    ? `<br>&#128222; ${r.phone}` : ''}
+                                    ${r.rating   ? `<br>&#11088; ${r.rating} (${r.reviews || r.review_count || 0} reviews)` : ''}
+                                    ${r.website  ? `<br><a href="${r.website}" target="_blank" style="color:#4ade80">${r.website}</a>` : ''}
+                                </div>`
+                            ).join('');
+                            setOutput(out, `<p style="color:#4ade80;margin-bottom:12px">Found ${data.results.length} results</p>${rows}`);
+                        } else {
+                            setOutput(out, '<em style="color:#aaa">No results found.</em>');
+                        }
+                    } catch(e) { setError(out, e.message); }
+                });
+            }
+
+            // ---- Enrich tab (/api/enrich) ----
+            const enrichBtn = document.querySelector('#tab-enrich .btn-run');
+            if (enrichBtn) {
+                enrichBtn.addEventListener('click', async () => {
+                    const panel  = document.getElementById('tab-enrich');
+                    const inputs = panel.querySelectorAll('input, textarea');
+                    const out    = panel.querySelector('.output-area');
+                    const body   = {};
+                    const labels = panel.querySelectorAll('label');
+                    labels.forEach((lbl, i) => {
+                        const inp = inputs[i];
+                        if (inp) body[lbl.textContent.trim().toLowerCase().replace(/[\s\/]+/g,'_')] = inp.value;
+                    });
+                    setLoading(out, 'Enriching lead data...');
+                    try {
+                        const data = await apiFetch('/api/enrich', body);
+                        const result = data.enriched || data;
+                        setOutput(out, `<pre style="white-space:pre-wrap;font-size:13px;color:#d4d4d4">${JSON.stringify(result, null, 2)}</pre>`);
+                    } catch(e) { setError(out, e.message); }
+                });
+            }
+
+            // ---- Export tab (/api/export) ----
+            const exportBtn = document.querySelector('#tab-export .btn-run');
+            if (exportBtn) {
+                exportBtn.addEventListener('click', async () => {
+                    const panel  = document.getElementById('tab-export');
+                    const inputs = panel.querySelectorAll('input, select, textarea');
+                    const out    = panel.querySelector('.output-area');
+                    const body   = {};
+                    const labels = panel.querySelectorAll('label');
+                    labels.forEach((lbl, i) => {
+                        const inp = inputs[i];
+                        if (inp) body[lbl.textContent.trim().toLowerCase().replace(/\s+/g,'_')] = inp.value || inp.options?.[inp.selectedIndex]?.value;
+                    });
+                    setLoading(out, 'Generating export...');
+                    try {
+                        const data = await apiFetch('/api/export', body);
+                        if (data.csv || data.content) {
+                            const blob = new Blob([data.csv || data.content], { type: 'text/csv' });
+                            const url  = URL.createObjectURL(blob);
+                            setOutput(out, `<p style="color:#4ade80">Export ready!</p><a href="${url}" download="leads_export.csv" style="color:#4ade80;text-decoration:underline">Download CSV</a>`);
+                        } else {
+                            setOutput(out, `<pre style="white-space:pre-wrap;font-size:13px;color:#d4d4d4">${JSON.stringify(data, null, 2)}</pre>`);
+                        }
+                    } catch(e) { setError(out, e.message); }
+                });
+            }
+
+            // ---- Mockup tab (/api/mockup) ----
+            const mockupBtn = document.querySelector('#tab-mockup .btn-run');
+            if (mockupBtn) {
+                mockupBtn.addEventListener('click', async () => {
+                    const panel  = document.getElementById('tab-mockup');
+                    const inputs = panel.querySelectorAll('input, select, textarea');
+                    const out    = panel.querySelector('.output-area');
+                    const body   = {};
+                    const labels = panel.querySelectorAll('label');
+                    labels.forEach((lbl, i) => {
+                        const inp = inputs[i];
+                        if (!inp) return;
+                        const key = lbl.textContent.trim().toLowerCase().replace(/[\s\/]+/g,'_').replace(/[^a-z0-9_]/g,'');
+                        body[key] = inp.tagName === 'SELECT'
+                            ? inp.options[inp.selectedIndex]?.value
+                            : inp.value;
+                    });
+                    const payload = {
+                        business_name: body.business_name || body.name || '',
+                        city:          body.city || '',
+                        category:      body.category || body.business_type || 'restaurant',
+                        phone:         body.phone || '',
+                        address:       body.address || '',
+                        rating:        parseFloat(body.rating) || 4.5,
+                        reviews:       parseInt(body.reviews || body.review_count) || 50,
+                        description:   body.description || body.description__context || ''
+                    };
+                    setLoading(out, 'Building stunning mockup...');
+                    try {
+                        const data = await apiFetch('/api/mockup', payload);
+                        if (data.html) {
+                            const iframe = document.createElement('iframe');
+                            iframe.style.cssText = 'width:100%;height:600px;border:none;border-radius:8px;margin-top:12px;';
+                            out.innerHTML = '<p style="color:#4ade80;margin-bottom:8px">Mockup ready! Scroll to preview:</p>';
+                            out.appendChild(iframe);
+                            iframe.contentDocument.open();
+                            iframe.contentDocument.write(data.html);
+                            iframe.contentDocument.close();
+                        } else {
+                            setError(out, data.error || 'No HTML returned');
+                        }
+                    } catch(e) { setError(out, e.message); }
+                });
+            }
+        });
     </script>
 </body>
 </html>
