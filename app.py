@@ -37,7 +37,13 @@ def gemini_generate(prompt, retries=3):
         for attempt in range(retries):
             try:
                 client = get_gemini_client(model)
-                response = client.generate_content(prompt)
+                response = client.generate_content(
+                    prompt,
+                    generation_config=genai.types.GenerationConfig(
+                        max_output_tokens=4096,
+                        temperature=0.7,
+                    )
+                )
                 return response
             except Exception as e:
                 err_str = str(e)
@@ -46,6 +52,35 @@ def gemini_generate(prompt, retries=3):
                     wait = (attempt + 1) * 10
                     logger.warning(f"Quota hit on {model} attempt {attempt+1}, waiting {wait}s: {e}")
                     time.sleep(wait)
+                    continue
+                else:
+                    logger.error(f"Gemini error on {model}: {e}")
+                    break
+    raise Exception(f"All Gemini models failed. Last error: {last_err}")
+
+def gemini_generate_long(prompt, retries=3):
+    """For HTML mockup generation — uses Pro model with high token limit."""
+    models = ['gemini-1.5-pro', 'gemini-1.5-flash']
+    last_err = None
+    for model in models:
+        for attempt in range(retries):
+            try:
+                client = get_gemini_client(model)
+                response = client.generate_content(
+                    prompt,
+                    generation_config=genai.types.GenerationConfig(
+                        max_output_tokens=8192,
+                        temperature=0.8,
+                    )
+                )
+                return response
+            except Exception as e:
+                last_err = e
+                err_str = str(e)
+                if '429' in err_str or 'quota' in err_str.lower() or 'exhausted' in err_str.lower():
+                    wait = (attempt + 1) * 10
+                    logger.warning(f"Quota hit on {model} attempt {attempt+1}, waiting {wait}s: {e}")
+                    import time; time.sleep(wait)
                     continue
                 else:
                     logger.error(f"Gemini error on {model}: {e}")
@@ -327,7 +362,7 @@ TECHNICAL REQUIREMENTS:
 
 Return ONLY the complete HTML document starting with <!DOCTYPE html>. No markdown, no explanation, no commentary before or after."""
 
-        response = gemini_generate(prompt)
+        response = gemini_generate_long(prompt)
         html = response.text.strip()
         if '```' in html:
             parts = html.split('```')
