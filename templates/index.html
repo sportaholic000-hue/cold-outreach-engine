@@ -145,17 +145,17 @@ iframe{width:100%;height:600px;border:none;background:#fff}
   </div>
   <div class="reviews">
     <div class="review-card">
-      <div class="review-stars">★★★★★</div>
+      <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
       <div class="review-text">"Booked 4 calls in my first week. The email writer is insane."</div>
       <div class="review-author">Sarah K. — Freelance Designer</div>
     </div>
     <div class="review-card">
-      <div class="review-stars">★★★★★</div>
+      <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
       <div class="review-text">"Finally a lead tool that actually finds real contacts."</div>
       <div class="review-author">Marcus T. — Agency Owner</div>
     </div>
     <div class="review-card">
-      <div class="review-stars">★★★★★</div>
+      <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
       <div class="review-text">"The mockup generator closes clients before the sales call."</div>
       <div class="review-author">Priya S. — Web Consultant</div>
     </div>
@@ -165,10 +165,10 @@ iframe{width:100%;height:600px;border:none;background:#fff}
 <!-- APP -->
 <div class="app-shell">
   <div class="tab-nav">
-    <button class="tab-btn active" data-tab="leads">🔍 Lead Finder</button>
-    <button class="tab-btn" data-tab="email">✉️ Email Writer</button>
-    <button class="tab-btn" data-tab="mockup">🎨 Mockup Gen</button>
-    <button class="tab-btn" data-tab="sequence">⚡ Sequence</button>
+    <button class="tab-btn active" data-tab="leads">&#128269; Lead Finder</button>
+    <button class="tab-btn" data-tab="email">&#9993;&#65039; Email Writer</button>
+    <button class="tab-btn" data-tab="mockup">&#127912; Mockup Gen</button>
+    <button class="tab-btn" data-tab="sequence">&#9889; Sequence</button>
   </div>
 
   <!-- TAB 1: LEAD FINDER -->
@@ -193,10 +193,10 @@ iframe{width:100%;height:600px;border:none;background:#fff}
           <label>Company Size</label>
           <select id="lead-size">
             <option value="Any">Any size</option>
-            <option value="1-10">1–10 employees (micro)</option>
-            <option value="11-50">11–50 employees (small)</option>
-            <option value="51-200">51–200 employees (mid)</option>
-            <option value="201-500">201–500 employees (growth)</option>
+            <option value="1-10">1-10 employees (micro)</option>
+            <option value="11-50">11-50 employees (small)</option>
+            <option value="51-200">51-200 employees (mid)</option>
+            <option value="201-500">201-500 employees (growth)</option>
             <option value="500+">500+ employees (enterprise)</option>
           </select>
         </div>
@@ -212,10 +212,10 @@ iframe{width:100%;height:600px;border:none;background:#fff}
       <div class="btn-row">
         <button class="btn btn-primary" id="btn-search">
           <span id="search-spinner" class="spinner" style="display:none"></span>
-          🔍 Find Leads
+          &#128269; Find Leads
         </button>
-        <button class="btn btn-secondary" id="btn-export-csv" style="display:none">⬇️ Export CSV</button>
-        <button class="btn btn-secondary" id="btn-export-json" style="display:none">⬇️ Export JSON</button>
+        <button class="btn btn-secondary" id="btn-export-csv" style="display:none">&#11015;&#65039; Export CSV</button>
+        <button class="btn btn-secondary" id="btn-export-json" style="display:none">&#11015;&#65039; Export JSON</button>
       </div>
     </div>
     <div class="error-box" id="search-error"></div>
@@ -256,7 +256,7 @@ iframe{width:100%;height:600px;border:none;background:#fff}
       <div class="btn-row">
         <button class="btn btn-primary" id="btn-email">
           <span id="email-spinner" class="spinner" style="display:none"></span>
-          ✉️ Generate Email
+          &#9993;&#65039; Generate Email
         </button>
       </div>
     </div>
@@ -308,7 +308,7 @@ iframe{width:100%;height:600px;border:none;background:#fff}
       <div class="btn-row">
         <button class="btn btn-primary" id="btn-mockup">
           <span id="mockup-spinner" class="spinner" style="display:none"></span>
-          🎨 Generate Mockup
+          &#127912; Generate Mockup
         </button>
       </div>
     </div>
@@ -346,7 +346,7 @@ iframe{width:100%;height:600px;border:none;background:#fff}
       <div class="btn-row">
         <button class="btn btn-primary" id="btn-sequence">
           <span id="seq-spinner" class="spinner" style="display:none"></span>
-          ⚡ Build Sequence
+          &#9889; Build Sequence
         </button>
       </div>
     </div>
@@ -448,9 +448,9 @@ document.getElementById('btn-search').addEventListener('click', async () => {
         <td>${l.contact_title || ''}</td>
         <td>${l.email ? `<a href="mailto:${l.email}">${l.email}</a>` : ''}</td>
         <td>${l.phone || ''}</td>
-        <td>${l.website ? `<a href="${l.website}" target="_blank">🔗 Site</a>` : ''}</td>
+        <td>${l.website ? `<a href="${l.website}" target="_blank">&#128279; Site</a>` : ''}</td>
         <td>${l.employees || ''}</td>
-        <td>${l.rating ? '⭐ ' + l.rating : ''}</td>
+        <td>${l.rating ? '&#11088; ' + l.rating : ''}</td>
       `;
       tbody.appendChild(tr);
     });
@@ -640,7 +640,7 @@ document.getElementById('btn-sequence').addEventListener('click', async () => {
           <span class="seq-day">Day ${step.day}</span>
           <span class="seq-purpose">${step.purpose || ''}</span>
         </div>
-        <div class="seq-subject">📧 ${step.subject}</div>
+        <div class="seq-subject">&#128231; ${step.subject}</div>
         <div class="seq-body">${step.body}</div>
       `;
       container.appendChild(div);
