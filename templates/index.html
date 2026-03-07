@@ -20,7 +20,6 @@
 }
 body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
 
-/* ── HERO ── */
 .hero{position:relative;padding:80px 24px 60px;text-align:center;overflow:hidden}
 .orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.35;pointer-events:none}
 .orb1{width:500px;height:500px;background:radial-gradient(circle,#00ff88,transparent);top:-150px;left:50%;transform:translateX(-50%)}
@@ -42,7 +41,6 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 .review-text{font-size:13px;color:var(--muted);margin-bottom:8px}
 .review-author{font-size:12px;font-weight:600}
 
-/* ── TABS ── */
 .app-shell{max-width:900px;margin:0 auto;padding:0 24px 80px}
 .tab-nav{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:24px}
 .tab-btn{flex:1;padding:10px;border:none;border-radius:8px;background:transparent;color:var(--muted);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s}
@@ -51,7 +49,6 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 .tab-panel{display:none}
 .tab-panel.active{display:block}
 
-/* ── CARDS / FORMS ── */
 .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:20px}
 .card h2{font-size:1.1rem;font-weight:700;margin-bottom:6px}
 .card p.desc{font-size:13px;color:var(--muted);margin-bottom:24px}
@@ -72,14 +69,12 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 .btn-secondary:hover{border-color:var(--primary);color:var(--primary)}
 .btn-row{display:flex;gap:12px;align-items:center;margin-top:20px;flex-wrap:wrap}
 
-/* ── RESULTS ── */
 .result-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:20px;display:none}
 .result-box.visible{display:block}
 .result-box h3{font-size:14px;font-weight:700;margin-bottom:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
 .error-box{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:12px 16px;color:#fca5a5;font-size:14px;margin-top:16px;display:none}
 .error-box.visible{display:block}
 
-/* ── LEADS TABLE ── */
 .leads-table-wrap{overflow-x:auto;margin-top:12px}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{background:rgba(0,255,136,.1);color:var(--primary);font-weight:600;padding:10px 12px;text-align:left;white-space:nowrap}
@@ -88,20 +83,17 @@ td a{color:var(--primary);text-decoration:none}
 td a:hover{text-decoration:underline}
 tr:hover td{background:rgba(255,255,255,.02)}
 
-/* ── EMAIL OUTPUT ── */
 .email-output{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:20px;font-size:14px;line-height:1.7}
 .email-subject{font-weight:700;font-size:15px;margin-bottom:4px}
 .email-preview{font-size:12px;color:var(--muted);margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)}
 .email-body{white-space:pre-wrap;color:var(--text)}
 
-/* ── MOCKUP FRAME ── */
 .mockup-frame-wrap{margin-top:20px;border:1px solid var(--border);border-radius:12px;overflow:hidden}
 .mockup-toolbar{display:flex;align-items:center;gap:8px;background:var(--surface);padding:10px 16px;border-bottom:1px solid var(--border)}
 .dot{width:10px;height:10px;border-radius:50%}
 .dot-r{background:#ef4444}.dot-y{background:#f59e0b}.dot-g{background:#22c55e}
 iframe{width:100%;height:600px;border:none;background:#fff}
 
-/* ── SEQUENCE ── */
 .seq-step{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:12px;position:relative}
 .seq-step-header{display:flex;align-items:center;gap:12px;margin-bottom:10px}
 .seq-badge{background:linear-gradient(135deg,#00ff88,#00ff88);color:#fff;border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;white-space:nowrap}
@@ -110,11 +102,9 @@ iframe{width:100%;height:600px;border:none;background:#fff}
 .seq-subject{font-weight:700;font-size:14px;margin-bottom:6px}
 .seq-body{font-size:13px;color:var(--muted);white-space:pre-wrap;line-height:1.6}
 
-/* ── SPINNER ── */
 .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ── COPY BTN ── */
 .copy-btn{padding:6px 12px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .2s}
 .copy-btn:hover{border-color:var(--primary);color:var(--primary)}
 
@@ -145,17 +135,17 @@ iframe{width:100%;height:600px;border:none;background:#fff}
   </div>
   <div class="reviews">
     <div class="review-card">
-      <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <div class="review-stars">★★★★★</div>
       <div class="review-text">"Booked 4 calls in my first week. The email writer is insane."</div>
       <div class="review-author">Sarah K. — Freelance Designer</div>
     </div>
     <div class="review-card">
-      <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <div class="review-stars">★★★★★</div>
       <div class="review-text">"Finally a lead tool that actually finds real contacts."</div>
       <div class="review-author">Marcus T. — Agency Owner</div>
     </div>
     <div class="review-card">
-      <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <div class="review-stars">★★★★★</div>
       <div class="review-text">"The mockup generator closes clients before the sales call."</div>
       <div class="review-author">Priya S. — Web Consultant</div>
     </div>
@@ -165,10 +155,10 @@ iframe{width:100%;height:600px;border:none;background:#fff}
 <!-- APP -->
 <div class="app-shell">
   <div class="tab-nav">
-    <button class="tab-btn active" data-tab="leads">&#128269; Lead Finder</button>
-    <button class="tab-btn" data-tab="email">&#9993;&#65039; Email Writer</button>
-    <button class="tab-btn" data-tab="mockup">&#127912; Mockup Gen</button>
-    <button class="tab-btn" data-tab="sequence">&#9889; Sequence</button>
+    <button class="tab-btn active" data-tab="leads">🔍 Lead Finder</button>
+    <button class="tab-btn" data-tab="email">✉️ Email Writer</button>
+    <button class="tab-btn" data-tab="mockup">🎨 Mockup Gen</button>
+    <button class="tab-btn" data-tab="sequence">⚡ Sequence</button>
   </div>
 
   <!-- TAB 1: LEAD FINDER -->
@@ -193,10 +183,10 @@ iframe{width:100%;height:600px;border:none;background:#fff}
           <label>Company Size</label>
           <select id="lead-size">
             <option value="Any">Any size</option>
-            <option value="1-10">1-10 employees (micro)</option>
-            <option value="11-50">11-50 employees (small)</option>
-            <option value="51-200">51-200 employees (mid)</option>
-            <option value="201-500">201-500 employees (growth)</option>
+            <option value="1-10">1–10 employees (micro)</option>
+            <option value="11-50">11–50 employees (small)</option>
+            <option value="51-200">51–200 employees (mid)</option>
+            <option value="201-500">201–500 employees (growth)</option>
             <option value="500+">500+ employees (enterprise)</option>
           </select>
         </div>
@@ -212,10 +202,10 @@ iframe{width:100%;height:600px;border:none;background:#fff}
       <div class="btn-row">
         <button class="btn btn-primary" id="btn-search">
           <span id="search-spinner" class="spinner" style="display:none"></span>
-          &#128269; Find Leads
+          🔍 Find Leads
         </button>
-        <button class="btn btn-secondary" id="btn-export-csv" style="display:none">&#11015;&#65039; Export CSV</button>
-        <button class="btn btn-secondary" id="btn-export-json" style="display:none">&#11015;&#65039; Export JSON</button>
+        <button class="btn btn-secondary" id="btn-export-csv" style="display:none">⬇️ Export CSV</button>
+        <button class="btn btn-secondary" id="btn-export-json" style="display:none">⬇️ Export JSON</button>
       </div>
     </div>
     <div class="error-box" id="search-error"></div>
@@ -256,7 +246,7 @@ iframe{width:100%;height:600px;border:none;background:#fff}
       <div class="btn-row">
         <button class="btn btn-primary" id="btn-email">
           <span id="email-spinner" class="spinner" style="display:none"></span>
-          &#9993;&#65039; Generate Email
+          ✉️ Generate Email
         </button>
       </div>
     </div>
@@ -308,7 +298,7 @@ iframe{width:100%;height:600px;border:none;background:#fff}
       <div class="btn-row">
         <button class="btn btn-primary" id="btn-mockup">
           <span id="mockup-spinner" class="spinner" style="display:none"></span>
-          &#127912; Generate Mockup
+          🎨 Generate Mockup
         </button>
       </div>
     </div>
@@ -346,7 +336,7 @@ iframe{width:100%;height:600px;border:none;background:#fff}
       <div class="btn-row">
         <button class="btn btn-primary" id="btn-sequence">
           <span id="seq-spinner" class="spinner" style="display:none"></span>
-          &#9889; Build Sequence
+          ⚡ Build Sequence
         </button>
       </div>
     </div>
@@ -360,7 +350,6 @@ iframe{width:100%;height:600px;border:none;background:#fff}
 </div><!-- end app-shell -->
 
 <script>
-// ── TAB SWITCHING ──
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -370,7 +359,6 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
-// ── HELPERS ──
 function showError(id, msg) {
   const el = document.getElementById(id);
   el.textContent = '⚠️ ' + msg;
@@ -407,9 +395,6 @@ function copyText(text) {
   });
 }
 
-// ═══════════════════════════════════════
-// LEAD FINDER
-// ═══════════════════════════════════════
 let _lastLeads = [];
 
 document.getElementById('btn-search').addEventListener('click', async () => {
@@ -448,9 +433,9 @@ document.getElementById('btn-search').addEventListener('click', async () => {
         <td>${l.contact_title || ''}</td>
         <td>${l.email ? `<a href="mailto:${l.email}">${l.email}</a>` : ''}</td>
         <td>${l.phone || ''}</td>
-        <td>${l.website ? `<a href="${l.website}" target="_blank">&#128279; Site</a>` : ''}</td>
+        <td>${l.website ? `<a href="${l.website}" target="_blank">🔗 Site</a>` : ''}</td>
         <td>${l.employees || ''}</td>
-        <td>${l.rating ? '&#11088; ' + l.rating : ''}</td>
+        <td>${l.rating ? '⭐ ' + l.rating : ''}</td>
       `;
       tbody.appendChild(tr);
     });
@@ -466,7 +451,6 @@ document.getElementById('btn-search').addEventListener('click', async () => {
   setLoading(btn, 'search-spinner', false);
 });
 
-// CSV Export
 document.getElementById('btn-export-csv').addEventListener('click', async () => {
   if (!_lastLeads.length) return;
   try {
@@ -483,7 +467,6 @@ document.getElementById('btn-export-csv').addEventListener('click', async () => 
   } catch(e) { alert('Export failed: ' + e.message); }
 });
 
-// JSON Export
 document.getElementById('btn-export-json').addEventListener('click', async () => {
   if (!_lastLeads.length) return;
   try {
@@ -500,9 +483,6 @@ document.getElementById('btn-export-json').addEventListener('click', async () =>
   } catch(e) { alert('Export failed: ' + e.message); }
 });
 
-// ═══════════════════════════════════════
-// EMAIL WRITER
-// ═══════════════════════════════════════
 let _lastEmailText = '';
 
 document.getElementById('btn-email').addEventListener('click', async () => {
@@ -547,9 +527,6 @@ document.getElementById('copy-email-btn').addEventListener('click', () => {
   setTimeout(() => btn.textContent = 'Copy', 1500);
 });
 
-// ═══════════════════════════════════════
-// MOCKUP GENERATOR
-// ═══════════════════════════════════════
 let _lastMockupHtml = '';
 
 document.getElementById('btn-mockup').addEventListener('click', async () => {
@@ -600,9 +577,6 @@ document.getElementById('copy-mockup-btn').addEventListener('click', () => {
   setTimeout(() => btn.textContent = 'Copy HTML', 1500);
 });
 
-// ═══════════════════════════════════════
-// SEQUENCE BUILDER
-// ═══════════════════════════════════════
 document.getElementById('btn-sequence').addEventListener('click', async () => {
   const btn = document.getElementById('btn-sequence');
   hideError('seq-error'); hideResult('seq-result');
@@ -640,7 +614,7 @@ document.getElementById('btn-sequence').addEventListener('click', async () => {
           <span class="seq-day">Day ${step.day}</span>
           <span class="seq-purpose">${step.purpose || ''}</span>
         </div>
-        <div class="seq-subject">&#128231; ${step.subject}</div>
+        <div class="seq-subject">📧 ${step.subject}</div>
         <div class="seq-body">${step.body}</div>
       `;
       container.appendChild(div);
