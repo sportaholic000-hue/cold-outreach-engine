@@ -27,7 +27,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 .orb2{width:300px;height:300px;background:radial-gradient(circle,#00ff88,transparent);top:50px;right:5%;animation:float 8s ease-in-out infinite}
 .orb3{width:250px;height:250px;background:radial-gradient(circle,#06b6d4,transparent);top:80px;left:5%;animation:float 10s ease-in-out infinite reverse}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}
-.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);border-radius:999px;padding:6px 16px;font-size:12px;font-weight:600;letter-spacing:.08em;color:#00ff88;margin-bottom:24px}
+.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(0,255,136,.15);border:1px solid rgba(0,255,136,.3);border-radius:999px;padding:6px 16px;font-size:12px;font-weight:600;letter-spacing:.08em;color:#00ff88;margin-bottom:24px}
 .badge span{width:6px;height:6px;border-radius:50%;background:#00ff88;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 .hero h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:800;line-height:1.1;background:linear-gradient(135deg,#fff 30%,#00ff88);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px}
@@ -82,7 +82,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 /* ── LEADS TABLE ── */
 .leads-table-wrap{overflow-x:auto;margin-top:12px}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{background:rgba(99,102,241,.1);color:var(--primary);font-weight:600;padding:10px 12px;text-align:left;white-space:nowrap}
+th{background:rgba(0,255,136,.1);color:var(--primary);font-weight:600;padding:10px 12px;text-align:left;white-space:nowrap}
 td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top}
 td a{color:var(--primary);text-decoration:none}
 td a:hover{text-decoration:underline}
@@ -171,9 +171,7 @@ iframe{width:100%;height:600px;border:none;background:#fff}
     <button class="tab-btn" data-tab="sequence">⚡ Sequence</button>
   </div>
 
-  <!-- ══════════════════════════════════════════
-       TAB 1: LEAD FINDER
-  ══════════════════════════════════════════ -->
+  <!-- TAB 1: LEAD FINDER -->
   <div class="tab-panel active" id="panel-leads">
     <div class="card">
       <h2>Find Qualified Leads</h2>
@@ -229,14 +227,8 @@ iframe{width:100%;height:600px;border:none;background:#fff}
         <table id="leads-table">
           <thead>
             <tr>
-              <th>Company</th>
-              <th>Contact</th>
-              <th>Title</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Website</th>
-              <th>Employees</th>
-              <th>Rating</th>
+              <th>Company</th><th>Contact</th><th>Title</th><th>Email</th>
+              <th>Phone</th><th>Website</th><th>Employees</th><th>Rating</th>
             </tr>
           </thead>
           <tbody id="leads-tbody"></tbody>
@@ -245,60 +237,21 @@ iframe{width:100%;height:600px;border:none;background:#fff}
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════════
-       TAB 2: EMAIL WRITER
-  ══════════════════════════════════════════ -->
+  <!-- TAB 2: EMAIL WRITER -->
   <div class="tab-panel" id="panel-email">
     <div class="card">
       <h2>AI Email Writer</h2>
       <p class="desc">Generate personalized cold emails with subject lines optimized for open rates.</p>
       <div class="form-grid">
-        <div class="form-group">
-          <label>Prospect Name</label>
-          <input id="email-prospect-name" type="text" placeholder="e.g. John Smith"/>
-        </div>
-        <div class="form-group">
-          <label>Prospect Company *</label>
-          <input id="email-prospect-company" type="text" placeholder="e.g. Acme Corp"/>
-        </div>
-        <div class="form-group">
-          <label>Prospect Title</label>
-          <input id="email-prospect-title" type="text" placeholder="e.g. CEO, Head of Marketing"/>
-        </div>
-        <div class="form-group">
-          <label>Your Name</label>
-          <input id="email-sender-name" type="text" placeholder="e.g. Alex Johnson"/>
-        </div>
-        <div class="form-group span2">
-          <label>Your Offer / Service *</label>
-          <textarea id="email-offer" placeholder="e.g. We help dental clinics get 20+ new patients/month with targeted Google Ads and a done-for-you landing page."></textarea>
-        </div>
-        <div class="form-group span2">
-          <label>Their Pain Point (optional)</label>
-          <input id="email-pain" type="text" placeholder="e.g. Struggling to fill appointment slots, relying on word of mouth"/>
-        </div>
-        <div class="form-group">
-          <label>Tone</label>
-          <select id="email-tone">
-            <option>Professional</option>
-            <option>Casual</option>
-            <option>Bold</option>
-            <option>Friendly</option>
-            <option>Direct</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Length</label>
-          <select id="email-length">
-            <option>Short (3-4 lines)</option>
-            <option>Medium (5-7 lines)</option>
-            <option>Long (full pitch)</option>
-          </select>
-        </div>
-        <div class="form-group span2">
-          <label>Call to Action</label>
-          <input id="email-cta" type="text" placeholder="e.g. Would you be open to a 15-min call this week?" value="Would you be open to a 15-min call this week?"/>
-        </div>
+        <div class="form-group"><label>Prospect Name</label><input id="email-prospect-name" type="text" placeholder="e.g. John Smith"/></div>
+        <div class="form-group"><label>Prospect Company *</label><input id="email-prospect-company" type="text" placeholder="e.g. Acme Corp"/></div>
+        <div class="form-group"><label>Prospect Title</label><input id="email-prospect-title" type="text" placeholder="e.g. CEO, Head of Marketing"/></div>
+        <div class="form-group"><label>Your Name</label><input id="email-sender-name" type="text" placeholder="e.g. Alex Johnson"/></div>
+        <div class="form-group span2"><label>Your Offer / Service *</label><textarea id="email-offer" placeholder="e.g. We help dental clinics get 20+ new patients/month with targeted Google Ads and a done-for-you landing page."></textarea></div>
+        <div class="form-group span2"><label>Their Pain Point (optional)</label><input id="email-pain" type="text" placeholder="e.g. Struggling to fill appointment slots, relying on word of mouth"/></div>
+        <div class="form-group"><label>Tone</label><select id="email-tone"><option>Professional</option><option>Casual</option><option>Bold</option><option>Friendly</option><option>Direct</option></select></div>
+        <div class="form-group"><label>Length</label><select id="email-length"><option>Short (3-4 lines)</option><option>Medium (5-7 lines)</option><option>Long (full pitch)</option></select></div>
+        <div class="form-group span2"><label>Call to Action</label><input id="email-cta" type="text" placeholder="e.g. Would you be open to a 15-min call this week?" value="Would you be open to a 15-min call this week?"/></div>
       </div>
       <div class="btn-row">
         <button class="btn btn-primary" id="btn-email">
@@ -321,51 +274,22 @@ iframe{width:100%;height:600px;border:none;background:#fff}
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════════
-       TAB 3: MOCKUP GENERATOR
-  ══════════════════════════════════════════ -->
+  <!-- TAB 3: MOCKUP GENERATOR -->
   <div class="tab-panel" id="panel-mockup">
     <div class="card">
       <h2>Client Website Mockup</h2>
       <p class="desc">Generate a full live website mockup for any business. AI builds a real HTML site — drop the link in your pitch.</p>
       <div class="form-grid">
+        <div class="form-group"><label>Business Name *</label><input id="mock-name" type="text" placeholder="e.g. Sunrise Dental"/></div>
+        <div class="form-group"><label>City / Location *</label><input id="mock-city" type="text" placeholder="e.g. Austin, TX"/></div>
+        <div class="form-group"><label>Industry / Business Type *</label><input id="mock-industry" type="text" placeholder="e.g. dental clinic, gym, restaurant, law firm"/></div>
+        <div class="form-group"><label>Phone Number</label><input id="mock-phone" type="text" placeholder="e.g. (512) 555-0192"/></div>
+        <div class="form-group span2"><label>Tagline</label><input id="mock-tagline" type="text" placeholder="e.g. Healthy Smiles for the Whole Family"/></div>
+        <div class="form-group span2"><label>Address</label><input id="mock-address" type="text" placeholder="e.g. 420 Oak Street, Austin, TX 78701"/></div>
+        <div class="form-group"><label>Google Rating</label><input id="mock-rating" type="text" placeholder="e.g. 4.8"/></div>
+        <div class="form-group"><label>Number of Reviews</label><input id="mock-reviews" type="text" placeholder="e.g. 247"/></div>
+        <div class="form-group"><label>CTA Button Text</label><input id="mock-cta" type="text" value="Book a Free Consultation"/></div>
         <div class="form-group">
-          <label>Business Name *</label>
-          <input id="mock-name" type="text" placeholder="e.g. Sunrise Dental"/>
-        </div>
-        <div class="form-group">
-          <label>City / Location *</label>
-          <input id="mock-city" type="text" placeholder="e.g. Austin, TX"/>
-        </div>
-        <div class="form-group">
-          <label>Industry / Business Type *</label>
-          <input id="mock-industry" type="text" placeholder="e.g. dental clinic, gym, restaurant, law firm"/>
-        </div>
-        <div class="form-group">
-          <label>Phone Number</label>
-          <input id="mock-phone" type="text" placeholder="e.g. (512) 555-0192"/>
-        </div>
-        <div class="form-group span2">
-          <label>Tagline <span style="color:var(--muted);font-weight:400">(AI will generate one if blank)</span></label>
-          <input id="mock-tagline" type="text" placeholder="e.g. Healthy Smiles for the Whole Family"/>
-        </div>
-        <div class="form-group span2">
-          <label>Address</label>
-          <input id="mock-address" type="text" placeholder="e.g. 420 Oak Street, Austin, TX 78701"/>
-        </div>
-        <div class="form-group">
-          <label>Google Rating</label>
-          <input id="mock-rating" type="text" placeholder="e.g. 4.8"/>
-        </div>
-        <div class="form-group">
-          <label>Number of Reviews</label>
-          <input id="mock-reviews" type="text" placeholder="e.g. 247"/>
-        </div>
-        <div class="form-group">
-          <label>CTA Button Text</label>
-          <input id="mock-cta" type="text" placeholder="e.g. Book a Free Consultation" value="Book a Free Consultation"/>
-        </div>
-        <div class="form-group" style="display:flex;flex-direction:column;gap:6px">
           <label>Color Scheme</label>
           <div style="display:flex;gap:12px;align-items:center">
             <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
@@ -378,14 +302,8 @@ iframe{width:100%;height:600px;border:none;background:#fff}
             </div>
           </div>
         </div>
-        <div class="form-group span2">
-          <label>Services / Products <span style="color:var(--muted);font-weight:400">(comma separated)</span></label>
-          <input id="mock-services" type="text" placeholder="e.g. General Dentistry, Teeth Whitening, Invisalign, Emergency Care, Dental Implants, Kids Dentistry"/>
-        </div>
-        <div class="form-group span2">
-          <label>What Makes Them Special <span style="color:var(--muted);font-weight:400">(key selling points, years in business, awards, etc.)</span></label>
-          <textarea id="mock-value" placeholder="e.g. Family-owned practice with 15 years experience. Same-day appointments available. Accepts all major insurance. Winner of Austin Best Dentist 2023."></textarea>
-        </div>
+        <div class="form-group span2"><label>Services / Products</label><input id="mock-services" type="text" placeholder="e.g. General Dentistry, Teeth Whitening, Invisalign, Emergency Care"/></div>
+        <div class="form-group span2"><label>What Makes Them Special</label><textarea id="mock-value" placeholder="e.g. Family-owned practice with 15 years experience. Same-day appointments available."></textarea></div>
       </div>
       <div class="btn-row">
         <button class="btn btn-primary" id="btn-mockup">
@@ -410,57 +328,20 @@ iframe{width:100%;height:600px;border:none;background:#fff}
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════════
-       TAB 4: SEQUENCE BUILDER
-  ══════════════════════════════════════════ -->
+  <!-- TAB 4: SEQUENCE BUILDER -->
   <div class="tab-panel" id="panel-sequence">
     <div class="card">
       <h2>Email Sequence Builder</h2>
       <p class="desc">Build a complete multi-step drip campaign. AI writes every email with a different angle.</p>
       <div class="form-grid">
-        <div class="form-group">
-          <label>Campaign Name</label>
-          <input id="seq-name" type="text" placeholder="e.g. Q1 Dental Outreach"/>
-        </div>
-        <div class="form-group">
-          <label>Target Industry *</label>
-          <input id="seq-industry" type="text" placeholder="e.g. dental clinics, SaaS startups"/>
-        </div>
-        <div class="form-group span2">
-          <label>Your Offer *</label>
-          <textarea id="seq-offer" placeholder="e.g. Done-for-you Google Ads + landing page to get 20+ new patients/month for dental clinics."></textarea>
-        </div>
-        <div class="form-group">
-          <label>Campaign Goal</label>
-          <select id="seq-goal">
-            <option>Book a Call</option>
-            <option>Drive Sign-ups</option>
-            <option>Generate Referrals</option>
-            <option>Nurture Leads</option>
-            <option>Close a Sale</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Tone</label>
-          <select id="seq-tone">
-            <option>Professional</option>
-            <option>Casual</option>
-            <option>Bold</option>
-            <option>Friendly</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Number of Emails</label>
-          <input id="seq-steps" type="number" min="2" max="10" value="5"/>
-        </div>
-        <div class="form-group">
-          <label>Days Between Emails</label>
-          <input id="seq-days" type="number" min="1" max="30" value="3"/>
-        </div>
-        <div class="form-group span2">
-          <label>Your Name</label>
-          <input id="seq-sender" type="text" placeholder="e.g. Alex Johnson"/>
-        </div>
+        <div class="form-group"><label>Campaign Name</label><input id="seq-name" type="text" placeholder="e.g. Q1 Dental Outreach"/></div>
+        <div class="form-group"><label>Target Industry *</label><input id="seq-industry" type="text" placeholder="e.g. dental clinics, SaaS startups"/></div>
+        <div class="form-group span2"><label>Your Offer *</label><textarea id="seq-offer" placeholder="e.g. Done-for-you Google Ads + landing page to get 20+ new patients/month for dental clinics."></textarea></div>
+        <div class="form-group"><label>Campaign Goal</label><select id="seq-goal"><option>Book a Call</option><option>Drive Sign-ups</option><option>Generate Referrals</option><option>Nurture Leads</option><option>Close a Sale</option></select></div>
+        <div class="form-group"><label>Tone</label><select id="seq-tone"><option>Professional</option><option>Casual</option><option>Bold</option><option>Friendly</option></select></div>
+        <div class="form-group"><label>Number of Emails</label><input id="seq-steps" type="number" min="2" max="10" value="5"/></div>
+        <div class="form-group"><label>Days Between Emails</label><input id="seq-days" type="number" min="1" max="30" value="3"/></div>
+        <div class="form-group span2"><label>Your Name</label><input id="seq-sender" type="text" placeholder="e.g. Alex Johnson"/></div>
       </div>
       <div class="btn-row">
         <button class="btn btn-primary" id="btn-sequence">
